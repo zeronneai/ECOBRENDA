@@ -5,6 +5,8 @@
    Todo se siente como si Brenda lo hubiera armado a mano.
    ============================================================ */
 
+import { planKeyFor } from './onboarding'
+
 export const GOALS = {
   perder_grasa:   { id:'perder_grasa',   label:'Perder grasa',        emoji:'🔥', kcalAdj:-0.20, protein:2.0 },
   tonificar:      { id:'tonificar',      label:'Tonificar glúteo',    emoji:'🍑', kcalAdj:-0.05, protein:1.9 },
@@ -139,13 +141,14 @@ export const MEALS = {
   ],
 }
 
-/* ---- selector: dado el perfil, regresa el plan completo "de Brenda" ---- */
+/* ---- selector: dado el perfil, regresa el plan completo "de Brenda" ----
+   El objetivo del onboarding (6 opciones) se mapea a uno de los 4 planes. */
 export function getBrendaPlan(profile) {
-  const goal = profile.goal || 'tonificar'
+  const key = planKeyFor(profile.goal)
   return {
-    goal: GOALS[goal],
-    macros: buildMacros(profile),
-    workout: WORKOUTS[goal],
-    meals: MEALS[goal],
+    goal: GOALS[key],
+    macros: buildMacros({ ...profile, goal: key }),
+    workout: WORKOUTS[key],
+    meals: MEALS[key],
   }
 }

@@ -84,6 +84,23 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .ob-name-input{width:100%;background:var(--surface);border:1px solid var(--line-strong);border-radius:16px;padding:20px;color:var(--txt);font-family:'Archivo';font-size:20px;font-weight:700;text-align:center;outline:none}
 .ob-name-input:focus{border-color:var(--magenta)}
 
+/* ===== Selectores del onboarding (toggle de unidad, chips, pills) ===== */
+.unit-toggle{display:inline-flex;align-self:center;gap:4px;background:var(--surface);border:1px solid var(--line-strong);border-radius:30px;padding:4px;margin:0 auto 6px}
+.unit-toggle button{border:none;background:none;color:var(--txt-dim);font-family:'Archivo';font-weight:800;font-size:13px;letter-spacing:.06em;padding:7px 20px;border-radius:30px;cursor:pointer;transition:.2s}
+.unit-toggle button.sel{background:linear-gradient(90deg,var(--magenta),var(--magenta-soft));color:#fff;box-shadow:0 0 14px var(--magenta-glow)}
+
+.chip-row{display:flex;flex-wrap:wrap;gap:10px}
+.chip{flex:1;min-width:62px;text-align:center;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:14px 8px;cursor:pointer;transition:.2s;font-family:'Bebas Neue';font-size:30px;line-height:.9;color:var(--txt)}
+.chip span{display:block;font-family:'Archivo';font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint);margin-top:5px}
+.chip:active{transform:scale(.96)}
+.chip.sel{border-color:var(--magenta);background:linear-gradient(120deg,rgba(255,31,107,.14),var(--surface));color:#fff;box-shadow:0 0 16px var(--magenta-glow)}
+.chip.sel span{color:var(--magenta-soft)}
+
+.pill-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.pill{flex:1;min-width:92px;text-align:center;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:15px 10px;cursor:pointer;transition:.2s;font-weight:800;font-size:13.5px;color:var(--txt)}
+.pill:active{transform:scale(.97)}
+.pill.sel{border-color:var(--magenta);background:linear-gradient(120deg,rgba(255,31,107,.14),var(--surface))}
+
 /* ===== HEADER ===== */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:0 22px;margin-bottom:24px}
 .hdr .hi{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);font-weight:700}

@@ -1,11 +1,11 @@
 import { useApp } from '../store'
-import { GOALS } from '../data/plans'
+import { goalLabel } from '../data/onboarding'
 import Sheet from './Sheet'
 
 export default function MealsSheet() {
   const { plan, profile } = useApp()
   const m = plan.macros
-  const lead = `Brenda lo armó para tu meta de ${GOALS[profile.goal].label.toLowerCase()}.`
+  const lead = `Brenda lo armó para tu meta de ${goalLabel(profile.goal).toLowerCase()}.`
 
   return (
     <Sheet>

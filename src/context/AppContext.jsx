@@ -20,8 +20,8 @@ export function AppProvider({ children }) {
   const [streak, setStreak] = useState(() => dataStore.getStreak())
   const [challengesDone, setChallengesDone] = useState(() => dataStore.getChallengeCount())
   const [totals, setTotals] = useState(() => dataStore.getTotals())
-  // Onboarding solo si NO hay perfil guardado (usuario nuevo).
-  const [onboarding, setOnboarding] = useState(() => !dataStore.getProfile())
+  // Onboarding solo si el perfil aún no está marcado onboarded.
+  const [onboarding, setOnboarding] = useState(() => !dataStore.getProfile()?.onboarded)
 
   const unlocked = subscription.status === 'active' // gate premium
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
-import { GOALS } from '../data/plans'
+import { goalLabel } from '../data/onboarding'
 import { CHALLENGE_AUDIO_SRC } from '../lib/alarmAudio'
 
 function greetingFor(h) {
@@ -25,7 +25,7 @@ export default function Home() {
   const greeting = greetingFor(new Date().getHours())
 
   const promoTitle = 'PLAN ' + plan.workout.title.toUpperCase()
-  const promoDesc = `Brenda preparó "${plan.workout.title}" para tu meta de ${GOALS[profile.goal].label.toLowerCase()}, calibrado a tus ${profile.weight}kg y ${profile.height}cm.`
+  const promoDesc = `Brenda preparó "${plan.workout.title}" para tu meta de ${goalLabel(profile.goal).toLowerCase()}, calibrado a tus ${profile.weight}kg y ${profile.height}cm.`
 
   const m = plan.macros
   const today = plan.workout.days[0]

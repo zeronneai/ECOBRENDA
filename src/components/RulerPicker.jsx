@@ -4,7 +4,8 @@ const STEP = 14 // px por unidad (coincide con el ancho del .tick)
 
 /* Regla arrastrable de peso/altura — misma matemática que el prototipo,
    con opción de editar escribiendo el valor. */
-export default function RulerPicker({ min, max, unit, value, onChange }) {
+export default function RulerPicker({ min, max, unit, value, onChange, format }) {
+  const fmt = (v) => (format ? format(v) : v)
   const rulerRef = useRef(null)
   const trackRef = useRef(null)
   const numRef = useRef(null)
@@ -25,7 +26,7 @@ export default function RulerPicker({ min, max, unit, value, onChange }) {
     const x = center - 7 - (v - min) * STEP
     track.style.transition = animate ? 'transform .25s cubic-bezier(.2,.8,.2,1)' : 'none'
     track.style.transform = 'translateX(' + x + 'px)'
-    if (numRef.current) numRef.current.textContent = v
+    if (numRef.current) numRef.current.textContent = fmt(v)
     Array.from(track.children).forEach((c, i) => {
       const bar = c.querySelector('.bar')
       if (bar) bar.style.background = i + min === v ? 'var(--magenta)' : ''
@@ -118,8 +119,8 @@ export default function RulerPicker({ min, max, unit, value, onChange }) {
           />
         ) : (
           <>
-            <span className="num" ref={numRef}>{valueRef.current}</span>
-            <span className="unit">{unit}</span>
+            <span className="num" ref={numRef}>{fmt(valueRef.current)}</span>
+            {unit ? <span className="unit">{unit}</span> : null}
             <span className="edit-hint">✎</span>
           </>
         )}

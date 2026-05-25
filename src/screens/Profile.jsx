@@ -1,12 +1,12 @@
 import { useApp } from '../store'
-import { GOALS } from '../data/plans'
+import { goalLabel } from '../data/onboarding'
 
 export default function Profile() {
   const { profile, unlocked } = useApp()
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
   const avatarLetter = firstName[0] || 'B'
   const subStatus = unlocked ? 'Premium · Brenda Fitness activo' : 'Plan gratuito · Booty Alarm'
-  const profileData = `${profile.weight}kg · ${profile.height}cm · ${GOALS[profile.goal].label}`
+  const profileData = `${profile.weight}kg · ${profile.height}cm · ${goalLabel(profile.goal)}`
 
   return (
     <section className="screen active" id="s-profile">
