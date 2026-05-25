@@ -136,7 +136,7 @@ export default function Home() {
               <div className="macro carb"><div className="v" id="mCarb">{m.carbs}g</div><div className="k">carbos</div></div>
             </div>
             <div className="brenda-live" style={{ marginTop: 14 }}>
-              <div className="bcard" onClick={() => navigate('/brenda')}>
+              <div className="bcard" onClick={() => navigate('/entrena')}>
                 <div className="ic" style={{ background: 'rgba(255,31,107,.15)' }}>🏋️</div>
                 <h4>RUTINA HOY</h4>
                 <p id="todayWk">{today.focus} · {today.ex.length} ejercicios</p>

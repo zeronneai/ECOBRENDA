@@ -8,12 +8,12 @@ export default function TabBar() {
 
   const isActive = (path) => pathname === path
 
-  const goBrenda = () => {
+  const goNutricion = () => {
     if (!unlocked) {
       openSheet('paywall')
       return
     }
-    navigate('/brenda')
+    navigate('/nutricion')
   }
 
   const goEntrena = () => {
@@ -52,13 +52,12 @@ export default function TabBar() {
       </button>
 
       <button
-        className={'tab' + (isActive('/brenda') ? ' active' : '') + (!unlocked ? ' locked' : '')}
-        id="tabBrenda"
-        onClick={goBrenda}
+        className={'tab' + (isActive('/nutricion') ? ' active' : '') + (!unlocked ? ' locked' : '')}
+        onClick={goNutricion}
       >
-        <svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M4 9h4M16 9h4M4 15h4M16 15h4" /></svg>
-        <span>Brenda</span>
-        {!unlocked && <span className="mini-lock" id="brendaTabLock">🔒</span>}
+        <svg viewBox="0 0 24 24"><path d="M5 3v8a3 3 0 003 3v7M8 3v6M11 3v6M17 3c-1.5 0-2 2-2 5s.5 4 2 4v9" /></svg>
+        <span>Nutrición</span>
+        {!unlocked && <span className="mini-lock">🔒</span>}
       </button>
 
       <button
