@@ -1,18 +1,12 @@
-// rep-counter.js — Contador de repeticiones con ANTI-TRAMPA (resuelve A3, A4).
+// rep-counter.js — Contador de reps con anti-trampa, CALIBRABLE.
 //
-// Lógica pura, sin DOM: fácil de testear. Recibe los landmarks de cada frame
-// (normalizados + worldLandmarks 3D de PoseTracker) y emite eventos:
-//   - onRep(count)         cuando se valida una rep COMPLETA y honesta
-//   - onState(phase, info) para feedback en UI ('UP'|'DOWN'|'TRANSITION'|'NOT_READY')
+// Los umbrales viven en CONFIG (abajo) para afinarlos fácil. Mantiene la
+// histéresis (dos umbrales) para no contar doble, pero está aflojado para que
+// CUENTE reps reales de una persona frente a la cámara del teléfono sin exigir
+// condiciones perfectas.
 //
-// Mejoras frente al código viejo:
-//   • Usa ángulos 3D (worldLandmarks en metros) → invariante a la perspectiva.
-//   • Exige cuerpo completo visible (gating de visibilidad real, no MIN_VIS=0.1 sin usar).
-//   • Squat: valida PROFUNDIDAD real (cadera baja respecto a rodilla), no solo el ángulo.
-//   • Lunge: exige flexión de AMBAS rodillas, no el mínimo de una (anti "marcha en el sitio").
-//   • Duración mínima/máxima de rep → descarta sacudidas e imposibles.
-//   • Suavizado EMA del ángulo → no cuenta por jitter de un frame.
-//   • Histéresis con dos umbrales (se conserva del diseño viejo, que era correcto).
+// Emite onState CADA frame con { phase, depth, reason, count } para feedback
+// visual en vivo (mensaje grande, indicador ARRIBA/ABAJO y barra de profundidad).
 
 // Índices BlazePose / MediaPipe Pose (33 puntos)
 const LM = {
@@ -20,200 +14,198 @@ const LM = {
   L_HIP: 23, R_HIP: 24,
   L_KNEE: 25, R_KNEE: 26,
   L_ANKLE: 27, R_ANKLE: 28,
-};
+}
 
-const DEFAULTS = {
-  // Visibilidad: umbral real (el viejo usaba 0.1 y ni lo aplicaba)
-  minVisibility: 0.6,
-  // Histéresis de ángulo de rodilla (grados)
-  downAngle: 95,    // por debajo => "abajo"
-  upAngle: 160,     // por encima => "arriba" (extensión casi completa, exige ROM completo)
-  // Suavizado
+// ───────────────── UMBRALES CALIBRABLES (ajústalos aquí) ─────────────────
+const CONFIG = {
+  // Visibilidad mínima por articulación para contar (antes 0.6 = muy estricto).
+  minVisibility: 0.35,
+  // Histéresis del ángulo de rodilla (grados):
+  downAngle: 115,   // por debajo => "abajo". Más alto = no exige bajar tanto (antes 95).
+  upAngle: 152,     // por encima => "arriba". Más bajo = no exige extensión total (antes 160).
+  // Suavizado EMA del ángulo (0..1; más alto = sigue más rápido).
   emaAlpha: 0.4,
-  // Duración plausible de una rep completa (ms)
-  minRepMs: 600,
-  maxRepMs: 8000,
-  // Squat: cuánto debe bajar la cadera respecto a la rodilla (metros, world coords).
-  // En el eje Y de world landmarks, "abajo" es +Y. Pedimos que la cadera se acerque
-  // o pase la altura de la rodilla.
-  squatHipDropM: 0.0,   // cadera.y >= rodilla.y - margen => suficientemente abajo
-  squatHipDropMarginM: 0.08,
-  // Torso: la rep no vale si te doblas hacia adelante en vez de sentarte (anti "agacharse").
-  maxTorsoLeanDeg: 50,
-};
+  // Duración plausible de una rep (ms) — descarta sacudidas e imposibles.
+  minRepMs: 450,    // antes 600
+  maxRepMs: 9000,   // antes 8000
+  // Tolerancia de inclinación del torso (grados). Más alto = más permisivo (antes 50).
+  maxTorsoLeanDeg: 70,
+  // Profundidad de cadera: si true, además exige que la cadera baje respecto a la
+  // rodilla. Por defecto OFF: la profundidad la da el ángulo de rodilla (más fiable
+  // en teléfono). Si lo activas, el margen controla cuánto debe bajar.
+  requireHipDepth: false,
+  squatHipDropMarginM: 0.25, // antes 0.08 (mucho más permisivo)
+  // Lunge: holgura para considerar "ambas rodillas flexionadas" (antes 20).
+  lungeBendToleranceDeg: 35,
+  // Cuánto se mantiene visible un aviso de rechazo (ms).
+  noticeMs: 1300,
+}
+
+const clamp01 = (v) => Math.max(0, Math.min(1, v))
 
 function angle3D(a, b, c) {
   // Ángulo en b del triángulo a-b-c usando coords 3D (x,y,z en metros).
-  const ab = { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z };
-  const cb = { x: c.x - b.x, y: c.y - b.y, z: c.z - b.z };
-  const dot = ab.x * cb.x + ab.y * cb.y + ab.z * cb.z;
-  const magAB = Math.hypot(ab.x, ab.y, ab.z);
-  const magCB = Math.hypot(cb.x, cb.y, cb.z);
-  if (magAB === 0 || magCB === 0) return 180;
-  return Math.acos(Math.max(-1, Math.min(1, dot / (magAB * magCB)))) * (180 / Math.PI);
+  const ab = { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }
+  const cb = { x: c.x - b.x, y: c.y - b.y, z: c.z - b.z }
+  const dot = ab.x * cb.x + ab.y * cb.y + ab.z * cb.z
+  const magAB = Math.hypot(ab.x, ab.y, ab.z)
+  const magCB = Math.hypot(cb.x, cb.y, cb.z)
+  if (magAB === 0 || magCB === 0) return 180
+  return Math.acos(Math.max(-1, Math.min(1, dot / (magAB * magCB)))) * (180 / Math.PI)
 }
 
 export class RepCounter {
   /**
    * @param {'squat'|'lunge'} exercise
-   * @param {object} opts  ver DEFAULTS
-   * @param {(count:number)=>void} opts.onRep
-   * @param {(phase:string, info:object)=>void} opts.onState
+   * @param {object} opts  sobre-escribe CONFIG + { onRep, onState }
    */
   constructor(exercise, opts = {}) {
-    this.exercise = exercise;
-    this.o = { ...DEFAULTS, ...opts };
-    this.count = 0;
-    this.phase = 'NOT_READY';   // 'NOT_READY' | 'UP' | 'DOWN'
-    this.ema = null;
-    this.downStartTs = 0;
-    this.reachedDepth = false;  // ¿alcanzó profundidad/validación real estando abajo?
+    this.exercise = exercise
+    this.o = { ...CONFIG, ...opts }
+    this.reset()
   }
 
   reset() {
-    this.count = 0;
-    this.phase = 'NOT_READY';
-    this.ema = null;
-    this.downStartTs = 0;
-    this.reachedDepth = false;
+    this.count = 0
+    this.phase = 'NOT_READY' // 'NOT_READY' | 'UP' | 'DOWN'
+    this.ema = null
+    this._emaPair = {}
+    this.downStartTs = 0
+    this.reachedDepth = false
+    this.notice = null
+    this.noticeUntil = 0
   }
 
   _visible(lm, ...idx) {
-    return idx.every((i) => lm[i] && (lm[i].visibility ?? 1) >= this.o.minVisibility);
+    return idx.every((i) => lm[i] && (lm[i].visibility ?? 1) >= this.o.minVisibility)
   }
 
   _smooth(angle) {
-    this.ema = this.ema == null ? angle : this.o.emaAlpha * angle + (1 - this.o.emaAlpha) * this.ema;
-    return this.ema;
+    this.ema = this.ema == null ? angle : this.o.emaAlpha * angle + (1 - this.o.emaAlpha) * this.ema
+    return this.ema
+  }
+
+  _smoothPair(key, angle) {
+    const prev = this._emaPair[key]
+    const v = prev == null ? angle : this.o.emaAlpha * angle + (1 - this.o.emaAlpha) * prev
+    this._emaPair[key] = v
+    return v
   }
 
   // Inclinación del torso respecto a la vertical (grados). 0 = erguido.
   _torsoLean(w) {
-    const sx = (w[LM.L_SHOULDER].x + w[LM.R_SHOULDER].x) / 2;
-    const sy = (w[LM.L_SHOULDER].y + w[LM.R_SHOULDER].y) / 2;
-    const hx = (w[LM.L_HIP].x + w[LM.R_HIP].x) / 2;
-    const hy = (w[LM.L_HIP].y + w[LM.R_HIP].y) / 2;
-    const dx = sx - hx, dy = sy - hy;
-    // ángulo respecto al eje vertical
-    return Math.abs(Math.atan2(Math.abs(dx), Math.abs(dy)) * (180 / Math.PI));
+    const sx = (w[LM.L_SHOULDER].x + w[LM.R_SHOULDER].x) / 2
+    const sy = (w[LM.L_SHOULDER].y + w[LM.R_SHOULDER].y) / 2
+    const hx = (w[LM.L_HIP].x + w[LM.R_HIP].x) / 2
+    const hy = (w[LM.L_HIP].y + w[LM.R_HIP].y) / 2
+    const dx = sx - hx
+    const dy = sy - hy
+    return Math.abs(Math.atan2(Math.abs(dx), Math.abs(dy)) * (180 / Math.PI))
+  }
+
+  _setNotice(reason, ts) {
+    this.notice = reason
+    this.noticeUntil = ts + this.o.noticeMs
+  }
+  _activeNotice(ts) {
+    return ts < this.noticeUntil ? this.notice : null
+  }
+
+  _emit(ts, depth) {
+    this.o.onState?.(this.phase, { depth, count: this.count, reason: this._activeNotice(ts) })
+  }
+
+  // Valida la rep al volver arriba. Devuelve true si cuenta; si no, deja aviso.
+  _tryComplete(ts) {
+    const dur = ts - this.downStartTs
+    if (dur < this.o.minRepMs) { this._setNotice('Más despacio', ts); return false }
+    if (dur > this.o.maxRepMs) { this._setNotice('Repite el movimiento', ts); return false }
+    if (!this.reachedDepth) { this._setNotice('Baja más', ts); return false }
+    this.count++
+    this.o.onRep?.(this.count)
+    return true
   }
 
   /**
    * Procesa un frame. Llamar desde PoseTracker.onResult.
-   * @param {Array} landmarks       normalizados (para gating de visibilidad)
-   * @param {Array} worldLandmarks  3D en metros (para ángulos/profundidad)
-   * @param {number} ts             timestamp (ms)
    */
   update({ landmarks, worldLandmarks, timestamp }) {
-    const lm = landmarks;
-    const w = worldLandmarks || landmarks; // si no hay world, degradar a normalizado
+    const ts = timestamp
+    const lm = landmarks
+    const w = worldLandmarks || landmarks // si no hay world, degradar a normalizado
 
-    // 1) Gating: cuerpo completo (ambas piernas + cadera + tobillos + hombros)
+    // Gating: piernas completas (cadera + rodillas + tobillos). Los hombros son
+    // opcionales (solo afinan el torso) para no cortar por encuadre.
     const ready = this._visible(
-      lm, LM.L_HIP, LM.R_HIP, LM.L_KNEE, LM.R_KNEE,
-      LM.L_ANKLE, LM.R_ANKLE, LM.L_SHOULDER, LM.R_SHOULDER,
-    );
+      lm, LM.L_HIP, LM.R_HIP, LM.L_KNEE, LM.R_KNEE, LM.L_ANKLE, LM.R_ANKLE,
+    )
     if (!ready) {
-      this.phase = 'NOT_READY';
-      this.o.onState?.('NOT_READY', { reason: 'Ponte de cuerpo completo en cuadro' });
-      return;
+      this.phase = 'NOT_READY'
+      this.o.onState?.('NOT_READY', { depth: 0, count: this.count, reason: 'Ponte de cuerpo completo en cuadro' })
+      return
     }
 
-    if (this.exercise === 'squat') this._squat(w, timestamp);
-    else this._lunge(w, timestamp);
-  }
-
-  _emitDown(info) { this.phase = 'DOWN'; this.o.onState?.('DOWN', info); }
-  _emitUp(info)   { this.phase = 'UP';   this.o.onState?.('UP', info); }
-
-  _tryComplete(ts) {
-    // Validación temporal: duración plausible
-    const dur = ts - this.downStartTs;
-    if (dur < this.o.minRepMs || dur > this.o.maxRepMs) {
-      this.o.onState?.('TRANSITION', { rejected: true, reason: 'Ritmo no válido', dur });
-      return false;
-    }
-    if (!this.reachedDepth) {
-      this.o.onState?.('TRANSITION', { rejected: true, reason: 'Baja más (sin profundidad)' });
-      return false;
-    }
-    this.count++;
-    this.o.onRep?.(this.count);
-    return true;
+    if (this.exercise === 'squat') this._squat(w, ts)
+    else this._lunge(w, ts)
   }
 
   _squat(w, ts) {
-    const lAngle = angle3D(w[LM.L_HIP], w[LM.L_KNEE], w[LM.L_ANKLE]);
-    const rAngle = angle3D(w[LM.R_HIP], w[LM.R_KNEE], w[LM.R_ANKLE]);
-    const knee = this._smooth((lAngle + rAngle) / 2);
+    const lAngle = angle3D(w[LM.L_HIP], w[LM.L_KNEE], w[LM.L_ANKLE])
+    const rAngle = angle3D(w[LM.R_HIP], w[LM.R_KNEE], w[LM.R_ANKLE])
+    const knee = this._smooth((lAngle + rAngle) / 2)
 
-    // Profundidad real: cadera baja hasta (o por debajo de) la altura de la rodilla.
-    const hipY = (w[LM.L_HIP].y + w[LM.R_HIP].y) / 2;
-    const kneeY = (w[LM.L_KNEE].y + w[LM.R_KNEE].y) / 2;
-    const deepEnough = hipY >= kneeY - this.o.squatHipDropMarginM; // +Y = abajo
-    const torsoOk = this._torsoLean(w) <= this.o.maxTorsoLeanDeg;
+    const torsoOk = this._torsoLean(w) <= this.o.maxTorsoLeanDeg
+    const hipY = (w[LM.L_HIP].y + w[LM.R_HIP].y) / 2
+    const kneeY = (w[LM.L_KNEE].y + w[LM.R_KNEE].y) / 2
+    const hipDeep = hipY >= kneeY - this.o.squatHipDropMarginM // +Y = abajo
+    const depthOk = torsoOk && (!this.o.requireHipDepth || hipDeep)
+
+    const depth = clamp01((this.o.upAngle - knee) / (this.o.upAngle - this.o.downAngle))
 
     if (this.phase !== 'DOWN' && knee < this.o.downAngle) {
-      this.downStartTs = ts;
-      this.reachedDepth = false;
-      this._emitDown({ angle: knee });
+      this.phase = 'DOWN'
+      this.downStartTs = ts
+      this.reachedDepth = false
     } else if (this.phase === 'DOWN') {
-      if (deepEnough && torsoOk) this.reachedDepth = true; // marca profundidad alcanzada
+      if (depthOk) this.reachedDepth = true
       if (knee > this.o.upAngle) {
-        if (this._tryComplete(ts)) this._emitUp({ angle: knee });
-        else this.phase = 'UP'; // vuelve arriba pero NO cuenta la rep inválida
+        this._tryComplete(ts)
+        this.phase = 'UP'
       }
     } else {
-      this.phase = 'UP';
-      this.o.onState?.('UP', { angle: knee });
+      this.phase = 'UP'
     }
+
+    this._emit(ts, depth)
   }
 
   _lunge(w, ts) {
-    const lAngle = this._smoothPair('l', angle3D(w[LM.L_HIP], w[LM.L_KNEE], w[LM.L_ANKLE]));
-    const rAngle = this._smoothPair('r', angle3D(w[LM.R_HIP], w[LM.R_KNEE], w[LM.R_ANKLE]));
+    const lAngle = this._smoothPair('l', angle3D(w[LM.L_HIP], w[LM.L_KNEE], w[LM.L_ANKLE]))
+    const rAngle = this._smoothPair('r', angle3D(w[LM.R_HIP], w[LM.R_KNEE], w[LM.R_ANKLE]))
 
-    // Anti "marcha en el sitio": EXIGE que AMBAS rodillas se flexionen (no el mínimo de una).
-    const bothBent = lAngle < this.o.downAngle + 20 && rAngle < this.o.downAngle + 20;
-    const frontDeep = Math.min(lAngle, rAngle) < this.o.downAngle;
-    const torsoOk = this._torsoLean(w) <= this.o.maxTorsoLeanDeg;
-    const bothExtended = lAngle > this.o.upAngle && rAngle > this.o.upAngle;
+    const torsoOk = this._torsoLean(w) <= this.o.maxTorsoLeanDeg
+    const frontDeep = Math.min(lAngle, rAngle) < this.o.downAngle
+    const bothBent =
+      lAngle < this.o.downAngle + this.o.lungeBendToleranceDeg &&
+      rAngle < this.o.downAngle + this.o.lungeBendToleranceDeg
+    const bothExtended = lAngle > this.o.upAngle && rAngle > this.o.upAngle
+
+    const depth = clamp01((this.o.upAngle - Math.min(lAngle, rAngle)) / (this.o.upAngle - this.o.downAngle))
 
     if (this.phase !== 'DOWN' && frontDeep && bothBent) {
-      this.downStartTs = ts;
-      this.reachedDepth = false;
-      this._emitDown({ l: lAngle, r: rAngle });
+      this.phase = 'DOWN'
+      this.downStartTs = ts
+      this.reachedDepth = false
     } else if (this.phase === 'DOWN') {
-      if (bothBent && torsoOk) this.reachedDepth = true;
+      if (torsoOk) this.reachedDepth = true
       if (bothExtended) {
-        if (this._tryComplete(ts)) this._emitUp({ l: lAngle, r: rAngle });
-        else this.phase = 'UP';
+        this._tryComplete(ts)
+        this.phase = 'UP'
       }
     } else {
-      this.phase = 'UP';
-      this.o.onState?.('UP', { l: lAngle, r: rAngle });
+      this.phase = 'UP'
     }
-  }
 
-  // EMA por pierna para el lunge
-  _smoothPair(key, angle) {
-    this._emaPair ??= {};
-    const prev = this._emaPair[key];
-    const v = prev == null ? angle : this.o.emaAlpha * angle + (1 - this.o.emaAlpha) * prev;
-    this._emaPair[key] = v;
-    return v;
+    this._emit(ts, depth)
   }
 }
-
-// ── Ejemplo de cableado ───────────────────────────────────────────────
-// import { PoseTracker } from './pose-tracker.js';
-// import { RepCounter } from './rep-counter.js';
-//
-// const counter = new RepCounter('squat', {
-//   onRep:   (n) => { ui.setReps(n); if (n >= target) finishWorkout(); },
-//   onState: (phase, info) => ui.setBadge(phase, info),
-// });
-// const tracker = new PoseTracker({ onResult: (r) => counter.update(r), fps: 20 });
-// await tracker.start(videoEl);
-// // al terminar:
-// await tracker.stop();   // libera cámara/WebGL — clave para no fugar memoria
