@@ -232,6 +232,16 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .nd-supp-line b{display:block;font-size:14px}
 .nd-supp-line span{font-size:12px;color:var(--txt-dim)}
 
+/* recetas */
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;transition:.25s}
+.rcard:active{transform:scale(.97);border-color:var(--line-strong)}
+.rcard-emoji{font-size:40px;line-height:1}
+.rcard h4{font-family:'Bebas Neue';font-size:21px;letter-spacing:.02em;margin-top:8px;line-height:1}
+.rcard-meta{font-size:11px;color:var(--txt-dim);margin-top:6px;font-weight:600}
+.rstep{display:flex;gap:12px;padding:10px 0;font-size:13.5px;line-height:1.5;color:var(--txt)}
+.rstep-n{width:26px;height:26px;border-radius:50%;background:rgba(255,31,107,.15);color:var(--magenta-soft);display:grid;place-items:center;font-weight:800;font-size:13px;flex-shrink:0}
+
 /* ===== HEADER ===== */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:0 22px;margin-bottom:24px}
 .hdr .hi{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);font-weight:700}

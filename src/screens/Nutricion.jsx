@@ -3,7 +3,7 @@ import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
 import { goalLabel } from '../data/onboarding'
 import { calculateMacros } from '../lib/dataStore'
-import { PLANS, getPlan, getSupplement } from '../data/nutrition'
+import { PLANS, RECIPES, RECIPE_CATEGORIES, getPlan, getRecipe, getSupplement, recipeDifficultyColor } from '../data/nutrition'
 
 function MacroWidget({ profile }) {
   const m = calculateMacros(profile)
@@ -93,11 +93,50 @@ function PlanDetail({ plan, profile, onBack }) {
   )
 }
 
+function RecipeDetail({ recipe, onBack }) {
+  return (
+    <>
+      <div className="nd-hero" style={{ background: 'linear-gradient(135deg,#ff1f6b,#7a28ff)' }}>
+        <div className="wd-hero-shade" />
+        <button className="wd-back" onClick={onBack}>‹</button>
+        <div className="wd-hero-inner">
+          <div className="wfeatured-emoji">{recipe.emoji}</div>
+          <h1 className="wd-title">{recipe.name}</h1>
+          <div className="wd-stats">
+            <span>⏱ {recipe.time} min</span>
+            <span style={{ color: recipeDifficultyColor(recipe.difficulty) }}>{recipe.difficulty}</span>
+            <span>🔥 {recipe.kcal} cal</span>
+          </div>
+        </div>
+      </div>
+      <div className="wd-body">
+        <div className="wd-section">
+          <h3>INGREDIENTES</h3>
+          {recipe.ingredients.map((ing, i) => (
+            <div className="nd-food" key={i}>
+              <span>{ing.name}</span>
+              <span className="nd-food-kcal">{ing.qty}</span>
+            </div>
+          ))}
+        </div>
+        <div className="wd-section">
+          <h3>PREPARACIÓN</h3>
+          {recipe.steps.map((s, i) => (
+            <div className="rstep" key={i}><span className="rstep-n">{i + 1}</span><span>{s}</span></div>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
 export default function Nutricion() {
   const { profile, openSheet } = useApp()
   const { isPremium } = useSubscription()
   const [tab, setTab] = useState('planes')
   const [planId, setPlanId] = useState(null)
+  const [recipeId, setRecipeId] = useState(null)
+  const [recipeCat, setRecipeCat] = useState('Todos')
 
   if (!isPremium) {
     return (
@@ -123,12 +162,16 @@ export default function Nutricion() {
   }
 
   const plan = planId ? getPlan(planId) : null
+  const recipe = recipeId ? getRecipe(recipeId) : null
+  const recipeList = RECIPES.filter((r) => recipeCat === 'Todos' || r.category === recipeCat)
 
   return (
     <section className="screen active" id="s-nutricion">
       <div className="scroll">
         {plan ? (
           <PlanDetail plan={plan} profile={profile} onBack={() => setPlanId(null)} />
+        ) : recipe ? (
+          <RecipeDetail recipe={recipe} onBack={() => setRecipeId(null)} />
         ) : (
           <>
             <div className="topgap" />
@@ -165,11 +208,32 @@ export default function Nutricion() {
             )}
 
             {tab === 'recetas' && (
-              <div className="wempty pad reveal d3">
-                <div className="wempty-emoji">🥗</div>
-                <h4>Recetas</h4>
-                <p>Próximamente (siguiente paso).</p>
-              </div>
+              <>
+                <div className="cat-row reveal d3">
+                  {RECIPE_CATEGORIES.map((c) => (
+                    <button key={c} className={'cat-pill' + (recipeCat === c ? ' sel' : '')} onClick={() => setRecipeCat(c)}>{c}</button>
+                  ))}
+                </div>
+                {recipeList.length === 0 ? (
+                  <div className="wempty pad reveal d4">
+                    <div className="wempty-emoji">🔍</div>
+                    <h4>Sin recetas</h4>
+                    <p>No hay recetas en esta categoría.</p>
+                  </div>
+                ) : (
+                  <div className="rgrid pad reveal d4">
+                    {recipeList.map((r) => (
+                      <div className="rcard" key={r.id} onClick={() => setRecipeId(r.id)}>
+                        <div className="rcard-emoji">{r.emoji}</div>
+                        <h4>{r.name}</h4>
+                        <div className="rcard-meta">
+                          {r.time} min · <span style={{ color: recipeDifficultyColor(r.difficulty) }}>{r.difficulty}</span> · {r.kcal} cal
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
             {tab === 'suplementos' && (
               <div className="wempty pad reveal d3">
