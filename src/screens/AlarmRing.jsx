@@ -1,14 +1,25 @@
-import { useNavigate } from 'react-router-dom'
+import { useApp } from '../store'
 
 export default function AlarmRing() {
-  const navigate = useNavigate()
+  const { profile, hideRing, openSheet } = useApp()
+
+  const startCamera = () => {
+    hideRing()
+    openSheet('cameraSheet')
+  }
+
   return (
-    <div className="screen screen--center">
-      <h1 className="screen__title">AlarmRing</h1>
-      <p className="screen__subtitle">Alarma sonando (Fase 4)</p>
-      <button className="screen__btn" onClick={() => navigate('/scan')}>
-        Ir a CameraScan
-      </button>
+    <div id="ringScreen" className="show">
+      <div className="ring-lbl">⏰ Booty Alarm</div>
+      <div className="ring-time" id="ringTime">{profile.wakeTime}</div>
+      <div className="pulse">🍑</div>
+      <div className="ring-msg">
+        No se apaga hasta que completes <b style={{ color: '#fff' }}>10 squats</b>. La cámara los cuenta.
+      </div>
+      <button className="ring-go" onClick={startCamera}>A DARLE 💪</button>
+      <div className="ring-note">
+        En iOS la app debe estar abierta · en Android suena en segundo plano
+      </div>
     </div>
   )
 }
