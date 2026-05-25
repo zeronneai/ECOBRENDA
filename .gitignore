@@ -24,3 +24,7 @@ pnpm-debug.log*
 ios/App/Pods
 android/.gradle
 android/app/build
+
+# MediaPipe wasm: se regenera desde node_modules (predev/prebuild).
+# El modelo .task SÍ se versiona (requiere descarga externa).
+public/mediapipe/wasm/
