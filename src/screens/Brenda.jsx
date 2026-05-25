@@ -1,8 +1,16 @@
 export default function Brenda() {
   return (
-    <div className="screen">
-      <h1 className="screen__title">Brenda</h1>
-      <p className="screen__subtitle">Rutinas y dietas (premium · Fase 7)</p>
-    </div>
+    <section className="screen active" id="s-brenda">
+      <div className="scroll">
+        <div className="topgap" />
+        <div className="hdr reveal d1">
+          <div>
+            <div className="hi">Premium</div>
+            <div className="name">BRENDA FITNESS</div>
+          </div>
+        </div>
+        {/* Contenido real en sub-paso 2d */}
+      </div>
+    </section>
   )
 }

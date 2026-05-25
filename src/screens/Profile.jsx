@@ -1,8 +1,16 @@
 export default function Profile() {
   return (
-    <div className="screen">
-      <h1 className="screen__title">Profile</h1>
-      <p className="screen__subtitle">Datos del usuario y suscripción (Fase 3)</p>
-    </div>
+    <section className="screen active" id="s-profile">
+      <div className="scroll">
+        <div className="topgap" />
+        <div className="hdr reveal d1">
+          <div>
+            <div className="hi">Cuenta</div>
+            <div className="name">PERFIL</div>
+          </div>
+        </div>
+        {/* Contenido real en sub-paso 2d */}
+      </div>
+    </section>
   )
 }

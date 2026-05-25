@@ -1,8 +1,16 @@
 export default function Home() {
   return (
-    <div className="screen">
-      <h1 className="screen__title">Home</h1>
-      <p className="screen__subtitle">Racha y próxima alarma (Fase 2)</p>
-    </div>
+    <section className="screen active" id="s-home">
+      <div className="scroll">
+        <div className="topgap" />
+        <div className="hdr reveal d1">
+          <div>
+            <div className="hi">Buen día</div>
+            <div className="name">HOME</div>
+          </div>
+        </div>
+        {/* Contenido real (racha, alarma, Brenda) en sub-paso 2c */}
+      </div>
+    </section>
   )
 }
