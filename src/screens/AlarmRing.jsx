@@ -1,15 +1,17 @@
 import { useEffect } from 'react'
 import { useApp } from '../store'
+import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
 
 export default function AlarmRing() {
-  const { profile, hideRing, openSheet, playAlarm } = useApp()
+  const { profile, hideRing, openSheet, playSong, setWorkout } = useApp()
 
   // Al abrirse la pantalla de alarma, suena la canción desde el inicio en loop.
   useEffect(() => {
-    playAlarm()
-  }, [playAlarm])
+    playSong(ALARM_AUDIO_SRC)
+  }, [playSong])
 
   const startCamera = () => {
+    setWorkout({ source: 'alarm', exercise: 'squats', reps: 10 })
     hideRing()
     openSheet('cameraSheet')
   }

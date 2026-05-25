@@ -231,11 +231,12 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 #celebrate.show{display:flex;animation:fade .4s}
 .celebrate-img{width:min(70%,280px);max-height:42vh;object-fit:contain;border-radius:22px;filter:drop-shadow(0 0 44px var(--magenta-glow)) drop-shadow(0 16px 32px rgba(0,0,0,.55));animation:popIn .7s cubic-bezier(.2,1.5,.4,1) both}
 @keyframes popIn{0%{transform:scale(.2);opacity:0}55%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
-.celebrate-kick{margin-top:26px;font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--lime);font-weight:800;animation:rise .6s .2s both}
-.celebrate-title{font-family:'Bebas Neue';font-size:48px;line-height:.95;margin:10px 0 8px;animation:rise .6s .28s both}
-.celebrate-msg{color:var(--txt-dim);font-size:15px;line-height:1.55;max-width:300px;animation:rise .6s .36s both}
-.celebrate-sign{color:var(--magenta-soft);font-weight:800;font-size:14px;margin-top:8px;margin-bottom:34px;animation:rise .6s .44s both}
-.celebrate-go{background:#fff;color:#0a0a0a;border:none;padding:16px 44px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;box-shadow:0 10px 30px rgba(255,255,255,.18);animation:rise .6s .52s both}
+.celebrate-kick{margin-top:24px;font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--lime);font-weight:800;animation:rise .6s .2s both}
+.celebrate-title{font-family:'Bebas Neue';font-size:46px;line-height:.95;margin:10px 0 14px;animation:rise .6s .28s both}
+.celebrate-stat{display:inline-flex;align-items:center;gap:8px;font-family:'Bebas Neue';font-size:34px;letter-spacing:.02em;color:#fff;background:linear-gradient(120deg,rgba(255,31,107,.18),rgba(255,255,255,.03));border:1px solid var(--magenta);border-radius:16px;padding:8px 20px;box-shadow:0 0 26px var(--magenta-glow);animation:popIn .6s .34s both}
+.celebrate-msg{color:var(--txt-dim);font-size:15px;line-height:1.55;max-width:300px;margin-top:16px;animation:rise .6s .42s both}
+.celebrate-sign{color:var(--magenta-soft);font-weight:800;font-size:14px;margin-top:6px;margin-bottom:28px;animation:rise .6s .5s both}
+.celebrate-go{background:#fff;color:#0a0a0a;border:none;padding:16px 44px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;box-shadow:0 10px 30px rgba(255,255,255,.18);animation:rise .6s .58s both}
 .celebrate-go:active{transform:scale(.97)}
 
 /* confetti dot */

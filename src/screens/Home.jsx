@@ -2,14 +2,22 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { GOALS } from '../data/plans'
+import { CHALLENGE_AUDIO_SRC } from '../lib/alarmAudio'
 
 function greetingFor(h) {
   return h < 12 ? 'Buen día' : h < 19 ? 'Buena tarde' : 'Buena noche'
 }
 
+const QUICK_CHALLENGES = [
+  { id: 'express', emoji: '🍑', reps: 15, exercise: 'squats', label: 'SQUATS', level: 'Express' },
+  { id: 'calentamiento', emoji: '🦵', reps: 20, exercise: 'lunges', label: 'LUNGES', level: 'Calentamiento' },
+  { id: 'intenso', emoji: '🍑', reps: 30, exercise: 'squats', label: 'SQUATS', level: 'Intenso' },
+  { id: 'bestia', emoji: '🦵', reps: 40, exercise: 'lunges', label: 'LUNGES', level: 'Bestia' },
+]
+
 export default function Home() {
   const navigate = useNavigate()
-  const { profile, plan, unlocked, streak, openSheet, showRing } = useApp()
+  const { profile, plan, unlocked, streak, challengesDone, openSheet, showRing, playSong, setWorkout } = useApp()
   const [alarmOn, setAlarmOn] = useState(true)
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
@@ -21,6 +29,12 @@ export default function Home() {
 
   const m = plan.macros
   const today = plan.workout.days[0]
+
+  const startChallenge = (ch) => {
+    setWorkout({ source: 'challenge', exercise: ch.exercise, reps: ch.reps, level: ch.level })
+    playSong(CHALLENGE_AUDIO_SRC)
+    openSheet('cameraSheet')
+  }
 
   return (
     <section className="screen active" id="s-home">
@@ -70,10 +84,29 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="sec-h reveal d4"><h2>BRENDA FITNESS</h2></div>
+        <div className="sec-h reveal d4">
+          <h2>RETOS RÁPIDOS</h2>
+          <span className="more">{challengesDone} COMPLETADOS</span>
+        </div>
+        <div className="brenda-live reveal d4">
+          {QUICK_CHALLENGES.map((ch) => (
+            <div className="bcard" key={ch.id} onClick={() => startChallenge(ch)}>
+              <div
+                className="ic"
+                style={{ background: ch.exercise === 'squats' ? 'rgba(255,31,107,.15)' : 'rgba(216,255,62,.13)' }}
+              >
+                {ch.emoji}
+              </div>
+              <h4>{ch.reps} {ch.label}</h4>
+              <p>{ch.level}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="sec-h reveal d5"><h2>BRENDA FITNESS</h2></div>
 
         {!unlocked && (
-          <div id="brendaLocked" className="reveal d4">
+          <div id="brendaLocked" className="reveal d5">
             <div className="brenda-promo">
               <div className="glow" /><div className="shimmer" />
               <div className="lock-pill">🔒 PREMIUM</div>

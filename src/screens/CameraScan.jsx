@@ -6,7 +6,9 @@ import Sheet from '../components/Sheet'
 // se reemplazan en la Fase 5 por la deteccion real con camara (MediaPipe
 // Pose) que cuenta las reps por movimiento, sin boton para saltar.
 export default function CameraScan() {
-  const { closeSheet, setStreak, stopAlarm, showCelebration } = useApp()
+  const { closeSheet, setStreak, stopSong, showCelebration, workout, setChallengesDone } = useApp()
+  const goal = workout?.reps ?? 10
+  const exercise = workout?.exercise === 'lunges' ? 'lunges' : 'squats'
   const [reps, setReps] = useState(0)
 
   useEffect(() => {
@@ -14,16 +16,18 @@ export default function CameraScan() {
     const iv = setInterval(() => {
       c++
       setReps(c)
-      if (c >= 10) clearInterval(iv)
+      if (c >= goal) clearInterval(iv)
     }, 450)
     return () => clearInterval(iv)
-  }, [])
+  }, [goal])
 
   const complete = () => {
-    stopAlarm() // la alarma solo se apaga al completar el reto
+    stopSong() // el audio solo se apaga al completar las reps
     closeSheet()
-    setStreak((s) => s + 1)
-    showCelebration() // pantalla de felicitacion de Brenda (con su propio confeti)
+    // La racha es SOLO de la alarma diaria; los retos rápidos van a su contador.
+    if (workout?.source === 'challenge') setChallengesDone((n) => n + 1)
+    else setStreak((s) => s + 1)
+    showCelebration()
   }
 
   return (
@@ -55,7 +59,7 @@ export default function CameraScan() {
         <div style={{ textAlign: 'center', zIndex: 2 }}>
           <div style={{ fontSize: 54, marginBottom: 12 }}>📷</div>
           <div style={{ fontSize: 13, color: 'var(--txt-dim)', maxWidth: 200, lineHeight: 1.5 }}>
-            Aquí se activa la detección de squats con la cámara
+            Aquí se activa la detección de {exercise} con la cámara
           </div>
         </div>
         <div
@@ -83,7 +87,7 @@ export default function CameraScan() {
           }}
         >
           <span id="repCount">{reps}</span>
-          <span style={{ fontSize: 20, color: 'var(--txt-dim)' }}>/10</span>
+          <span style={{ fontSize: 20, color: 'var(--txt-dim)' }}>/{goal}</span>
         </div>
       </div>
 

@@ -22,11 +22,14 @@ export function AppProvider({ children }) {
   const [celebrating, setCelebrating] = useState(false)
   const [toastMsg, setToastMsg] = useState(null)
   const [selectedPlan, setSelectedPlan] = useState('anual')
+  // Sesión de cámara activa: { source:'alarm'|'challenge', exercise, reps, level? }
+  const [workout, setWorkout] = useState(null)
+  const [challengesDone, setChallengesDone] = useState(0)   // contador aparte de retos rápidos
 
   const appRef = useRef(null)      // contenedor .app — para el confeti imperativo
   const toastTimer = useRef(null)
-  const alarmAudioRef = useRef(null)       // <audio> de la alarma (vive en AppShell)
-  const alarmGestureRef = useRef(null)     // handler de reintento ante autoplay bloqueado
+  const audioRef = useRef(null)            // <audio> único (alarma o reto), vive en AppShell
+  const gestureRef = useRef(null)          // handler de reintento ante autoplay bloqueado
 
   const plan = useMemo(() => getBrendaPlan(profile), [profile])
 
@@ -74,46 +77,47 @@ export function AppProvider({ children }) {
     }
   }, [])
 
-  // ===== Audio de la alarma =====
-  const disarmAlarmFallback = useCallback(() => {
-    const h = alarmGestureRef.current
+  // ===== Audio (alarma y retos comparten el mismo <audio>) =====
+  const disarmAudioFallback = useCallback(() => {
+    const h = gestureRef.current
     if (!h) return
     window.removeEventListener('pointerdown', h)
     window.removeEventListener('touchstart', h)
-    alarmGestureRef.current = null
+    gestureRef.current = null
   }, [])
 
-  const armAlarmFallback = useCallback(() => {
-    if (alarmGestureRef.current) return
+  const armAudioFallback = useCallback(() => {
+    if (gestureRef.current) return
     const h = () => {
-      const el = alarmAudioRef.current
+      const el = audioRef.current
       if (el) el.play().catch(() => {})
-      disarmAlarmFallback()
+      disarmAudioFallback()
     }
-    alarmGestureRef.current = h
+    gestureRef.current = h
     window.addEventListener('pointerdown', h, { once: true })
     window.addEventListener('touchstart', h, { once: true })
-  }, [disarmAlarmFallback])
+  }, [disarmAudioFallback])
 
-  // Arranca la canción desde el inicio, en loop, a volumen máximo.
-  const playAlarm = useCallback(() => {
-    const el = alarmAudioRef.current
+  // Arranca una canción desde el inicio, en loop, a volumen máximo.
+  const playSong = useCallback((src) => {
+    const el = audioRef.current
     if (!el) return
+    if (src && el.src !== src) el.src = src
     el.currentTime = 0
     el.volume = 1.0
     el.loop = true
     const p = el.play()
-    if (p && typeof p.catch === 'function') p.catch(() => armAlarmFallback())
-  }, [armAlarmFallback])
+    if (p && typeof p.catch === 'function') p.catch(() => armAudioFallback())
+  }, [armAudioFallback])
 
-  // Único modo de detenerla: completar el reto (Fase 5: cámara).
-  const stopAlarm = useCallback(() => {
-    disarmAlarmFallback()
-    const el = alarmAudioRef.current
+  // Único modo de detenerla: completar las reps (Fase 5: cámara).
+  const stopSong = useCallback(() => {
+    disarmAudioFallback()
+    const el = audioRef.current
     if (!el) return
     el.pause()
     el.currentTime = 0
-  }, [disarmAlarmFallback])
+  }, [disarmAudioFallback])
 
   const value = {
     profile, updateProfile,
@@ -127,7 +131,9 @@ export function AppProvider({ children }) {
     toastMsg, showToast,
     selectedPlan, setSelectedPlan,
     confetti, appRef,
-    alarmAudioRef, playAlarm, stopAlarm,
+    audioRef, playSong, stopSong,
+    workout, setWorkout,
+    challengesDone, setChallengesDone,
   }
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>

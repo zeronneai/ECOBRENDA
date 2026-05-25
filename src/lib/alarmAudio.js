@@ -22,5 +22,10 @@
    Nota: el volumen del elemento es 1.0 (máximo); el volumen real depende del
    volumen de medios del dispositivo, que la web no puede forzar. */
 
+// Canción de la alarma de la mañana.
 export const ALARM_AUDIO_SRC =
   'https://res.cloudinary.com/dsprn0ew4/video/upload/v1775536848/Junior_H_con_Banda_-_El_Hijo_Mayor_En_Vivo_rofzm5.mp3'
+
+// Canción de los retos rápidos (distinta de la alarma).
+export const CHALLENGE_AUDIO_SRC =
+  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1775681660/Eden_Mu%C3%B1oz_Cosme_Tadeo_-_La_Nena_LETRA_e70dkv.mp3'
