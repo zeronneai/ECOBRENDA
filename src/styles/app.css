@@ -226,6 +226,33 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .toast{position:absolute;top:calc(var(--safe-top) + 14px);left:50%;transform:translateX(-50%) translateY(-90px);background:var(--surface-2);border:1px solid var(--line-strong);padding:13px 20px;border-radius:14px;font-size:13px;font-weight:600;z-index:300;transition:.45s cubic-bezier(.3,1.4,.5,1);display:flex;gap:9px;align-items:center;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
+/* ===== CAMERA SCAN (deteccion real, pantalla completa) ===== */
+#scan{position:absolute;inset:0;z-index:210;background:#000;overflow:hidden}
+.scan-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.scan-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 28%,transparent 52%,rgba(7,7,8,.88))}
+
+/* priming / denied */
+.scan-card{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px;background:radial-gradient(120% 90% at 50% 0%,#2a0014,#070708)}
+.scan-emoji{font-size:60px;margin-bottom:18px}
+.scan-title{font-family:'Bebas Neue';font-size:40px;line-height:.95;margin-bottom:14px}
+.scan-lead{color:var(--txt-dim);font-size:14.5px;line-height:1.6;max-width:320px;margin-bottom:30px}
+.scan-go{background:#fff;color:#0a0a0a;border:none;padding:16px 42px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;box-shadow:0 10px 30px var(--magenta-glow)}
+.scan-go:active{transform:scale(.97)}
+
+/* HUD activo */
+.scan-top{position:absolute;top:calc(var(--safe-top) + 16px);left:0;right:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.scan-live{display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid var(--line-strong);border-radius:30px;padding:7px 13px;font-size:11px;font-weight:800;letter-spacing:.08em}
+.scan-live .dot{width:8px;height:8px;border-radius:50%;background:var(--magenta);box-shadow:0 0 10px var(--magenta);animation:blink 1.5s infinite}
+.scan-ex{font-family:'Bebas Neue';font-size:28px;letter-spacing:.04em;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.scan-prep{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;color:var(--txt-dim);font-weight:700;font-size:14px}
+.scan-bottom{position:absolute;left:0;right:0;bottom:calc(var(--safe-bot) + 46px);z-index:2;display:flex;flex-direction:column;align-items:center;gap:18px}
+.scan-fb{background:rgba(255,31,107,.18);border:1px solid var(--magenta);color:#fff;border-radius:30px;padding:9px 18px;font-size:13px;font-weight:700;backdrop-filter:blur(8px);box-shadow:0 0 20px var(--magenta-glow)}
+.scan-ring{position:relative;width:200px;height:200px;filter:drop-shadow(0 0 18px var(--magenta-glow))}
+.scan-ring svg{transform:rotate(-90deg)}
+.scan-count{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.scan-count .n{font-family:'Bebas Neue';font-size:88px;line-height:.78;color:#fff}
+.scan-count .g{font-size:15px;color:var(--txt-dim);font-weight:700;letter-spacing:.04em}
+
 /* ===== CELEBRATION (felicitacion de Brenda al completar) ===== */
 #celebrate{position:absolute;inset:0;z-index:220;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 30px calc(var(--safe-bot) + 30px);background:radial-gradient(120% 90% at 50% 0%,#2a0014,#070708)}
 #celebrate.show{display:flex;animation:fade .4s}

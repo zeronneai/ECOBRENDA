@@ -1,97 +1,155 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../store'
-import Sheet from '../components/Sheet'
+import { PoseTracker } from '../lib/poseTracker'
+import { RepCounter } from '../lib/repCounter'
+import * as storage from '../lib/storage'
 
-// TEMPORAL (prototipo): el conteo simulado y el boton "SIMULAR COMPLETAR"
-// se reemplazan en la Fase 5 por la deteccion real con camara (MediaPipe
-// Pose) que cuenta las reps por movimiento, sin boton para saltar.
+// Anillo de progreso SVG.
+const R = 92
+const CIRC = 2 * Math.PI * R
+
 export default function CameraScan() {
-  const { closeSheet, setStreak, stopSong, showCelebration, workout, setChallengesDone } = useApp()
+  const { workout, stopSong, setStreak, setChallengesDone, stopScan, showCelebration } = useApp()
   const goal = workout?.reps ?? 10
   const exercise = workout?.exercise === 'lunges' ? 'lunges' : 'squats'
+  const exKind = exercise === 'lunges' ? 'lunge' : 'squat'
+  const exLabel = exercise === 'lunges' ? 'LUNGES' : 'SQUATS'
+
+  // 'priming' | 'active' | 'denied'
+  const [phase, setPhase] = useState('priming')
+  const [ready, setReady] = useState(false)            // cámara en vivo
   const [reps, setReps] = useState(0)
+  const [feedback, setFeedback] = useState('Colócate de cuerpo completo en cuadro')
 
-  useEffect(() => {
-    let c = 0
-    const iv = setInterval(() => {
-      c++
-      setReps(c)
-      if (c >= goal) clearInterval(iv)
-    }, 450)
-    return () => clearInterval(iv)
-  }, [goal])
+  const videoRef = useRef(null)
+  const trackerRef = useRef(null)
+  const finishedRef = useRef(false)
 
-  const complete = () => {
-    stopSong() // el audio solo se apaga al completar las reps
-    closeSheet()
-    // La racha es SOLO de la alarma diaria; los retos rápidos van a su contador.
-    if (workout?.source === 'challenge') setChallengesDone((n) => n + 1)
-    else setStreak((s) => s + 1)
+  const finish = () => {
+    if (finishedRef.current) return
+    finishedRef.current = true
+    trackerRef.current?.stop() // libera la cámara de inmediato
+    stopSong()
+    // La racha es SOLO de la alarma diaria; los retos van a su contador.
+    if (workout?.source === 'challenge') setChallengesDone(storage.recordChallenge())
+    else setStreak(storage.completeWorkout(exKind).streak)
+    stopScan()
     showCelebration()
   }
 
+  // Arranca modelo + cámara cuando el usuario acepta el priming.
+  useEffect(() => {
+    if (phase !== 'active') return
+    let cancelled = false
+
+    const counter = new RepCounter(exKind, {
+      onRep: (n) => {
+        storage.recordRep(exKind) // suma reps REALES por ejercicio
+        setReps(n)
+        if (n >= goal) finish()
+      },
+      onState: (p, info) => {
+        if (p === 'NOT_READY') setFeedback(info?.reason || 'Colócate de cuerpo completo en cuadro')
+        else if (p === 'TRANSITION' && info?.rejected) setFeedback(info?.reason || 'Movimiento no válido')
+        else setFeedback(null)
+      },
+    })
+
+    const tracker = new PoseTracker({
+      onResult: (r) => { if (!cancelled) counter.update(r) },
+      fps: 20,
+    })
+    trackerRef.current = tracker
+
+    tracker
+      .start(videoRef.current)
+      .then(() => { if (!cancelled) setReady(true) })
+      .catch((err) => {
+        console.warn('[CameraScan] cámara no disponible:', err)
+        if (!cancelled) setPhase('denied')
+      })
+
+    return () => {
+      cancelled = true
+      tracker.dispose() // libera cámara + WebGL (evita la fuga de memoria)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
+
+  const activate = () => {
+    finishedRef.current = false
+    setReady(false)
+    setReps(0)
+    setPhase('active')
+  }
+
+  const pct = Math.min(reps / goal, 1)
+
   return (
-    <Sheet>
-      <h3>ESCANEO DE CUERPO</h3>
-      <p className="lead">Colócate frente a la cámara. Cuento tus repeticiones en tiempo real.</p>
+    <div id="scan">
+      {/* Video en vivo (espejado) */}
+      <video ref={videoRef} className="scan-video" muted playsInline />
+      <div className="scan-shade" />
 
-      <div
-        style={{
-          aspectRatio: '3/4',
-          borderRadius: 18,
-          background: 'linear-gradient(160deg,#1a0a12,#0a0a0c)',
-          border: '1px solid var(--line-strong)',
-          display: 'grid',
-          placeItems: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          marginBottom: 18,
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'radial-gradient(60% 50% at 50% 50%,rgba(255,31,107,.14),transparent)',
-            animation: 'breathe 3s infinite',
-          }}
-        />
-        <div style={{ textAlign: 'center', zIndex: 2 }}>
-          <div style={{ fontSize: 54, marginBottom: 12 }}>📷</div>
-          <div style={{ fontSize: 13, color: 'var(--txt-dim)', maxWidth: 200, lineHeight: 1.5 }}>
-            Aquí se activa la detección de {exercise} con la cámara
+      {/* PRIMING: explicación + permiso */}
+      {phase === 'priming' && (
+        <div className="scan-card">
+          <div className="scan-emoji">📷</div>
+          <h2 className="scan-title">ESCANEO DE CUERPO</h2>
+          <p className="scan-lead">
+            Tu cámara cuenta tus <b style={{ color: '#fff' }}>{goal} {exLabel.toLowerCase()}</b> en
+            tiempo real. El video <b style={{ color: '#fff' }}>no se sube</b>: todo se procesa en tu
+            teléfono.
+          </p>
+          <button className="scan-go" onClick={activate}>ACTIVAR CÁMARA</button>
+        </div>
+      )}
+
+      {/* DENIED: permiso negado / cámara no disponible */}
+      {phase === 'denied' && (
+        <div className="scan-card">
+          <div className="scan-emoji">🚫</div>
+          <h2 className="scan-title">SIN ACCESO A LA CÁMARA</h2>
+          <p className="scan-lead">
+            Necesito tu cámara para contar tus reps (no hay forma de saltarlo). Activa el permiso
+            en los ajustes de la app y reintenta.
+          </p>
+          <button className="scan-go" onClick={activate}>REINTENTAR</button>
+        </div>
+      )}
+
+      {/* ACTIVE: HUD de conteo */}
+      {phase === 'active' && (
+        <>
+          <div className="scan-top">
+            <div className="scan-live"><span className="dot" /> EN VIVO</div>
+            <div className="scan-ex">{exLabel}</div>
           </div>
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            top: 14,
-            left: 14,
-            background: 'rgba(0,0,0,.5)',
-            padding: '6px 12px',
-            borderRadius: 30,
-            fontSize: 11,
-            fontWeight: 800,
-          }}
-        >
-          ● EN VIVO
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 14,
-            right: 14,
-            fontFamily: "'Bebas Neue'",
-            fontSize: 48,
-            lineHeight: 0.8,
-          }}
-        >
-          <span id="repCount">{reps}</span>
-          <span style={{ fontSize: 20, color: 'var(--txt-dim)' }}>/{goal}</span>
-        </div>
-      </div>
 
-      <button className="cta full" onClick={complete}>SIMULAR COMPLETAR ✓</button>
-    </Sheet>
+          {!ready && <div className="scan-prep">Preparando cámara…</div>}
+
+          {ready && (
+            <div className="scan-bottom">
+              {feedback && <div className="scan-fb">{feedback}</div>}
+              <div className="scan-ring">
+                <svg width="200" height="200" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r={R} fill="none" stroke="rgba(255,255,255,.12)" strokeWidth="10" />
+                  <circle
+                    cx="100" cy="100" r={R} fill="none" stroke="var(--magenta)" strokeWidth="10"
+                    strokeLinecap="round" strokeDasharray={CIRC}
+                    strokeDashoffset={CIRC * (1 - pct)}
+                    style={{ transition: 'stroke-dashoffset .3s ease' }}
+                  />
+                </svg>
+                <div className="scan-count">
+                  <div className="n">{reps}</div>
+                  <div className="g">/ {goal}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   )
 }

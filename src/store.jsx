@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useMemo, useRef, useCallback } from 'react'
 import { getBrendaPlan } from './data/plans'
+import * as storage from './lib/storage'
 
 const AppCtx = createContext(null)
 
@@ -16,15 +17,18 @@ export function AppProvider({ children }) {
   const [profile, setProfileState] = useState(DEFAULT_PROFILE)
   const [unlocked, setUnlocked] = useState(false)
   const [onboarding, setOnboarding] = useState(true)
-  const [streak, setStreak] = useState(0)
-  const [sheet, setSheet] = useState(null)          // 'paywall' | 'alarmSheet' | 'mealsSheet' | 'cameraSheet' | null
+  // Racha real desde storage (fecha actual, expira sola, 0 para usuario nuevo).
+  const [streak, setStreak] = useState(() => storage.getCurrentStreak())
+  const [sheet, setSheet] = useState(null)          // 'paywall' | 'alarmSheet' | 'mealsSheet' | null
   const [ringOpen, setRingOpen] = useState(false)
+  const [scanning, setScanning] = useState(false)   // escaneo de cámara a pantalla completa
   const [celebrating, setCelebrating] = useState(false)
   const [toastMsg, setToastMsg] = useState(null)
   const [selectedPlan, setSelectedPlan] = useState('anual')
   // Sesión de cámara activa: { source:'alarm'|'challenge', exercise, reps, level? }
   const [workout, setWorkout] = useState(null)
-  const [challengesDone, setChallengesDone] = useState(0)   // contador aparte de retos rápidos
+  // Contador de retos rápidos desde storage (aparte de la racha).
+  const [challengesDone, setChallengesDone] = useState(() => storage.getChallengesDone())
 
   const appRef = useRef(null)      // contenedor .app — para el confeti imperativo
   const toastTimer = useRef(null)
@@ -41,6 +45,8 @@ export function AppProvider({ children }) {
   const closeSheet = useCallback(() => setSheet(null), [])
   const showRing = useCallback(() => setRingOpen(true), [])
   const hideRing = useCallback(() => setRingOpen(false), [])
+  const startScan = useCallback(() => setScanning(true), [])
+  const stopScan = useCallback(() => setScanning(false), [])
   const showCelebration = useCallback(() => setCelebrating(true), [])
   const hideCelebration = useCallback(() => setCelebrating(false), [])
   const unlock = useCallback(() => setUnlocked(true), [])
@@ -127,6 +133,7 @@ export function AppProvider({ children }) {
     plan,
     sheet, openSheet, closeSheet,
     ringOpen, showRing, hideRing,
+    scanning, startScan, stopScan,
     celebrating, showCelebration, hideCelebration,
     toastMsg, showToast,
     selectedPlan, setSelectedPlan,
