@@ -19,6 +19,7 @@ export function AppProvider({ children }) {
   const [streak, setStreak] = useState(0)
   const [sheet, setSheet] = useState(null)          // 'paywall' | 'alarmSheet' | 'mealsSheet' | 'cameraSheet' | null
   const [ringOpen, setRingOpen] = useState(false)
+  const [celebrating, setCelebrating] = useState(false)
   const [toastMsg, setToastMsg] = useState(null)
   const [selectedPlan, setSelectedPlan] = useState('anual')
 
@@ -37,6 +38,8 @@ export function AppProvider({ children }) {
   const closeSheet = useCallback(() => setSheet(null), [])
   const showRing = useCallback(() => setRingOpen(true), [])
   const hideRing = useCallback(() => setRingOpen(false), [])
+  const showCelebration = useCallback(() => setCelebrating(true), [])
+  const hideCelebration = useCallback(() => setCelebrating(false), [])
   const unlock = useCallback(() => setUnlocked(true), [])
   const finishOnboarding = useCallback(() => setOnboarding(false), [])
 
@@ -47,11 +50,11 @@ export function AppProvider({ children }) {
   }, [])
 
   // Confeti — mismo comportamiento que el prototipo (Web Animations API).
-  const confetti = useCallback(() => {
+  const confetti = useCallback((count = 40) => {
     const app = appRef.current
     if (!app) return
     const cols = ['#ff1f6b', '#d8ff3e', '#f5c451', '#fff']
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < count; i++) {
       const c = document.createElement('div')
       c.className = 'cf'
       c.style.background = cols[i % 4]
@@ -120,6 +123,7 @@ export function AppProvider({ children }) {
     plan,
     sheet, openSheet, closeSheet,
     ringOpen, showRing, hideRing,
+    celebrating, showCelebration, hideCelebration,
     toastMsg, showToast,
     selectedPlan, setSelectedPlan,
     confetti, appRef,

@@ -226,5 +226,17 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .toast{position:absolute;top:calc(var(--safe-top) + 14px);left:50%;transform:translateX(-50%) translateY(-90px);background:var(--surface-2);border:1px solid var(--line-strong);padding:13px 20px;border-radius:14px;font-size:13px;font-weight:600;z-index:300;transition:.45s cubic-bezier(.3,1.4,.5,1);display:flex;gap:9px;align-items:center;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
+/* ===== CELEBRATION (felicitacion de Brenda al completar) ===== */
+#celebrate{position:absolute;inset:0;z-index:220;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 30px calc(var(--safe-bot) + 30px);background:radial-gradient(120% 90% at 50% 0%,#2a0014,#070708)}
+#celebrate.show{display:flex;animation:fade .4s}
+.celebrate-img{width:min(70%,280px);max-height:42vh;object-fit:contain;border-radius:22px;filter:drop-shadow(0 0 44px var(--magenta-glow)) drop-shadow(0 16px 32px rgba(0,0,0,.55));animation:popIn .7s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes popIn{0%{transform:scale(.2);opacity:0}55%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.celebrate-kick{margin-top:26px;font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--lime);font-weight:800;animation:rise .6s .2s both}
+.celebrate-title{font-family:'Bebas Neue';font-size:48px;line-height:.95;margin:10px 0 8px;animation:rise .6s .28s both}
+.celebrate-msg{color:var(--txt-dim);font-size:15px;line-height:1.55;max-width:300px;animation:rise .6s .36s both}
+.celebrate-sign{color:var(--magenta-soft);font-weight:800;font-size:14px;margin-top:8px;margin-bottom:34px;animation:rise .6s .44s both}
+.celebrate-go{background:#fff;color:#0a0a0a;border:none;padding:16px 44px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;box-shadow:0 10px 30px rgba(255,255,255,.18);animation:rise .6s .52s both}
+.celebrate-go:active{transform:scale(.97)}
+
 /* confetti dot */
 .cf{position:absolute;width:8px;height:8px;z-index:250;pointer-events:none;border-radius:2px}

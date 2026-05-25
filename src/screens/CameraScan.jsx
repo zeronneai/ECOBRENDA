@@ -6,7 +6,7 @@ import Sheet from '../components/Sheet'
 // se reemplazan en la Fase 5 por la deteccion real con camara (MediaPipe
 // Pose) que cuenta las reps por movimiento, sin boton para saltar.
 export default function CameraScan() {
-  const { closeSheet, confetti, setStreak, showToast, stopAlarm } = useApp()
+  const { closeSheet, setStreak, stopAlarm, showCelebration } = useApp()
   const [reps, setReps] = useState(0)
 
   useEffect(() => {
@@ -22,9 +22,8 @@ export default function CameraScan() {
   const complete = () => {
     stopAlarm() // la alarma solo se apaga al completar el reto
     closeSheet()
-    confetti()
     setStreak((s) => s + 1)
-    showToast('¡Reto completado! Racha +1 🔥')
+    showCelebration() // pantalla de felicitacion de Brenda (con su propio confeti)
   }
 
   return (
