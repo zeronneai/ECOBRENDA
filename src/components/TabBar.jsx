@@ -16,6 +16,14 @@ export default function TabBar() {
     navigate('/brenda')
   }
 
+  const goEntrena = () => {
+    if (!unlocked) {
+      openSheet('paywall')
+      return
+    }
+    navigate('/entrena')
+  }
+
   return (
     <nav className="tabbar">
       <button
@@ -32,6 +40,15 @@ export default function TabBar() {
       >
         <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2M5 3L2 6M22 6l-3-3" /></svg>
         <span>Alarma</span>
+      </button>
+
+      <button
+        className={'tab' + (isActive('/entrena') ? ' active' : '') + (!unlocked ? ' locked' : '')}
+        onClick={goEntrena}
+      >
+        <svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M4 7l3-3 3 3-3 3zM14 17l3-3 3 3-3 3zM3 8l-1 1 2 2 1-1zM21 16l1-1-2-2-1 1z" /></svg>
+        <span>Entrena</span>
+        {!unlocked && <span className="mini-lock">🔒</span>}
       </button>
 
       <button
