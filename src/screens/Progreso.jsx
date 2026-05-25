@@ -3,15 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
-
-const ACHIEVEMENTS = [
-  { id: 'semana', emoji: '🔥', name: 'Primera semana', req: '3 entrenamientos', check: (s, w) => w >= 3 },
-  { id: 'mes', emoji: '💪', name: 'Mes completo', req: '12 entrenamientos', check: (s, w) => w >= 12 },
-  { id: 'racha7', emoji: '⭐', name: 'Racha 7 días', req: 'Racha de 7', check: (s) => s >= 7 },
-  { id: 'cincuenta', emoji: '🏆', name: '50 entrenamientos', req: '50 entrenamientos', check: (s, w) => w >= 50 },
-  { id: 'racha30', emoji: '💎', name: 'Racha 30 días', req: 'Racha de 30', check: (s) => s >= 30 },
-  { id: 'cien', emoji: '🌟', name: '100 entrenamientos', req: '100 entrenamientos', check: (s, w) => w >= 100 },
-]
+import { ACHIEVEMENTS } from '../data/achievements'
 
 export default function Progreso() {
   const navigate = useNavigate()

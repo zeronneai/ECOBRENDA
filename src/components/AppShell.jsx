@@ -6,10 +6,11 @@ import SheetHost from './SheetHost'
 import AlarmRing from '../screens/AlarmRing'
 import CameraScan from '../screens/CameraScan'
 import Celebration from '../screens/Celebration'
+import AchievementModal from './AchievementModal'
 import Onboarding from '../screens/Onboarding'
 
 export default function AppShell() {
-  const { appRef, onboarding, ringOpen, scanning, celebrating, audioRef } = useApp()
+  const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef } = useApp()
   return (
     <div className="app" ref={appRef}>
       {/* Audio único (alarma o reto): vive a nivel app para sobrevivir al
@@ -31,6 +32,8 @@ export default function AppShell() {
       {ringOpen && <AlarmRing />}
       {scanning && <CameraScan />}
       {celebrating && <Celebration />}
+      {/* Logro: aparece tras cerrar la felicitación de reto (no choca) */}
+      {achievementQueue.length > 0 && !celebrating && <AchievementModal />}
       <Toast />
 
       {onboarding && <Onboarding />}

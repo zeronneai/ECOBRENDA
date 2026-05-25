@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useMemo, useRef, useCallback } from 'react'
+import { createContext, useContext, useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { getBrendaPlan } from '../data/plans'
+import { ACHIEVEMENTS } from '../data/achievements'
 import * as dataStore from '../lib/dataStore'
 
 const AppCtx = createContext(null)
@@ -23,6 +24,7 @@ export function AppProvider({ children }) {
   const [workoutLog, setWorkoutLogState] = useState(() => dataStore.getWorkoutLog())
   const [progressLog, setProgressLogState] = useState(() => dataStore.getProgressLog())
   const [settings, setSettingsState] = useState(() => dataStore.getSettings())
+  const [achievementQueue, setAchievementQueue] = useState([]) // ids de logros por celebrar
   const [alarms, setAlarmsState] = useState(() => dataStore.getAlarms())
   const [weekChart, setWeekChart] = useState(() => dataStore.getWeekChartData())
   // Onboarding solo si el perfil aún no está marcado onboarded.
@@ -60,11 +62,32 @@ export function AppProvider({ children }) {
     setSubscriptionState(dataStore.setSubscription({ status: 'active', plan: selectedPlan }))
   }, [selectedPlan])
 
+  // Detecta el momento EXACTO en que se cruza el umbral de un logro.
+  // 1ª vez (announced===null): siembra los ya desbloqueados SIN celebrar
+  // (evita aluvión a usuarios existentes). Después: encola solo los nuevos.
+  const syncAchievements = useCallback(() => {
+    const s = dataStore.getStreak()
+    const w = dataStore.getTotals().workouts
+    const unlocked = ACHIEVEMENTS.filter((a) => a.check(s, w)).map((a) => a.id)
+    const announced = dataStore.getAnnouncedAchievements()
+    if (announced === null) {
+      dataStore.setAnnouncedAchievements(unlocked)
+      return
+    }
+    const newly = unlocked.filter((id) => !announced.includes(id))
+    if (newly.length) {
+      dataStore.setAnnouncedAchievements([...announced, ...newly])
+      setAchievementQueue((q) => [...q, ...newly])
+    }
+  }, [])
+  const dismissAchievement = useCallback(() => setAchievementQueue((q) => q.slice(1)), [])
+
   // Completar el ejercicio de la alarma → racha de despertar (persistente).
   const completeWakeWorkout = useCallback(() => {
     dataStore.completeWakeWorkout()
     setStreak(dataStore.getStreak())
-  }, [])
+    syncAchievements()
+  }, [syncAchievements])
 
   // Reto rápido completado → su contador propio (no toca la racha).
   const incrementChallenge = useCallback(() => {
@@ -82,7 +105,8 @@ export function AppProvider({ children }) {
     setTotals({ ...dataStore.getTotals() })
     setWeekChart(dataStore.getWeekChartData())
     setWorkoutLogState([...dataStore.getWorkoutLog()])
-  }, [])
+    syncAchievements()
+  }, [syncAchievements])
 
   // ── Progreso (peso) ──
   const addProgressEntry = useCallback((entry) => {
@@ -220,6 +244,11 @@ export function AppProvider({ children }) {
     setScanning(true)                  // abre CameraScan
   }, [playSong])
 
+  // Al montar: siembra el baseline (no celebra logros ya ganados).
+  useEffect(() => {
+    syncAchievements()
+  }, [syncAchievements])
+
   const value = {
     profile, updateProfile,
     subscription, unlocked, unlock,
@@ -229,6 +258,7 @@ export function AppProvider({ children }) {
     totals, recordRep, logWorkout, workoutLog,
     progressLog, addProgressEntry, deleteProgressEntry,
     settings, saveSettings, resetProgress,
+    achievementQueue, dismissAchievement,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,
     plan,

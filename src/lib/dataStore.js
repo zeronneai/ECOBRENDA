@@ -34,6 +34,8 @@ const DEFAULT_STATE = {
   totals: { squat: 0, lunge: 0, reps: 0, workouts: 0 }, // reps REALES por ejercicio
   // [{ id, hour:'HH:MM', exercise:'squats'|'lunges', reps, days:[0-6], active }]
   alarms: [],
+  // Logros ya anunciados (null = aún sin inicializar/seed).
+  announcedAchievements: null,
   settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false },
 }
 
@@ -312,6 +314,15 @@ export function saveSettings(patch) {
   s.settings = { ...s.settings, ...patch }
   save()
   return s.settings
+}
+
+// ── Logros anunciados (para no repetir la celebración) ──────────────────
+export function getAnnouncedAchievements() { return load().announcedAchievements }
+export function setAnnouncedAchievements(ids) {
+  const s = load()
+  s.announcedAchievements = ids
+  save()
+  return s.announcedAchievements
 }
 
 // ── Reiniciar progreso: borra SOLO el log de entrenamientos y de peso ────

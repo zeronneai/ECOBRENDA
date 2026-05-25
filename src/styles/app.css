@@ -331,6 +331,18 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .legal-lead{font-size:15px;color:var(--txt);margin-bottom:6px}
 .legal-foot{font-size:11px;color:var(--txt-faint);margin-top:26px}
 
+/* ===== MODAL DE LOGRO ===== */
+#achv{position:absolute;inset:0;z-index:240;display:flex;align-items:center;justify-content:center;padding:30px;background:rgba(7,7,8,.82);backdrop-filter:blur(6px)}
+#achv.show{animation:fade .3s}
+.achv-card{background:linear-gradient(160deg,#1a0a14,#0c0c0f);border:1px solid var(--magenta);border-radius:26px;padding:30px 26px;text-align:center;max-width:340px;box-shadow:0 0 60px var(--magenta-glow);animation:popIn .6s cubic-bezier(.2,1.5,.4,1) both}
+.achv-emoji{font-size:64px;line-height:1;animation:popIn .7s .12s both}
+.achv-kick{margin-top:12px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--lime);font-weight:800}
+.achv-title{font-family:'Bebas Neue';font-size:42px;line-height:.95;margin:6px 0 8px}
+.achv-desc{color:var(--txt-dim);font-size:14px;line-height:1.5;margin-bottom:14px}
+.achv-brenda{background:rgba(255,31,107,.1);border:1px solid var(--line-strong);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--magenta-soft);font-weight:600;line-height:1.45;margin-bottom:22px}
+.achv-go{background:#fff;color:#0a0a0a;border:none;padding:14px 40px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:15px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;box-shadow:0 10px 30px rgba(255,255,255,.18)}
+.achv-go:active{transform:scale(.97)}
+
 /* ===== HEADER ===== */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:0 22px;margin-bottom:24px}
 .hdr .hi{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);font-weight:700}
