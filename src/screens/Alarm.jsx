@@ -1,10 +1,8 @@
-import { useState } from 'react'
 import { useApp } from '../store'
+import { formatDays } from '../data/onboarding'
 
 export default function Alarm() {
-  const { profile, openSheet } = useApp()
-  const [a1, setA1] = useState(true)
-  const [a2, setA2] = useState(false)
+  const { alarms, toggleAlarm, openAlarmEditor } = useApp()
 
   return (
     <section className="screen active" id="s-alarm">
@@ -17,33 +15,28 @@ export default function Alarm() {
           </div>
         </div>
 
-        <div className="alarm-card reveal d2" style={{ marginBottom: 14 }}>
-          <div className="row">
-            <div className="alarm-time" id="alarmTime2">{profile.wakeTime}</div>
-            <div className="alarm-meta">
-              <div className="t">Despertar activo</div>
-              <div className="d" id="alarmDesc2">10 squats · L a V</div>
+        {alarms.map((a, i) => {
+          const ex = a.exercise === 'lunges' ? 'lunges' : 'squats'
+          return (
+            <div className={'alarm-card reveal d' + Math.min(i + 2, 5)} key={a.id} style={{ marginBottom: 12 }}>
+              <div className="row" onClick={() => openAlarmEditor(a)}>
+                <div className="alarm-time" style={a.active ? undefined : { opacity: 0.5 }}>{a.hour}</div>
+                <div className="alarm-meta">
+                  <div className="t">{i === 0 ? 'Despertar activo' : 'Alarma'}</div>
+                  <div className="d">{a.reps} {ex} · {formatDays(a.days)}</div>
+                </div>
+                <div
+                  className={'toggle' + (a.active ? ' on' : '')}
+                  onClick={(e) => { e.stopPropagation(); toggleAlarm(a.id) }}
+                >
+                  <div className="knob" />
+                </div>
+              </div>
             </div>
-            <div className={'toggle' + (a1 ? ' on' : '')} onClick={() => setA1((v) => !v)}>
-              <div className="knob" />
-            </div>
-          </div>
-        </div>
+          )
+        })}
 
-        <div className="alarm-card reveal d3">
-          <div className="row">
-            <div className="alarm-time" style={{ opacity: 0.5 }}>13:00</div>
-            <div className="alarm-meta">
-              <div className="t">Reto de mediodía</div>
-              <div className="d">8 lunges · diario</div>
-            </div>
-            <div className={'toggle' + (a2 ? ' on' : '')} onClick={() => setA2((v) => !v)}>
-              <div className="knob" />
-            </div>
-          </div>
-        </div>
-
-        <button className="cta reveal d4" onClick={() => openSheet('alarmSheet')}>
+        <button className="cta reveal d4" onClick={() => openAlarmEditor(null)}>
           ＋ NUEVA ALARMA
         </button>
       </div>

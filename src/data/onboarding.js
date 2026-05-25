@@ -24,6 +24,16 @@ export const GENDERS = [
 
 export const DAYS_OPTIONS = [2, 3, 4, 5, 6]
 
+// Días de la semana para alarmas (0=Lun … 6=Dom).
+export const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+export function formatDays(days = []) {
+  if (days.length === 7) return 'Diario'
+  const sorted = [...days].sort((a, b) => a - b)
+  if (sorted.length === 5 && sorted.every((d, i) => d === i)) return 'L a V'
+  if (sorted.length === 0) return 'Sin días'
+  return sorted.map((d) => DAY_LABELS[d]).join('·')
+}
+
 export function goalById(id) {
   return GOALS.find((g) => g.id === id)
 }

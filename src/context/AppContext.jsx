@@ -20,6 +20,8 @@ export function AppProvider({ children }) {
   const [streak, setStreak] = useState(() => dataStore.getStreak())
   const [challengesDone, setChallengesDone] = useState(() => dataStore.getChallengeCount())
   const [totals, setTotals] = useState(() => dataStore.getTotals())
+  const [alarms, setAlarmsState] = useState(() => dataStore.getAlarms())
+  const [weekChart, setWeekChart] = useState(() => dataStore.getWeekChartData())
   // Onboarding solo si el perfil aún no está marcado onboarded.
   const [onboarding, setOnboarding] = useState(() => !dataStore.getProfile()?.onboarded)
 
@@ -34,6 +36,8 @@ export function AppProvider({ children }) {
   const [selectedPlan, setSelectedPlan] = useState('anual')
   // Sesión de cámara activa: { source:'alarm'|'challenge', exercise, reps, level? }
   const [workout, setWorkout] = useState(null)
+  const [ringAlarm, setRingAlarm] = useState(null)     // alarma que se está probando/sonando
+  const [editingAlarm, setEditingAlarm] = useState(null) // alarma en edición (null = nueva)
 
   const appRef = useRef(null)      // contenedor .app — para el confeti imperativo
   const toastTimer = useRef(null)
@@ -69,18 +73,39 @@ export function AppProvider({ children }) {
     dataStore.recordRep(exercise)
   }, [])
 
-  // Registra una sesión terminada en el log y refresca totales.
+  // Registra una sesión terminada en el log y refresca totales + gráfica semanal.
   const logWorkout = useCallback((entry) => {
     dataStore.logWorkout(entry)
     setTotals({ ...dataStore.getTotals() })
+    setWeekChart(dataStore.getWeekChartData())
   }, [])
 
-  const finishOnboarding = useCallback(() => setOnboarding(false), [])
+  // ── Alarmas ──
+  const refreshAlarms = useCallback(() => setAlarmsState([...dataStore.getAlarms()]), [])
+  const addAlarm = useCallback((a) => { dataStore.addAlarm(a); refreshAlarms() }, [refreshAlarms])
+  const updateAlarm = useCallback((id, patch) => { dataStore.updateAlarm(id, patch); refreshAlarms() }, [refreshAlarms])
+  const deleteAlarm = useCallback((id) => { dataStore.deleteAlarm(id); refreshAlarms() }, [refreshAlarms])
+  const toggleAlarm = useCallback((id) => { dataStore.toggleAlarm(id); refreshAlarms() }, [refreshAlarms])
+
+  // Al cerrar el onboarding, siembra la 1ª alarma desde el perfil recién guardado.
+  const finishOnboarding = useCallback(() => {
+    setOnboarding(false)
+    refreshAlarms()
+  }, [refreshAlarms])
 
   // ── UI ──
   const openSheet = useCallback((id) => setSheet(id), [])
   const closeSheet = useCallback(() => setSheet(null), [])
-  const showRing = useCallback(() => setRingOpen(true), [])
+  // Abre la sheet de alarma para editar `alarm` (o null = alarma nueva).
+  const openAlarmEditor = useCallback((alarm = null) => {
+    setEditingAlarm(alarm)
+    setSheet('alarmSheet')
+  }, [])
+  // Muestra el ring; `alarm` define el ejercicio/reps/hora que se prueban.
+  const showRing = useCallback((alarm = null) => {
+    setRingAlarm(alarm)
+    setRingOpen(true)
+  }, [])
   const hideRing = useCallback(() => setRingOpen(false), [])
   const startScan = useCallback(() => setScanning(true), [])
   const stopScan = useCallback(() => setScanning(false), [])
@@ -175,9 +200,12 @@ export function AppProvider({ children }) {
     streak, completeWakeWorkout,
     challengesDone, incrementChallenge,
     totals, recordRep, logWorkout,
+    weekChart,
+    alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,
     plan,
     sheet, openSheet, closeSheet,
-    ringOpen, showRing, hideRing,
+    editingAlarm, openAlarmEditor,
+    ringOpen, ringAlarm, showRing, hideRing,
     scanning, startScan, stopScan, startWorkout,
     celebrating, showCelebration, hideCelebration,
     toastMsg, showToast,

@@ -32,8 +32,12 @@ const DEFAULT_STATE = {
   progressLog: [],  // [{ id, ts, date, weight, note }]
   challengeCount: 0,
   totals: { squat: 0, lunge: 0, reps: 0, workouts: 0 }, // reps REALES por ejercicio
+  // [{ id, hour:'HH:MM', exercise:'squats'|'lunges', reps, days:[0-6], active }]
+  alarms: [],
   settings: { sound: true },
 }
+
+const DEFAULT_DAYS = [0, 1, 2, 3, 4] // Lun–Vie
 
 // ── Fechas en local time ────────────────────────────────────────────────
 function ymd(d = new Date()) {
@@ -84,6 +88,7 @@ function migrate(s) {
     settings: { ...DEFAULT_STATE.settings, ...(s.settings || {}) },
     workoutLog: Array.isArray(s.workoutLog) ? s.workoutLog : [],
     progressLog: Array.isArray(s.progressLog) ? s.progressLog : [],
+    alarms: Array.isArray(s.alarms) ? s.alarms : [],
   }
 }
 
@@ -241,6 +246,60 @@ export function recordRep(exercise) {
   if (exercise === 'squat' || exercise === 'lunge') s.totals[exercise] += 1
   s.totals.reps += 1
   save()
+}
+
+// ── ALARMAS ─────────────────────────────────────────────────────────────
+// Si no hay alarmas pero el perfil ya tiene hora de despertar (onboarding),
+// crea la primera alarma a partir del perfil.
+function ensureSeedAlarm(s) {
+  if (s.alarms.length === 0 && s.profile?.wakeTime) {
+    s.alarms.push({
+      id: uid(),
+      hour: s.profile.wakeTime,
+      exercise: s.profile.exercise === 'lunges' ? 'lunges' : 'squats',
+      reps: s.profile.reps || 10,
+      days: DEFAULT_DAYS.slice(),
+      active: true,
+    })
+  }
+}
+export function getAlarms() {
+  const s = load()
+  ensureSeedAlarm(s)
+  save()
+  return s.alarms
+}
+export function addAlarm(alarm = {}) {
+  const s = load()
+  const row = {
+    id: uid(),
+    hour: '07:00',
+    exercise: 'squats',
+    reps: 10,
+    days: DEFAULT_DAYS.slice(),
+    active: true,
+    ...alarm,
+  }
+  s.alarms.push(row)
+  save()
+  return row
+}
+export function updateAlarm(id, patch) {
+  const s = load()
+  s.alarms = s.alarms.map((a) => (a.id === id ? { ...a, ...patch } : a))
+  save()
+  return s.alarms.find((a) => a.id === id)
+}
+export function deleteAlarm(id) {
+  const s = load()
+  s.alarms = s.alarms.filter((a) => a.id !== id)
+  save()
+}
+export function toggleAlarm(id) {
+  const s = load()
+  s.alarms = s.alarms.map((a) => (a.id === id ? { ...a, active: !a.active } : a))
+  save()
+  return s.alarms.find((a) => a.id === id)
 }
 
 // ── AJUSTES ─────────────────────────────────────────────────────────────

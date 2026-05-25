@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
-import { goalLabel } from '../data/onboarding'
+import { useSubscription } from '../hooks/useSubscription'
+import { goalLabel, formatDays } from '../data/onboarding'
 import { CHALLENGE_AUDIO_SRC } from '../lib/alarmAudio'
 
 function greetingFor(h) {
@@ -17,8 +17,8 @@ const QUICK_CHALLENGES = [
 
 export default function Home() {
   const navigate = useNavigate()
-  const { profile, plan, unlocked, streak, challengesDone, openSheet, showRing, startWorkout } = useApp()
-  const [alarmOn, setAlarmOn] = useState(true)
+  const { profile, plan, streak, weekChart, challengesDone, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
+  const { isPremium } = useSubscription()
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
   const avatarLetter = firstName[0] || 'B'
@@ -29,6 +29,15 @@ export default function Home() {
 
   const m = plan.macros
   const today = plan.workout.days[0]
+
+  // Alarma principal (la primera de la lista real).
+  const primary = alarms[0]
+  const alarmTime = primary?.hour || profile.wakeTime
+  const alarmEx = primary?.exercise === 'lunges' ? 'lunges' : 'squats'
+  const alarmDesc = primary
+    ? `${primary.reps} ${alarmEx} · ${formatDays(primary.days)}`
+    : `${profile.reps || 10} squats · L a V`
+  const alarmActive = primary ? primary.active : true
 
   const startChallenge = (ch) => {
     startWorkout({ source: 'challenge', exercise: ch.exercise, reps: ch.reps, level: ch.level, song: CHALLENGE_AUDIO_SRC })
@@ -53,32 +62,33 @@ export default function Home() {
             {streak > 0 ? '¡Vas con todo! Sigue tu racha 🔥' : 'Empieza hoy tu primera racha 🔥'}
           </div>
           <div className="week">
-            <div className="day done">L</div><div className="day done">M</div><div className="day done">M</div>
-            <div className="day done">J</div><div className="day today">V</div><div className="day">S</div><div className="day">D</div>
+            {weekChart.map((d, i) => (
+              <div key={i} className={'day' + (d.done ? ' done' : '') + (d.today ? ' today' : '')}>{d.key}</div>
+            ))}
           </div>
         </div>
 
         <div className="sec-h reveal d3">
           <h2>TU ALARMA</h2>
-          <span className="more" onClick={() => openSheet('alarmSheet')}>EDITAR</span>
+          <span className="more" onClick={() => primary && openAlarmEditor(primary)}>EDITAR</span>
         </div>
         <div className="alarm-card reveal d3">
           <div className="row">
-            <div className="alarm-time" id="homeAlarmTime">{profile.wakeTime}</div>
+            <div className="alarm-time" id="homeAlarmTime">{alarmTime}</div>
             <div className="alarm-meta">
               <div className="t">Despertar activo</div>
-              <div className="d" id="homeAlarmDesc">10 squats · L a V</div>
+              <div className="d" id="homeAlarmDesc">{alarmDesc}</div>
             </div>
             <div
-              className={'toggle' + (alarmOn ? ' on' : '')}
-              onClick={() => setAlarmOn((v) => !v)}
+              className={'toggle' + (alarmActive ? ' on' : '')}
+              onClick={() => primary && toggleAlarm(primary.id)}
             >
               <div className="knob" />
             </div>
           </div>
           <div className="alarm-foot">
-            <button><span className="ex">●</span> SQUATS</button>
-            <button onClick={showRing}>▶ PROBAR ALARMA</button>
+            <button><span className="ex">●</span> {alarmEx.toUpperCase()}</button>
+            <button onClick={() => showRing(primary)}>▶ PROBAR ALARMA</button>
           </div>
         </div>
 
@@ -103,7 +113,7 @@ export default function Home() {
 
         <div className="sec-h reveal d5"><h2>BRENDA FITNESS</h2></div>
 
-        {!unlocked && (
+        {!isPremium && (
           <div id="brendaLocked" className="reveal d5">
             <div className="brenda-promo">
               <div className="glow" /><div className="shimmer" />
@@ -118,7 +128,7 @@ export default function Home() {
           </div>
         )}
 
-        {unlocked && (
+        {isPremium && (
           <div id="brendaUnlocked">
             <div className="macros">
               <div className="macro kcal"><div className="v" id="mKcal">{m.kcal}</div><div className="k">kcal</div></div>

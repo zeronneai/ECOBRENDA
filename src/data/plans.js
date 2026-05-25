@@ -5,7 +5,7 @@
    Todo se siente como si Brenda lo hubiera armado a mano.
    ============================================================ */
 
-import { planKeyFor } from './onboarding'
+import { planKeyFor } from './onboarding.js'
 
 export const GOALS = {
   perder_grasa:   { id:'perder_grasa',   label:'Perder grasa',        emoji:'🔥', kcalAdj:-0.20, protein:2.0 },

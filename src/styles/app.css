@@ -101,6 +101,14 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pill:active{transform:scale(.97)}
 .pill.sel{border-color:var(--magenta);background:linear-gradient(120deg,rgba(255,31,107,.14),var(--surface))}
 
+/* selector de días (alarma) */
+.daysel{display:flex;gap:7px}
+.daysel .d{flex:1;aspect-ratio:1;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--txt-faint);border:1px solid var(--line-strong);cursor:pointer;transition:.2s}
+.daysel .d:active{transform:scale(.94)}
+.daysel .d.on{background:linear-gradient(160deg,var(--magenta),#c20051);color:#fff;border-color:var(--magenta-soft);box-shadow:0 4px 14px var(--magenta-glow)}
+.alarm-delete{text-align:center;color:var(--txt-faint);font-weight:700;font-size:13px;margin-top:16px;cursor:pointer}
+.alarm-delete:active{color:var(--magenta)}
+
 /* ===== HEADER ===== */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:0 22px;margin-bottom:24px}
 .hdr .hi{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);font-weight:700}
