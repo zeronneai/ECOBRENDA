@@ -197,6 +197,9 @@ export function removeWorkoutLog(id) {
   save()
 }
 
+// Clave de fecha de hoy ('YYYY-MM-DD' local) — para checar "completado hoy".
+export function todayKey() { return ymd() }
+
 // Entrenamientos de la semana actual (número de sesiones registradas).
 export function getWeeklyWorkouts() {
   const s = load()

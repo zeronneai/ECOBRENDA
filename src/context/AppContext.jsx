@@ -20,6 +20,7 @@ export function AppProvider({ children }) {
   const [streak, setStreak] = useState(() => dataStore.getStreak())
   const [challengesDone, setChallengesDone] = useState(() => dataStore.getChallengeCount())
   const [totals, setTotals] = useState(() => dataStore.getTotals())
+  const [workoutLog, setWorkoutLogState] = useState(() => dataStore.getWorkoutLog())
   const [alarms, setAlarmsState] = useState(() => dataStore.getAlarms())
   const [weekChart, setWeekChart] = useState(() => dataStore.getWeekChartData())
   // Onboarding solo si el perfil aún no está marcado onboarded.
@@ -73,11 +74,12 @@ export function AppProvider({ children }) {
     dataStore.recordRep(exercise)
   }, [])
 
-  // Registra una sesión terminada en el log y refresca totales + gráfica semanal.
+  // Registra una sesión terminada en el log y refresca totales + gráfica + log.
   const logWorkout = useCallback((entry) => {
     dataStore.logWorkout(entry)
     setTotals({ ...dataStore.getTotals() })
     setWeekChart(dataStore.getWeekChartData())
+    setWorkoutLogState([...dataStore.getWorkoutLog()])
   }, [])
 
   // ── Alarmas ──
@@ -199,7 +201,7 @@ export function AppProvider({ children }) {
     onboarding, finishOnboarding,
     streak, completeWakeWorkout,
     challengesDone, incrementChallenge,
-    totals, recordRep, logWorkout,
+    totals, recordRep, logWorkout, workoutLog,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,
     plan,
