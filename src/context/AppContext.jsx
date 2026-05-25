@@ -21,6 +21,7 @@ export function AppProvider({ children }) {
   const [challengesDone, setChallengesDone] = useState(() => dataStore.getChallengeCount())
   const [totals, setTotals] = useState(() => dataStore.getTotals())
   const [workoutLog, setWorkoutLogState] = useState(() => dataStore.getWorkoutLog())
+  const [progressLog, setProgressLogState] = useState(() => dataStore.getProgressLog())
   const [alarms, setAlarmsState] = useState(() => dataStore.getAlarms())
   const [weekChart, setWeekChart] = useState(() => dataStore.getWeekChartData())
   // Onboarding solo si el perfil aún no está marcado onboarded.
@@ -80,6 +81,16 @@ export function AppProvider({ children }) {
     setTotals({ ...dataStore.getTotals() })
     setWeekChart(dataStore.getWeekChartData())
     setWorkoutLogState([...dataStore.getWorkoutLog()])
+  }, [])
+
+  // ── Progreso (peso) ──
+  const addProgressEntry = useCallback((entry) => {
+    dataStore.addProgressEntry(entry)
+    setProgressLogState([...dataStore.getProgressLog()])
+  }, [])
+  const deleteProgressEntry = useCallback((id) => {
+    dataStore.deleteProgressEntry(id)
+    setProgressLogState([...dataStore.getProgressLog()])
   }, [])
 
   // ── Alarmas ──
@@ -202,6 +213,7 @@ export function AppProvider({ children }) {
     streak, completeWakeWorkout,
     challengesDone, incrementChallenge,
     totals, recordRep, logWorkout, workoutLog,
+    progressLog, addProgressEntry, deleteProgressEntry,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,
     plan,

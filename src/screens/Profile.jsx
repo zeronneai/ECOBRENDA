@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { goalLabel } from '../data/onboarding'
 
 export default function Profile() {
+  const navigate = useNavigate()
   const { profile, unlocked } = useApp()
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
   const avatarLetter = firstName[0] || 'B'
@@ -40,7 +42,17 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="alarm-card reveal d4">
+        <div className="alarm-card reveal d4" style={{ marginBottom: 12 }} onClick={() => navigate('/progreso')}>
+          <div className="row">
+            <div className="alarm-meta">
+              <div className="t">Mi progreso</div>
+              <div className="d">Peso, gráficas y logros</div>
+            </div>
+            <div style={{ color: 'var(--magenta)' }}>›</div>
+          </div>
+        </div>
+
+        <div className="alarm-card reveal d5">
           <div className="row">
             <div className="alarm-meta">
               <div className="t">Notificaciones</div>
