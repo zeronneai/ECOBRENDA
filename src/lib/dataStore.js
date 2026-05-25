@@ -34,7 +34,7 @@ const DEFAULT_STATE = {
   totals: { squat: 0, lunge: 0, reps: 0, workouts: 0 }, // reps REALES por ejercicio
   // [{ id, hour:'HH:MM', exercise:'squats'|'lunges', reps, days:[0-6], active }]
   alarms: [],
-  settings: { sound: true },
+  settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false },
 }
 
 const DEFAULT_DAYS = [0, 1, 2, 3, 4] // Lun–Vie
@@ -314,7 +314,15 @@ export function saveSettings(patch) {
   return s.settings
 }
 
-// ── RESET (para "empezar de nuevo" — fase futura) ───────────────────────
+// ── Reiniciar progreso: borra SOLO el log de entrenamientos y de peso ────
+export function resetProgress() {
+  const s = load()
+  s.workoutLog = []
+  s.progressLog = []
+  save()
+}
+
+// ── Empezar de nuevo: borra SOLO las claves del namespace 'bf:' ──────────
 export function clearAll() {
   Object.keys(localStorage)
     .filter((k) => k.startsWith(NS))

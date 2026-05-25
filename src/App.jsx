@@ -6,6 +6,7 @@ import Entrena from './screens/Entrena'
 import WorkoutDetail from './screens/WorkoutDetail'
 import Nutricion from './screens/Nutricion'
 import Progreso from './screens/Progreso'
+import Privacy from './screens/Privacy'
 import Profile from './screens/Profile'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/entrena/:id" element={<WorkoutDetail />} />
         <Route path="/nutricion" element={<Nutricion />} />
         <Route path="/progreso" element={<Progreso />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

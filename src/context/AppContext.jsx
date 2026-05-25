@@ -22,6 +22,7 @@ export function AppProvider({ children }) {
   const [totals, setTotals] = useState(() => dataStore.getTotals())
   const [workoutLog, setWorkoutLogState] = useState(() => dataStore.getWorkoutLog())
   const [progressLog, setProgressLogState] = useState(() => dataStore.getProgressLog())
+  const [settings, setSettingsState] = useState(() => dataStore.getSettings())
   const [alarms, setAlarmsState] = useState(() => dataStore.getAlarms())
   const [weekChart, setWeekChart] = useState(() => dataStore.getWeekChartData())
   // Onboarding solo si el perfil aún no está marcado onboarded.
@@ -50,8 +51,8 @@ export function AppProvider({ children }) {
 
   // ── Acciones de datos ──
   const updateProfile = useCallback((patch) => {
-    setProfileState((p) => ({ ...p, ...patch }))
-    dataStore.saveProfile(patch) // persiste
+    const saved = dataStore.saveProfile(patch) // persiste y devuelve el perfil completo (con createdAt)
+    setProfileState({ ...DEFAULT_PROFILE, ...saved })
   }, [])
 
   // Activa premium (hoy local; mañana lo hará el webhook de Stripe en Supabase).
@@ -91,6 +92,19 @@ export function AppProvider({ children }) {
   const deleteProgressEntry = useCallback((id) => {
     dataStore.deleteProgressEntry(id)
     setProgressLogState([...dataStore.getProgressLog()])
+  }, [])
+
+  // ── Ajustes ──
+  const saveSettings = useCallback((patch) => {
+    setSettingsState({ ...dataStore.saveSettings(patch) })
+  }, [])
+
+  // Reiniciar progreso (no toca perfil ni suscripción).
+  const resetProgress = useCallback(() => {
+    dataStore.resetProgress()
+    setWorkoutLogState([...dataStore.getWorkoutLog()])
+    setProgressLogState([...dataStore.getProgressLog()])
+    setWeekChart(dataStore.getWeekChartData())
   }, [])
 
   // ── Alarmas ──
@@ -214,6 +228,7 @@ export function AppProvider({ children }) {
     challengesDone, incrementChallenge,
     totals, recordRep, logWorkout, workoutLog,
     progressLog, addProgressEntry, deleteProgressEntry,
+    settings, saveSettings, resetProgress,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,
     plan,
