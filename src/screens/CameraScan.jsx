@@ -3,14 +3,13 @@ import { DrawingUtils, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { useApp } from '../store'
 import { PoseTracker } from '../lib/poseTracker'
 import { RepCounter } from '../lib/repCounter'
-import * as storage from '../lib/storage'
 
 // Anillo de progreso SVG.
 const R = 92
 const CIRC = 2 * Math.PI * R
 
 export default function CameraScan() {
-  const { workout, stopSong, setStreak, setChallengesDone, stopScan, showCelebration } = useApp()
+  const { workout, stopSong, stopScan, showCelebration, recordRep, completeWakeWorkout, incrementChallenge, logWorkout } = useApp()
   const goal = workout?.reps ?? 10
   const exercise = workout?.exercise === 'lunges' ? 'lunges' : 'squats'
   const exKind = exercise === 'lunges' ? 'lunge' : 'squat'
@@ -33,8 +32,10 @@ export default function CameraScan() {
     finishedRef.current = true
     trackerRef.current?.stop() // libera la cámara de inmediato
     stopSong()
-    if (workout?.source === 'challenge') setChallengesDone(storage.recordChallenge())
-    else setStreak(storage.completeWorkout(exKind).streak)
+    // La racha es SOLO de la alarma diaria; los retos van a su contador.
+    if (workout?.source === 'challenge') incrementChallenge()
+    else completeWakeWorkout()
+    logWorkout({ source: workout?.source ?? 'alarm', exercise: exKind, reps: goal })
     stopScan()
     showCelebration()
   }
@@ -78,7 +79,7 @@ export default function CameraScan() {
 
     const counter = new RepCounter(exKind, {
       onRep: (n) => {
-        storage.recordRep(exKind)
+        recordRep(exKind)
         setReps(n)
         if (n >= goal) finish()
       },
