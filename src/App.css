@@ -1,0 +1,83 @@
+/* Layout del esqueleto (Fase 1). El diseño real llega en Fase 2. */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: var(--safe-top);
+}
+
+.app__content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom));
+}
+
+/* Pantallas */
+.screen {
+  padding: 24px;
+}
+
+.screen--center {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.screen__title {
+  font-family: var(--font-display);
+  font-size: 64px;
+  letter-spacing: 1px;
+  margin: 0;
+  color: var(--text);
+}
+
+.screen__subtitle {
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.screen__btn {
+  margin-top: 12px;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  background: var(--magenta);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Barra de tabs */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--tabbar-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--surface-2);
+}
+
+.tabbar__item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.tabbar__item--active {
+  color: var(--lima);
+}
