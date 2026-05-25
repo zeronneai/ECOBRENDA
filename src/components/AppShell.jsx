@@ -2,9 +2,10 @@ import { Outlet } from 'react-router-dom'
 import { useApp } from '../store'
 import TabBar from './TabBar'
 import Toast from './Toast'
+import Onboarding from '../screens/Onboarding'
 
 export default function AppShell() {
-  const { appRef } = useApp()
+  const { appRef, onboarding } = useApp()
   return (
     <div className="app" ref={appRef}>
       <div className="bg-fx">
@@ -17,8 +18,10 @@ export default function AppShell() {
 
       <TabBar />
 
-      {/* Overlays: Onboarding (2b), AlarmRing + Sheets (2e) se montan aquí */}
+      {/* Overlays: AlarmRing + Sheets (2e) se montan aquí */}
       <Toast />
+
+      {onboarding && <Onboarding />}
     </div>
   )
 }
