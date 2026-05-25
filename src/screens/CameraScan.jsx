@@ -6,7 +6,7 @@ import Sheet from '../components/Sheet'
 // se reemplazan en la Fase 5 por la deteccion real con camara (MediaPipe
 // Pose) que cuenta las reps por movimiento, sin boton para saltar.
 export default function CameraScan() {
-  const { closeSheet, confetti, setStreak, showToast } = useApp()
+  const { closeSheet, confetti, setStreak, showToast, stopAlarm } = useApp()
   const [reps, setReps] = useState(0)
 
   useEffect(() => {
@@ -20,6 +20,7 @@ export default function CameraScan() {
   }, [])
 
   const complete = () => {
+    stopAlarm() // la alarma solo se apaga al completar el reto
     closeSheet()
     confetti()
     setStreak((s) => s + 1)

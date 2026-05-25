@@ -24,6 +24,8 @@ export function AppProvider({ children }) {
 
   const appRef = useRef(null)      // contenedor .app — para el confeti imperativo
   const toastTimer = useRef(null)
+  const alarmAudioRef = useRef(null)       // <audio> de la alarma (vive en AppShell)
+  const alarmGestureRef = useRef(null)     // handler de reintento ante autoplay bloqueado
 
   const plan = useMemo(() => getBrendaPlan(profile), [profile])
 
@@ -69,6 +71,47 @@ export function AppProvider({ children }) {
     }
   }, [])
 
+  // ===== Audio de la alarma =====
+  const disarmAlarmFallback = useCallback(() => {
+    const h = alarmGestureRef.current
+    if (!h) return
+    window.removeEventListener('pointerdown', h)
+    window.removeEventListener('touchstart', h)
+    alarmGestureRef.current = null
+  }, [])
+
+  const armAlarmFallback = useCallback(() => {
+    if (alarmGestureRef.current) return
+    const h = () => {
+      const el = alarmAudioRef.current
+      if (el) el.play().catch(() => {})
+      disarmAlarmFallback()
+    }
+    alarmGestureRef.current = h
+    window.addEventListener('pointerdown', h, { once: true })
+    window.addEventListener('touchstart', h, { once: true })
+  }, [disarmAlarmFallback])
+
+  // Arranca la canción desde el inicio, en loop, a volumen máximo.
+  const playAlarm = useCallback(() => {
+    const el = alarmAudioRef.current
+    if (!el) return
+    el.currentTime = 0
+    el.volume = 1.0
+    el.loop = true
+    const p = el.play()
+    if (p && typeof p.catch === 'function') p.catch(() => armAlarmFallback())
+  }, [armAlarmFallback])
+
+  // Único modo de detenerla: completar el reto (Fase 5: cámara).
+  const stopAlarm = useCallback(() => {
+    disarmAlarmFallback()
+    const el = alarmAudioRef.current
+    if (!el) return
+    el.pause()
+    el.currentTime = 0
+  }, [disarmAlarmFallback])
+
   const value = {
     profile, updateProfile,
     unlocked, unlock,
@@ -80,6 +123,7 @@ export function AppProvider({ children }) {
     toastMsg, showToast,
     selectedPlan, setSelectedPlan,
     confetti, appRef,
+    alarmAudioRef, playAlarm, stopAlarm,
   }
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
