@@ -3,7 +3,7 @@ import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
 import { goalLabel } from '../data/onboarding'
 import { calculateMacros } from '../lib/dataStore'
-import { PLANS, RECIPES, RECIPE_CATEGORIES, getPlan, getRecipe, getSupplement, recipeDifficultyColor } from '../data/nutrition'
+import { PLANS, RECIPES, RECIPE_CATEGORIES, SUPPLEMENTS, getPlan, getRecipe, getSupplement, recipeDifficultyColor, supplementColor } from '../data/nutrition'
 
 function MacroWidget({ profile }) {
   const m = calculateMacros(profile)
@@ -236,10 +236,23 @@ export default function Nutricion() {
               </>
             )}
             {tab === 'suplementos' && (
-              <div className="wempty pad reveal d3">
-                <div className="wempty-emoji">💊</div>
-                <h4>Suplementos</h4>
-                <p>Próximamente (siguiente paso).</p>
+              <div className="pad reveal d3">
+                <div className="supp-disclaimer">
+                  ⚠ Los suplementos complementan una buena alimentación, no la reemplazan. Consulta a un profesional de la salud antes de empezar.
+                </div>
+                {SUPPLEMENTS.map((s) => (
+                  <div className="supp-card" key={s.id} style={{ '--acc': supplementColor(s.color) }}>
+                    <div className="supp-emoji">{s.emoji}</div>
+                    <div className="supp-info">
+                      <h4>{s.name}</h4>
+                      <p>{s.desc}</p>
+                      <div className="supp-meta">
+                        <span><b>Dosis:</b> {s.dose}</span>
+                        <span><b>Cuándo:</b> {s.timing}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </>

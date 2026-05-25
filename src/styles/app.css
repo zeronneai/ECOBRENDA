@@ -242,6 +242,16 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .rstep{display:flex;gap:12px;padding:10px 0;font-size:13.5px;line-height:1.5;color:var(--txt)}
 .rstep-n{width:26px;height:26px;border-radius:50%;background:rgba(255,31,107,.15);color:var(--magenta-soft);display:grid;place-items:center;font-weight:800;font-size:13px;flex-shrink:0}
 
+/* suplementos */
+.supp-disclaimer{background:rgba(245,196,81,.1);border:1px solid var(--gold);border-radius:14px;padding:13px 16px;font-size:12.5px;color:var(--txt-dim);line-height:1.5;margin-bottom:16px}
+.supp-card{display:flex;gap:14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--acc,var(--magenta));border-radius:16px;padding:16px;margin-bottom:12px}
+.supp-emoji{font-size:30px;width:40px;text-align:center;flex-shrink:0}
+.supp-info{flex:1;min-width:0}
+.supp-info h4{font-family:'Bebas Neue';font-size:22px;letter-spacing:.02em}
+.supp-info p{font-size:12.5px;color:var(--txt-dim);line-height:1.45;margin:4px 0 10px}
+.supp-meta{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--txt)}
+.supp-meta b{color:var(--acc,var(--magenta));font-weight:800}
+
 /* ===== HEADER ===== */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:0 22px;margin-bottom:24px}
 .hdr .hi{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);font-weight:700}
