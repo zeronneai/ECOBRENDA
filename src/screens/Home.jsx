@@ -1,15 +1,120 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useApp } from '../store'
+import { GOALS } from '../data/plans'
+
+function greetingFor(h) {
+  return h < 12 ? 'Buen día' : h < 19 ? 'Buena tarde' : 'Buena noche'
+}
+
 export default function Home() {
+  const navigate = useNavigate()
+  const { profile, plan, unlocked, streak, openSheet, showRing } = useApp()
+  const [alarmOn, setAlarmOn] = useState(true)
+
+  const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
+  const avatarLetter = firstName[0] || 'B'
+  const greeting = greetingFor(new Date().getHours())
+
+  const promoTitle = 'PLAN ' + plan.workout.title.toUpperCase()
+  const promoDesc = `Brenda preparó "${plan.workout.title}" para tu meta de ${GOALS[profile.goal].label.toLowerCase()}, calibrado a tus ${profile.weight}kg y ${profile.height}cm.`
+
+  const m = plan.macros
+  const today = plan.workout.days[0]
+
   return (
     <section className="screen active" id="s-home">
       <div className="scroll">
         <div className="topgap" />
         <div className="hdr reveal d1">
           <div>
-            <div className="hi">Buen día</div>
-            <div className="name">HOME</div>
+            <div className="hi" id="greeting">{greeting}</div>
+            <div className="name" id="userName">{firstName}</div>
+          </div>
+          <div className="avatar" id="avatarLetter">{avatarLetter}</div>
+        </div>
+
+        <div className="streak reveal d2">
+          <div className="lbl">Racha actual</div>
+          <div className="big"><span id="streakNum">{streak}</span><span>días</span></div>
+          <div className="sub" id="streakSub">
+            {streak > 0 ? '¡Vas con todo! Sigue tu racha 🔥' : 'Empieza hoy tu primera racha 🔥'}
+          </div>
+          <div className="week">
+            <div className="day done">L</div><div className="day done">M</div><div className="day done">M</div>
+            <div className="day done">J</div><div className="day today">V</div><div className="day">S</div><div className="day">D</div>
           </div>
         </div>
-        {/* Contenido real (racha, alarma, Brenda) en sub-paso 2c */}
+
+        <div className="sec-h reveal d3">
+          <h2>TU ALARMA</h2>
+          <span className="more" onClick={() => openSheet('alarmSheet')}>EDITAR</span>
+        </div>
+        <div className="alarm-card reveal d3">
+          <div className="row">
+            <div className="alarm-time" id="homeAlarmTime">{profile.wakeTime}</div>
+            <div className="alarm-meta">
+              <div className="t">Despertar activo</div>
+              <div className="d" id="homeAlarmDesc">10 squats · L a V</div>
+            </div>
+            <div
+              className={'toggle' + (alarmOn ? ' on' : '')}
+              onClick={() => setAlarmOn((v) => !v)}
+            >
+              <div className="knob" />
+            </div>
+          </div>
+          <div className="alarm-foot">
+            <button><span className="ex">●</span> SQUATS</button>
+            <button onClick={showRing}>▶ PROBAR ALARMA</button>
+          </div>
+        </div>
+
+        <div className="sec-h reveal d4"><h2>BRENDA FITNESS</h2></div>
+
+        {!unlocked && (
+          <div id="brendaLocked" className="reveal d4">
+            <div className="brenda-promo">
+              <div className="glow" /><div className="shimmer" />
+              <div className="lock-pill">🔒 PREMIUM</div>
+              <div className="inner">
+                <div className="kick">Nutrición + Rutinas</div>
+                <h3 id="promoTitle">{promoTitle}</h3>
+                <p id="promoDesc">{promoDesc}</p>
+                <button className="unlock" onClick={() => openSheet('paywall')}>DESBLOQUEAR →</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {unlocked && (
+          <div id="brendaUnlocked">
+            <div className="macros">
+              <div className="macro kcal"><div className="v" id="mKcal">{m.kcal}</div><div className="k">kcal</div></div>
+              <div className="macro prot"><div className="v" id="mProt">{m.protein}g</div><div className="k">proteína</div></div>
+              <div className="macro carb"><div className="v" id="mCarb">{m.carbs}g</div><div className="k">carbos</div></div>
+            </div>
+            <div className="brenda-live" style={{ marginTop: 14 }}>
+              <div className="bcard" onClick={() => navigate('/brenda')}>
+                <div className="ic" style={{ background: 'rgba(255,31,107,.15)' }}>🏋️</div>
+                <h4>RUTINA HOY</h4>
+                <p id="todayWk">{today.focus} · {today.ex.length} ejercicios</p>
+              </div>
+              <div className="bcard" onClick={() => openSheet('mealsSheet')}>
+                <div className="ic" style={{ background: 'rgba(216,255,62,.13)' }}>🥗</div>
+                <h4>COMIDAS</h4>
+                <p>5 comidas · tu plan</p>
+              </div>
+            </div>
+            <div className="brenda-signature">
+              <div className="ba">B</div>
+              <div className="bt">
+                <b>Brenda Jazmín</b><br />
+                <span id="sigText">{plan.workout.note}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )
