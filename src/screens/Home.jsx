@@ -17,7 +17,7 @@ const QUICK_CHALLENGES = [
 
 export default function Home() {
   const navigate = useNavigate()
-  const { profile, plan, unlocked, streak, challengesDone, openSheet, showRing, playSong, setWorkout, startScan } = useApp()
+  const { profile, plan, unlocked, streak, challengesDone, openSheet, showRing, startWorkout } = useApp()
   const [alarmOn, setAlarmOn] = useState(true)
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
@@ -31,9 +31,7 @@ export default function Home() {
   const today = plan.workout.days[0]
 
   const startChallenge = (ch) => {
-    setWorkout({ source: 'challenge', exercise: ch.exercise, reps: ch.reps, level: ch.level })
-    playSong(CHALLENGE_AUDIO_SRC)
-    startScan()
+    startWorkout({ source: 'challenge', exercise: ch.exercise, reps: ch.reps, level: ch.level, song: CHALLENGE_AUDIO_SRC })
   }
 
   return (

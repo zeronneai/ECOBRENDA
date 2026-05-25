@@ -125,6 +125,15 @@ export function AppProvider({ children }) {
     el.currentTime = 0
   }, [disarmAudioFallback])
 
+  // Ruta ÚNICA hacia la cámara real. La usan exactamente igual la alarma
+  // (AlarmRing → "A DARLE") y los retos rápidos del Home.
+  const startWorkout = useCallback((cfg) => {
+    setWorkout({ source: cfg.source, exercise: cfg.exercise, reps: cfg.reps, level: cfg.level })
+    if (cfg.song) playSong(cfg.song)   // reto: arranca su canción; alarma: ya suena desde el ring
+    setRingOpen(false)                 // cierra el ring si venía de la alarma
+    setScanning(true)                  // abre CameraScan
+  }, [playSong])
+
   const value = {
     profile, updateProfile,
     unlocked, unlock,
@@ -133,7 +142,7 @@ export function AppProvider({ children }) {
     plan,
     sheet, openSheet, closeSheet,
     ringOpen, showRing, hideRing,
-    scanning, startScan, stopScan,
+    scanning, startScan, stopScan, startWorkout,
     celebrating, showCelebration, hideCelebration,
     toastMsg, showToast,
     selectedPlan, setSelectedPlan,
