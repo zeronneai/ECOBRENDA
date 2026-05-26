@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { getBrendaPlan } from '../data/plans'
 import { ACHIEVEMENTS } from '../data/achievements'
+import { getSilentAudioUrl } from '../lib/alarmAudio'
 import * as dataStore from '../lib/dataStore'
 
 const AppCtx = createContext(null)
@@ -48,6 +49,7 @@ export function AppProvider({ children }) {
   const toastTimer = useRef(null)
   const audioRef = useRef(null)            // <audio> único (alarma o reto), vive en AppShell
   const gestureRef = useRef(null)          // handler de reintento ante autoplay bloqueado
+  const audioUnlockedRef = useRef(false)   // ¿ya se "bendijo" el audio con un gesto?
 
   const plan = useMemo(() => getBrendaPlan(profile), [profile])
 
@@ -236,6 +238,26 @@ export function AppProvider({ children }) {
     el.currentTime = 0
   }, [disarmAudioFallback])
 
+  // Desbloqueo de audio: play/pause SILENCIOSO en el primer gesto del usuario
+  // para que la alarma del scheduler pueda sonar luego sin gesto directo.
+  // Solo actúa una vez y nunca interrumpe una reproducción real (ya desbloqueada).
+  const unlockAudio = useCallback(() => {
+    const el = audioRef.current
+    if (!el || audioUnlockedRef.current) return
+    try {
+      if (!el.src) el.src = getSilentAudioUrl()
+      el.muted = true
+      const p = el.play()
+      const done = () => {
+        try { el.pause(); el.currentTime = 0 } catch { /* noop */ }
+        el.muted = false
+        audioUnlockedRef.current = true
+      }
+      if (p && typeof p.then === 'function') p.then(done).catch(() => { el.muted = false })
+      else done()
+    } catch { el.muted = false }
+  }, [])
+
   // Ruta ÚNICA hacia la cámara real. La usan igual la alarma y los retos.
   const startWorkout = useCallback((cfg) => {
     setWorkout({ source: cfg.source, exercise: cfg.exercise, reps: cfg.reps, level: cfg.level })
@@ -277,6 +299,24 @@ export function AppProvider({ children }) {
     return () => clearInterval(iv)
   }, [updateAlarm, showRing])
 
+  // Desbloqueo de audio en el primer gesto del usuario (cualquier toque,
+  // incluido activar/guardar una alarma). Se desmonta al lograrlo.
+  useEffect(() => {
+    const onGesture = () => {
+      unlockAudio()
+      if (audioUnlockedRef.current) {
+        window.removeEventListener('pointerdown', onGesture)
+        window.removeEventListener('touchstart', onGesture)
+      }
+    }
+    window.addEventListener('pointerdown', onGesture)
+    window.addEventListener('touchstart', onGesture)
+    return () => {
+      window.removeEventListener('pointerdown', onGesture)
+      window.removeEventListener('touchstart', onGesture)
+    }
+  }, [unlockAudio])
+
   const value = {
     profile, updateProfile,
     subscription, unlocked, unlock,
@@ -298,7 +338,7 @@ export function AppProvider({ children }) {
     toastMsg, showToast,
     selectedPlan, setSelectedPlan,
     confetti, appRef,
-    audioRef, playSong, stopSong,
+    audioRef, playSong, stopSong, unlockAudio,
     workout, setWorkout,
   }
 
