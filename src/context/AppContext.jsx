@@ -249,6 +249,34 @@ export function AppProvider({ children }) {
     syncAchievements()
   }, [syncAchievements])
 
+  // ── Scheduler de alarma "app abierta" ──
+  // Mientras la app está abierta, revisa el reloj y dispara la alarma cuando
+  // coincide hora + día. Marca lastTriggered para no repetir el mismo día.
+  // (La capa nativa con app cerrada llega después con Capacitor.)
+  const schedRef = useRef({})
+  schedRef.current = { alarms, ringOpen, scanning, celebrating, onboarding }
+  useEffect(() => {
+    const pad = (n) => String(n).padStart(2, '0')
+    const tick = () => {
+      const st = schedRef.current
+      if (st.ringOpen || st.scanning || st.celebrating || st.onboarding) return // no interrumpir
+      const now = new Date()
+      const hhmm = `${pad(now.getHours())}:${pad(now.getMinutes())}`
+      const dow = (now.getDay() + 6) % 7 // Lun=0 … Dom=6
+      const today = dataStore.todayKey()
+      const due = st.alarms.find(
+        (a) => a.active && a.hour === hhmm && (a.days || []).includes(dow) && a.lastTriggered !== today
+      )
+      if (due) {
+        updateAlarm(due.id, { lastTriggered: today }) // una sola vez hoy (persistente)
+        showRing(due) // AlarmRing con su canción → cámara con su ejercicio/reps
+      }
+    }
+    tick() // por si abres la app justo en el minuto de la alarma
+    const iv = setInterval(tick, 15000)
+    return () => clearInterval(iv)
+  }, [updateAlarm, showRing])
+
   const value = {
     profile, updateProfile,
     subscription, unlocked, unlock,
