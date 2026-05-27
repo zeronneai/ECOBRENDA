@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useApp } from '../store'
 import { songUrlById } from '../data/songs'
+import { startAlarmTone } from '../lib/alarmTone'
 
 export default function AlarmRing() {
   const { profile, ringAlarm, playSong, startWorkout } = useApp()
@@ -9,9 +10,12 @@ export default function AlarmRing() {
   const reps = ringAlarm?.reps ?? 10
   const time = ringAlarm?.hour || profile.wakeTime
 
-  // Al abrirse la pantalla de alarma, suena la canción ELEGIDA (songId) desde el
-  // inicio en loop. Si la alarma no tiene songId, cae a la de por defecto.
+  // Al abrirse la alarma, suenan EN PARALELO desde el inicio:
+  //  - el pitido fuerte Web Audio (startAlarmTone): shock ~10s y se desvanece
+  //  - la canción ELEGIDA (songId) en loop: sigue hasta completar las reps
+  // El pitido se apaga solo; la canción es el sonido de despertar que continúa.
   useEffect(() => {
+    startAlarmTone()
     playSong(songUrlById(ringAlarm?.songId))
   }, [playSong, ringAlarm])
 

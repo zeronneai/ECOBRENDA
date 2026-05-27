@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useMemo, useRef, useCallback, useE
 import { getBrendaPlan } from '../data/plans'
 import { ACHIEVEMENTS } from '../data/achievements'
 import * as dataStore from '../lib/dataStore'
+import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
 
 const AppCtx = createContext(null)
 
@@ -228,9 +229,10 @@ export function AppProvider({ children }) {
     if (p && typeof p.catch === 'function') p.catch(() => armAudioFallback())
   }, [armAudioFallback])
 
-  // Único modo de detenerla: completar las reps (cámara).
+  // Único modo de detenerla: completar las reps (cámara). Detiene canción + pitido.
   const stopSong = useCallback(() => {
     disarmAudioFallback()
+    stopAlarmTone()
     const el = audioRef.current
     if (!el) return
     el.pause()
@@ -313,11 +315,15 @@ export function AppProvider({ children }) {
   }, [updateAlarm, showRing])
 
   // Desbloqueo de audio en el primer gesto (cualquier toque, incl. guardar una
-  // alarma). Se desmonta al lograrlo. NO afecta al ring (es solo audio).
+  // alarma). Desbloquea AMBOS para que suenen juntos al dispararse la alarma:
+  //  - el AudioContext del pitido Web Audio (unlockAlarmAudio)
+  //  - el elemento <audio> de la canción elegida (unlockAudio, play/pause mudo)
+  // Se desmonta cuando los dos están listos. NO afecta al ring (es solo audio).
   useEffect(() => {
     const onGesture = () => {
       unlockAudio()
-      if (audioUnlockedRef.current) {
+      unlockAlarmAudio()
+      if (audioUnlockedRef.current && isAlarmAudioReady()) {
         window.removeEventListener('pointerdown', onGesture)
         window.removeEventListener('touchstart', onGesture)
       }
