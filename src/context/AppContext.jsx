@@ -310,7 +310,7 @@ export function AppProvider({ children }) {
       }
     }
     tick() // chequeo inmediato al abrir la app
-    const iv = setInterval(tick, 5000)
+    const iv = setInterval(tick, 1000) // cada 1s (como la app vieja): dispara sin retraso perceptible
     return () => clearInterval(iv)
   }, [updateAlarm, showRing])
 

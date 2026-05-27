@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../store'
-import { GOALS, LEVELS, GENDERS, DAYS_OPTIONS } from '../data/onboarding'
+import { GOALS, LEVELS, GENDERS, DAYS_OPTIONS, DAY_LABELS } from '../data/onboarding'
+import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
 import RulerPicker from '../components/RulerPicker'
 import WheelPicker from '../components/WheelPicker'
 
@@ -8,7 +9,7 @@ const OB_TOTAL = 8
 
 const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1))
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
-const REPS_OPTIONS = [5, 8, 10, 12, 15, 20]
+const REPS_OPTIONS = [10, 12, 15, 20]
 
 // Conversiones (canónico: kg + cm).
 const kgToLb = (kg) => Math.round(kg * 2.20462)
@@ -18,7 +19,7 @@ const inToCm = (inch) => Math.round(inch * 2.54)
 const fmtFt = (inch) => `${Math.floor(inch / 12)}'${inch % 12}"`
 
 export default function Onboarding() {
-  const { updateProfile, finishOnboarding, showToast } = useApp()
+  const { updateProfile, addAlarm, finishOnboarding, showToast } = useApp()
 
   const [step, setStep] = useState(0)
   const [leaving, setLeaving] = useState(false)
@@ -38,6 +39,35 @@ export default function Onboarding() {
   const [ampm, setAmpm] = useState('AM')
   const [exercise, setExercise] = useState('squats')
   const [reps, setReps] = useState(10)
+  const [alarmDays, setAlarmDays] = useState([0, 1, 2, 3, 4])
+  const [songId, setSongId] = useState(DEFAULT_SONG_ID)
+
+  // Desbloqueo progresivo del paso de alarma: hora→ejercicio→días→canción.
+  const [unlocked, setUnlocked] = useState(1)
+  const unlock = (n) => setUnlocked((u) => Math.max(u, n))
+
+  // Previsualización de canción (objeto Audio aparte).
+  const [previewId, setPreviewId] = useState(null)
+  const previewRef = useRef(null)
+  const stopPreview = () => {
+    if (previewRef.current) { previewRef.current.pause(); previewRef.current = null }
+    setPreviewId(null)
+  }
+  useEffect(() => stopPreview, [])
+  const togglePreview = (song) => {
+    if (previewId === song.id) { stopPreview(); return }
+    stopPreview()
+    const a = new Audio(song.url)
+    a.volume = 1.0
+    a.play().catch(() => {})
+    a.onended = () => setPreviewId((cur) => (cur === song.id ? null : cur))
+    previewRef.current = a
+    setPreviewId(song.id)
+  }
+
+  const toggleAlarmDay = (d) => {
+    setAlarmDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort((a, b) => a - b)))
+  }
 
   const computeWakeTime = () => {
     let H = parseInt(hour, 10)
@@ -47,6 +77,8 @@ export default function Onboarding() {
   }
 
   const finish = () => {
+    stopPreview()
+    const wakeTime = computeWakeTime()
     updateProfile({
       name,
       age,
@@ -58,22 +90,27 @@ export default function Onboarding() {
       goal,
       level,
       daysPerWeek,
-      wakeTime: computeWakeTime(),
+      wakeTime,
       exercise,
       reps,
       onboarded: true,
     })
+    // Crea la primera alarma con TODO lo elegido (incl. canción y días).
+    addAlarm({ hour: wakeTime, exercise, reps, days: alarmDays, songId, active: true })
     setLeaving(true)
     setTimeout(() => finishOnboarding(), 500)
   }
 
   const next = () => {
+    if (leaving) return // ya terminando: evita crear la alarma dos veces
     if (step === 0 && !name.trim()) {
       showToast('Escribe tu nombre 😊')
       return
     }
-    if (step < OB_TOTAL - 1) setStep((s) => s + 1)
-    else finish()
+    if (step < OB_TOTAL - 1) { setStep((s) => s + 1); return }
+    // Último paso (alarma): desbloquea sección por sección antes de terminar.
+    if (unlocked < 4) { setUnlocked((u) => u + 1); return }
+    finish()
   }
   const prev = () => { if (step > 0) setStep((s) => s - 1) }
 
@@ -209,7 +246,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* 7 — ALARMA (Despertar Activo) */}
+        {/* 7 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
         {step === 7 && (
           <div className="ob-step active">
             <div className="ob-kick">Despertar Activo</div>
@@ -217,29 +254,72 @@ export default function Onboarding() {
             <div className="ob-sub">Sonará a esta hora y no para hasta que completes tus reps.</div>
             <div className="wheel-wrap">
               <div className="wheel-line" />
-              <WheelPicker items={HOURS} initIdx={5} onChange={(v) => setHour(v)} />
+              <WheelPicker items={HOURS} initIdx={5} onChange={(v) => { setHour(v); unlock(2) }} />
               <div className="wheel-colon">:</div>
-              <WheelPicker items={MINUTES} initIdx={30} onChange={(v) => setMinute(v)} />
-              <WheelPicker items={['AM', 'PM']} initIdx={0} isAP onChange={(v) => setAmpm(v)} />
+              <WheelPicker items={MINUTES} initIdx={30} onChange={(v) => { setMinute(v); unlock(2) }} />
+              <WheelPicker items={['AM', 'PM']} initIdx={0} isAP onChange={(v) => { setAmpm(v); unlock(2) }} />
             </div>
-            <div className="chip-row" style={{ marginTop: 4 }}>
-              <div className={'chip' + (exercise === 'squats' ? ' sel' : '')} onClick={() => setExercise('squats')}>🍑<span>Squats</span></div>
-              <div className={'chip' + (exercise === 'lunges' ? ' sel' : '')} onClick={() => setExercise('lunges')}>🦵<span>Lunges</span></div>
-            </div>
-            <div className="chip-row" style={{ marginTop: 10 }}>
-              {REPS_OPTIONS.map((r) => (
-                <div key={r} className={'chip' + (reps === r ? ' sel' : '')} onClick={() => setReps(r)}>
-                  {r}<span>reps</span>
+
+            {unlocked >= 2 && (
+              <div className="cfg-stage">
+                <div className="sec-h" style={{ margin: '6px 0 10px' }}><h2 style={{ fontSize: 18 }}>EJERCICIO</h2></div>
+                <div className="chip-row">
+                  <div className={'chip' + (exercise === 'squats' ? ' sel' : '')} onClick={() => { setExercise('squats'); unlock(3) }}>🍑<span>Squats</span></div>
+                  <div className={'chip' + (exercise === 'lunges' ? ' sel' : '')} onClick={() => { setExercise('lunges'); unlock(3) }}>🦵<span>Lunges</span></div>
                 </div>
-              ))}
-            </div>
+                <div className="chip-row" style={{ marginTop: 10 }}>
+                  {REPS_OPTIONS.map((r) => (
+                    <div key={r} className={'chip' + (reps === r ? ' sel' : '')} onClick={() => { setReps(r); unlock(3) }}>
+                      {r}<span>reps</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {unlocked >= 3 && (
+              <div className="cfg-stage">
+                <div className="sec-h" style={{ margin: '16px 0 10px' }}><h2 style={{ fontSize: 18 }}>DÍAS</h2></div>
+                <div className="daysel">
+                  {DAY_LABELS.map((lbl, d) => (
+                    <div key={d} className={'d' + (alarmDays.includes(d) ? ' on' : '')} onClick={() => { toggleAlarmDay(d); unlock(4) }}>{lbl}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {unlocked >= 4 && (
+              <div className="cfg-stage">
+                <div className="sec-h" style={{ margin: '16px 0 10px' }}><h2 style={{ fontSize: 18 }}>CANCIÓN</h2></div>
+                <div className="songsel">
+                  {ALARM_SONGS.map((song) => (
+                    <div key={song.id} className={'songrow' + (songId === song.id ? ' sel' : '')} onClick={() => { setSongId(song.id); stopPreview() }}>
+                      <span className="songradio" />
+                      <span className="songname">{song.nombre}</span>
+                      <button
+                        type="button"
+                        className={'songplay' + (previewId === song.id ? ' on' : '')}
+                        onClick={(e) => { e.stopPropagation(); togglePreview(song) }}
+                        aria-label={previewId === song.id ? 'Detener' : 'Escuchar'}
+                      >
+                        {previewId === song.id ? '◼' : '▶'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {unlocked < 4 && (
+              <div className="cfg-hint">{unlocked === 1 ? 'Ajusta la hora ▾' : unlocked === 2 ? 'Elige ejercicio y reps ▾' : 'Elige los días ▾'}</div>
+            )}
           </div>
         )}
       </div>
 
       <div className="ob-foot">
         <button className="cta full" onClick={next}>
-          {step === OB_TOTAL - 1 ? 'EMPEZAR 🔥' : 'CONTINUAR'}
+          {step === OB_TOTAL - 1 ? (unlocked < 4 ? 'CONTINUAR' : 'EMPEZAR 🔥') : 'CONTINUAR'}
         </button>
       </div>
     </div>

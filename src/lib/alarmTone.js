@@ -21,6 +21,8 @@ let toneGain = null     // controla el desvanecimiento global del pitido
 let ringing = false
 let loopTimer = null
 let stopTimer = null
+let keepAlive = null    // oscilador inaudible que evita que iOS suspenda el contexto
+let visInstalled = false
 
 function ensureCtx() {
   if (ctx) return ctx
@@ -38,8 +40,37 @@ function ensureCtx() {
   return ctx
 }
 
-// Desbloqueo: crea/reanuda el contexto y reproduce un buffer silencioso (truco
-// que iOS exige). Debe llamarse DENTRO de un gesto del usuario. Idempotente.
+// Keep-alive: un oscilador prácticamente inaudible (gain ~-80dB) que corre
+// SIEMPRE. Mientras hay una fuente activa, iOS NO suspende el contexto en primer
+// plano, así que al dispararse la alarma el pitido suena al instante, sin gesto
+// y sin delay. Es la clave para que NO haya que tocar la pantalla.
+function startKeepAlive() {
+  if (!ctx || keepAlive) return
+  try {
+    const osc = ctx.createOscillator()
+    const g = ctx.createGain()
+    g.gain.value = 0.0001
+    osc.frequency.value = 30
+    osc.connect(g)
+    g.connect(ctx.destination)
+    osc.start()
+    keepAlive = { osc, g }
+  } catch { /* noop */ }
+}
+
+// Si iOS suspende el contexto (al irse a segundo plano / bloquear pantalla),
+// lo reanuda al volver a primer plano.
+function installVisibilityResume() {
+  if (visInstalled) return
+  visInstalled = true
+  const resume = () => { if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {}) }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) resume() })
+  window.addEventListener('focus', resume)
+}
+
+// Desbloqueo: crea/reanuda el contexto, reproduce un buffer silencioso (truco
+// que iOS exige) y arranca el keep-alive. Debe llamarse DENTRO de un gesto del
+// usuario. Idempotente.
 export function unlockAlarmAudio() {
   const c = ensureCtx()
   if (!c) return
@@ -51,6 +82,8 @@ export function unlockAlarmAudio() {
     src.connect(c.destination)
     src.start(0)
   } catch { /* noop */ }
+  startKeepAlive()
+  installVisibilityResume()
 }
 
 // ¿El contexto ya está listo para sonar sin gesto?

@@ -109,6 +109,12 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .alarm-delete{text-align:center;color:var(--txt-faint);font-weight:700;font-size:13px;margin-top:16px;cursor:pointer}
 .alarm-delete:active{color:var(--magenta)}
 
+/* desbloqueo progresivo de la config de alarma (hora→ejercicio→días→canción) */
+.cfg-stage{animation:cfgIn .42s cubic-bezier(.2,1,.4,1) both}
+@keyframes cfgIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.cfg-hint{margin-top:14px;text-align:center;font-size:12.5px;font-weight:800;letter-spacing:.04em;color:var(--magenta-soft);animation:cfgHint 1.6s ease-in-out infinite}
+@keyframes cfgHint{0%,100%{opacity:.55;transform:translateY(0)}50%{opacity:1;transform:translateY(2px)}}
+
 /* selector de canción de la alarma (radio + preview) */
 .songsel{display:flex;flex-direction:column;gap:8px}
 .songrow{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:12px 14px;cursor:pointer;transition:.18s}
