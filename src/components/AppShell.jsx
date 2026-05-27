@@ -8,15 +8,18 @@ import CameraScan from '../screens/CameraScan'
 import Celebration from '../screens/Celebration'
 import AchievementModal from './AchievementModal'
 import Onboarding from '../screens/Onboarding'
+import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
 
 export default function AppShell() {
   const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef } = useApp()
   return (
     <div className="app" ref={appRef}>
       {/* Audio único (alarma o reto): vive a nivel app para sobrevivir al
-          cambio AlarmRing/Home -> CameraScan. La fuente la fija playSong.
+          cambio AlarmRing/Home -> CameraScan. Trae la canción de la alarma por
+          defecto para poder "desbloquearla" en el 1er gesto (unlockAudio) y que
+          suene sola al dispararse. playSong cambia la fuente para los retos.
           Solo se detiene al completar las reps. */}
-      <audio ref={audioRef} loop preload="auto" />
+      <audio ref={audioRef} src={ALARM_AUDIO_SRC} loop preload="auto" />
       <div className="bg-fx">
         <div className="blob b1" />
         <div className="blob b2" />
