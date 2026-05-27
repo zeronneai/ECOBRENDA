@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { signUp, signIn } from '../lib/auth'
+import { signUp, signIn, resetPassword } from '../lib/auth'
 
 /* Pantallas de autenticación (estética 100% Booty Alarm, sin branding Supabase).
    Vistas: 'signup' | 'login' | 'recover'. Por ahora implementada 'signup'
@@ -17,8 +17,9 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
   const [showPw, setShowPw] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
 
-  const go = (v) => { setError(''); setView(v) }
+  const go = (v) => { setError(''); setSent(false); setView(v) }
 
   const doSignup = async () => {
     setError('')
@@ -40,6 +41,17 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
     setBusy(false)
     if (r.error) { setError(r.error); return }
     onAuthed?.(r.session)
+  }
+
+  const doRecover = async () => {
+    setError('')
+    if (!email.trim()) return setError('Escribe tu email.')
+    setBusy(true)
+    const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined
+    const r = await resetPassword(email.trim(), redirectTo)
+    setBusy(false)
+    if (r.error) { setError(r.error); return }
+    setSent(true)
   }
 
   return (
@@ -140,6 +152,46 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
               <span className="auth-link" onClick={() => go('signup')}>Regístrate</span>
             </div>
           </div>
+        </div>
+      )}
+
+      {view === 'recover' && (
+        <div className="auth-card">
+          <button type="button" className="auth-back" onClick={() => go('login')} aria-label="Volver">‹</button>
+
+          {!sent ? (
+            <>
+              <div className="auth-kick">Sin bronca</div>
+              <h1 className="auth-title">RECUPERA TU ACCESO</h1>
+              <p className="auth-sub">Te mandamos un link a tu correo para crear una nueva contraseña.</p>
+
+              <div className="auth-field">
+                <input
+                  className="auth-input"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="tu@correo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') doRecover() }}
+                />
+              </div>
+
+              {error && <div className="auth-error">{error}</div>}
+
+              <button className="cta full auth-cta" onClick={doRecover} disabled={busy}>
+                {busy ? 'ENVIANDO…' : 'ENVIAR LINK'}
+              </button>
+            </>
+          ) : (
+            <div className="auth-sent">
+              <div className="ic">📧</div>
+              <h1 className="auth-title">REVISA TU CORREO</h1>
+              <p className="auth-sub">Te enviamos un link a <b style={{ color: '#fff' }}>{email.trim()}</b> para crear una nueva contraseña.</p>
+              <button className="cta full auth-cta" onClick={() => go('login')}>VOLVER A INICIAR SESIÓN</button>
+            </div>
+          )}
         </div>
       )}
     </div>
