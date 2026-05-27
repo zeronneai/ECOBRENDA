@@ -109,6 +109,9 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .alarm-delete{text-align:center;color:var(--txt-faint);font-weight:700;font-size:13px;margin-top:16px;cursor:pointer}
 .alarm-delete:active{color:var(--magenta)}
 
+/* link "ya tengo cuenta" en el primer paso del onboarding */
+.ob-haveaccount{margin-top:20px;text-align:center;font-size:14px;color:var(--txt-dim)}
+
 /* pantallas de autenticación (Crear cuenta / Iniciar sesión / Recuperar) */
 #auth{position:absolute;inset:0;z-index:170;display:flex;flex-direction:column;justify-content:center;padding:30px 26px calc(var(--safe-bot) + 24px);background:radial-gradient(120% 90% at 50% 0%,#2a0014,#070708);overflow-y:auto;animation:fade .35s}
 .auth-brand{text-align:center;font-size:12px;font-weight:800;letter-spacing:.22em;color:var(--magenta-soft);margin-bottom:22px}

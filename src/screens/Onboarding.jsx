@@ -19,7 +19,7 @@ const inToCm = (inch) => Math.round(inch * 2.54)
 const fmtFt = (inch) => `${Math.floor(inch / 12)}'${inch % 12}"`
 
 export default function Onboarding() {
-  const { updateProfile, addAlarm, finishOnboarding, showToast } = useApp()
+  const { updateProfile, addAlarm, finishOnboarding, showToast, cloudEnabled, openAuth } = useApp()
 
   const [step, setStep] = useState(0)
   const [leaving, setLeaving] = useState(false)
@@ -140,6 +140,11 @@ export default function Onboarding() {
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') next() }}
             />
+            {cloudEnabled && (
+              <div className="ob-haveaccount">
+                ¿Ya tienes cuenta? <span className="auth-link" onClick={() => openAuth('login')}>Inicia sesión</span>
+              </div>
+            )}
           </div>
         )}
 
