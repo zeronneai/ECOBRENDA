@@ -5,6 +5,7 @@ import * as dataStore from '../lib/dataStore'
 import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
 import { isNativeApp, rescheduleNativeAlarms, onAlarmTapped } from '../lib/nativeAlarm'
 import { primeNativePermissions } from '../lib/nativePerms'
+import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 
 const AppCtx = createContext(null)
 
@@ -231,10 +232,12 @@ export function AppProvider({ children }) {
     if (p && typeof p.catch === 'function') p.catch(() => armAudioFallback())
   }, [armAudioFallback])
 
-  // Único modo de detenerla: completar las reps (cámara). Detiene canción + pitido.
+  // Único modo de detenerla: completar las reps (cámara). Detiene canción +
+  // pitido in-app + el servicio de alarma nativo (Android).
   const stopSong = useCallback(() => {
     disarmAudioFallback()
     stopAlarmTone()
+    stopAndroidAlarm()
     const el = audioRef.current
     if (!el) return
     el.pause()
@@ -328,14 +331,21 @@ export function AppProvider({ children }) {
     showRing(a)
   }, [updateAlarm, showRing])
 
-  // Reagenda las notificaciones nativas cuando cambian las alarmas (solo nativo).
+  // Reagenda al cambiar las alarmas. Android: plugin nativo (AlarmManager + FGS).
+  // iOS: LocalNotifications. Web: nada.
   useEffect(() => {
-    if (!isNativeApp()) return
-    rescheduleNativeAlarms(alarms)
+    if (isAndroid()) { scheduleAndroidAlarms(alarms); return }
+    if (isNativeApp()) rescheduleNativeAlarms(alarms)
   }, [alarms])
 
-  // Escucha el tap de la notificación nativa -> dispara esa alarma (solo nativo).
+  // Disparo nativo -> dispara la alarma. Android: evento 'native-alarm' (+ cold
+  // start con consumePending). iOS: tap de la notificación.
   useEffect(() => {
+    if (isAndroid()) {
+      const off = onNativeAlarm((id) => triggerAlarmById(id))
+      consumePendingAndroidAlarm().then((id) => { if (id) triggerAlarmById(id) })
+      return off
+    }
     if (!isNativeApp()) return
     let off = () => {}
     onAlarmTapped((id) => triggerAlarmById(id)).then((fn) => { off = fn })
@@ -346,8 +356,11 @@ export function AppProvider({ children }) {
   const needsPriming = isNativeApp() && !onboarding && profile.onboarded && !settings.permsPrimed
   const primePermissions = useCallback(async () => {
     await primeNativePermissions()
+    if (isAndroid()) await ensureExactAlarmAllowed() // Android 12+: permiso de alarma exacta
     setSettingsState({ ...dataStore.saveSettings({ permsPrimed: true }) })
-    rescheduleNativeAlarms(dataStore.getAlarms()) // ya con permiso de notificaciones
+    const al = dataStore.getAlarms()
+    if (isAndroid()) scheduleAndroidAlarms(al)
+    else rescheduleNativeAlarms(al)
   }, [])
 
   // Desbloqueo de audio en el primer gesto (cualquier toque, incl. guardar una

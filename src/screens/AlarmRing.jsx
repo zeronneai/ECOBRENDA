@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useApp } from '../store'
 import { songUrlById } from '../data/songs'
 import { startAlarmTone } from '../lib/alarmTone'
+import { isAndroid } from '../lib/androidAlarm'
 
 export default function AlarmRing() {
   const { profile, ringAlarm, playSong, startWorkout } = useApp()
@@ -10,11 +11,12 @@ export default function AlarmRing() {
   const reps = ringAlarm?.reps ?? 10
   const time = ringAlarm?.hour || profile.wakeTime
 
-  // Al abrirse la alarma, suenan EN PARALELO desde el inicio:
-  //  - el pitido fuerte Web Audio (startAlarmTone): shock ~10s y se desvanece
-  //  - la canción ELEGIDA (songId) en loop: sigue hasta completar las reps
-  // El pitido se apaga solo; la canción es el sonido de despertar que continúa.
+  // En Android el SERVICIO NATIVO ya reproduce la canción en loop (sonido
+  // imparable), así que el JS NO arranca su propio audio (evita doble sonido).
+  // En web/iOS suenan en paralelo desde el inicio el pitido Web Audio (shock
+  // ~10s que se desvanece) y la canción elegida (sigue hasta completar reps).
   useEffect(() => {
+    if (isAndroid()) return
     startAlarmTone()
     playSong(songUrlById(ringAlarm?.songId))
   }, [playSong, ringAlarm])
