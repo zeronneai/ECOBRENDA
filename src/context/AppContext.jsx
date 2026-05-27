@@ -3,6 +3,8 @@ import { getBrendaPlan } from '../data/plans'
 import { ACHIEVEMENTS } from '../data/achievements'
 import * as dataStore from '../lib/dataStore'
 import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
+import { isNativeApp, rescheduleNativeAlarms, onAlarmTapped } from '../lib/nativeAlarm'
+import { primeNativePermissions } from '../lib/nativePerms'
 
 const AppCtx = createContext(null)
 
@@ -314,6 +316,40 @@ export function AppProvider({ children }) {
     return () => clearInterval(iv)
   }, [updateAlarm, showRing])
 
+  // ── ALARMA NATIVA (Capacitor) ────────────────────────────────────────────
+  // Punto de entrada ÚNICO para disparar una alarma por id (lo usa el tap de la
+  // notificación nativa; el scheduler in-app usa showRing directo). Marca
+  // lastTriggered para que el scheduler no la repita dentro de la ventana.
+  const triggerAlarmById = useCallback((id) => {
+    const a = (schedRef.current.alarms || []).find((x) => String(x.id) === String(id))
+    if (!a) return
+    const today = dataStore.todayKey()
+    if (a.lastTriggered !== today) updateAlarm(a.id, { lastTriggered: today })
+    showRing(a)
+  }, [updateAlarm, showRing])
+
+  // Reagenda las notificaciones nativas cuando cambian las alarmas (solo nativo).
+  useEffect(() => {
+    if (!isNativeApp()) return
+    rescheduleNativeAlarms(alarms)
+  }, [alarms])
+
+  // Escucha el tap de la notificación nativa -> dispara esa alarma (solo nativo).
+  useEffect(() => {
+    if (!isNativeApp()) return
+    let off = () => {}
+    onAlarmTapped((id) => triggerAlarmById(id)).then((fn) => { off = fn })
+    return () => off()
+  }, [triggerAlarmById])
+
+  // Permisos nativos: pedir UNA vez (cámara + notificaciones) tras el onboarding.
+  const needsPriming = isNativeApp() && !onboarding && profile.onboarded && !settings.permsPrimed
+  const primePermissions = useCallback(async () => {
+    await primeNativePermissions()
+    setSettingsState({ ...dataStore.saveSettings({ permsPrimed: true }) })
+    rescheduleNativeAlarms(dataStore.getAlarms()) // ya con permiso de notificaciones
+  }, [])
+
   // Desbloqueo de audio en el primer gesto (cualquier toque, incl. guardar una
   // alarma). Desbloquea AMBOS para que suenen juntos al dispararse la alarma:
   //  - el AudioContext del pitido Web Audio (unlockAlarmAudio)
@@ -345,6 +381,7 @@ export function AppProvider({ children }) {
     totals, recordRep, logWorkout, workoutLog,
     progressLog, addProgressEntry, deleteProgressEntry,
     settings, saveSettings, resetProgress,
+    needsPriming, primePermissions,
     achievementQueue, dismissAchievement,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,

@@ -109,6 +109,21 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .alarm-delete{text-align:center;color:var(--txt-faint);font-weight:700;font-size:13px;margin-top:16px;cursor:pointer}
 .alarm-delete:active{color:var(--magenta)}
 
+/* priming de permisos nativos (Android/iOS) */
+#perms{position:absolute;inset:0;z-index:180;display:flex;align-items:center;justify-content:center;padding:30px;background:radial-gradient(120% 90% at 50% 0%,#2a0014,#070708);animation:fade .35s}
+.perms-card{width:100%;max-width:360px;text-align:center}
+.perms-emoji{font-size:54px;margin-bottom:14px}
+.perms-title{font-family:'Bebas Neue';font-size:38px;line-height:.95;margin-bottom:10px}
+.perms-lead{color:var(--txt-dim);font-size:14.5px;line-height:1.55;margin-bottom:22px}
+.perms-row{display:flex;align-items:center;gap:14px;text-align:left;background:var(--surface);border:1px solid var(--line-strong);border-radius:16px;padding:14px;margin-bottom:12px}
+.perms-ic{font-size:26px;flex-shrink:0}
+.perms-tx{display:flex;flex-direction:column;gap:2px}
+.perms-tx b{font-size:15px;color:#fff}
+.perms-tx span{font-size:12.5px;color:var(--txt-dim);line-height:1.4}
+.perms-go{margin-top:14px;width:100%;background:#fff;color:#0a0a0a;border:none;padding:16px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px var(--magenta-glow)}
+.perms-go:disabled{opacity:.6}
+.perms-go:active{transform:scale(.98)}
+
 /* desbloqueo progresivo de la config de alarma (hora→ejercicio→días→canción) */
 .cfg-stage{animation:cfgIn .42s cubic-bezier(.2,1,.4,1) both}
 @keyframes cfgIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}

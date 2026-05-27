@@ -36,7 +36,7 @@ const DEFAULT_STATE = {
   alarms: [],
   // Logros ya anunciados (null = aún sin inicializar/seed).
   announcedAchievements: null,
-  settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false },
+  settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false, permsPrimed: false },
 }
 
 const DEFAULT_DAYS = [0, 1, 2, 3, 4] // Lun–Vie

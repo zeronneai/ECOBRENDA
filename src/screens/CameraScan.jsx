@@ -128,6 +128,25 @@ export default function CameraScan() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage])
 
+  // Wake lock: mantiene la pantalla encendida durante el workout y la re-adquiere
+  // al volver a primer plano (B7). Aislado: no toca la detección.
+  useEffect(() => {
+    if (stage !== 'active' || !('wakeLock' in navigator)) return
+    let lock = null
+    let cancelled = false
+    const acquire = async () => {
+      try { lock = await navigator.wakeLock.request('screen') } catch { /* noop */ }
+    }
+    const onVis = () => { if (!document.hidden && !cancelled) acquire() }
+    acquire()
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      cancelled = true
+      document.removeEventListener('visibilitychange', onVis)
+      try { lock?.release() } catch { /* noop */ }
+    }
+  }, [stage])
+
   const activate = () => {
     finishedRef.current = false
     tauntFiredRef.current = false
