@@ -250,30 +250,42 @@ export function AppProvider({ children }) {
   }, [syncAchievements])
 
   // ── Scheduler de alarma "app abierta" ──
-  // Mientras la app está abierta, revisa el reloj y dispara la alarma cuando
-  // coincide hora + día. Marca lastTriggered para no repetir el mismo día.
-  // (La capa nativa con app cerrada llega después con Capacitor.)
+  // Mientras la app está abierta, compara el reloj contra la hora OBJETIVO de
+  // cada alarma activa (hora + día). Dispara si "ahora" ya alcanzó la hora y
+  // está dentro de una ventana de tolerancia (~90 s), para no perderse aunque
+  // el chequeo caiga unos segundos / un minuto tarde. Marca lastTriggered para
+  // no repetir el mismo día.
+  //
+  // LÍMITE conocido: esta es la capa "app abierta". Con la pantalla bloqueada o
+  // la pestaña en segundo plano los timers del navegador se ralentizan/pausan y
+  // puede perderse la ventana; y el audio NO suena solo por el autoplay (suena
+  // al primer toque). La fiabilidad TOTAL (pantalla bloqueada, app cerrada y
+  // sonido automático) requiere la capa NATIVA con Capacitor.
   const schedRef = useRef({})
   schedRef.current = { alarms, ringOpen, scanning, celebrating, onboarding }
   useEffect(() => {
-    const pad = (n) => String(n).padStart(2, '0')
+    const TOLERANCE_MS = 90 * 1000
     const tick = () => {
       const st = schedRef.current
       if (st.ringOpen || st.scanning || st.celebrating || st.onboarding) return // no interrumpir
       const now = new Date()
-      const hhmm = `${pad(now.getHours())}:${pad(now.getMinutes())}`
       const dow = (now.getDay() + 6) % 7 // Lun=0 … Dom=6
       const today = dataStore.todayKey()
-      const due = st.alarms.find(
-        (a) => a.active && a.hour === hhmm && (a.days || []).includes(dow) && a.lastTriggered !== today
-      )
+      const due = st.alarms.find((a) => {
+        if (!a.active || a.lastTriggered === today || !(a.days || []).includes(dow)) return false
+        const [hh, mm] = String(a.hour).split(':').map(Number)
+        const target = new Date(now)
+        target.setHours(hh, mm, 0, 0)
+        const diff = now.getTime() - target.getTime() // ms desde la hora objetivo
+        return diff >= 0 && diff <= TOLERANCE_MS // ya llegó la hora y dentro de la ventana
+      })
       if (due) {
         updateAlarm(due.id, { lastTriggered: today }) // una sola vez hoy (persistente)
         showRing(due) // AlarmRing con su canción → cámara con su ejercicio/reps
       }
     }
-    tick() // por si abres la app justo en el minuto de la alarma
-    const iv = setInterval(tick, 15000)
+    tick() // chequeo inmediato al abrir la app
+    const iv = setInterval(tick, 5000)
     return () => clearInterval(iv)
   }, [updateAlarm, showRing])
 
