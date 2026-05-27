@@ -44,6 +44,12 @@ jobs:
 
       - name: Build web (Vite)
         run: npm run build
+        env:
+          # Configura estos secrets en el repo: Settings -> Secrets and variables
+          # -> Actions -> New repository secret. Si faltan, el APK compila igual
+          # pero sin Supabase (la app cae a localStorage).
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Capacitor sync (copia web + plugins a android/)
         run: npx cap sync android
