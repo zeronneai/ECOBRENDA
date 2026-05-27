@@ -67,13 +67,77 @@ function applyProfileRow(r) {
   })
 }
 
+async function pullProfile() {
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle()
+  if (!error && data) applyProfileRow(data)
+}
+async function pushProfile() {
+  const { error } = await supabase.from('profiles').upsert(profileRowFromLocal(dataStore.getProfile()), { onConflict: 'id' })
+  if (error) throw error
+}
+
+// ── Mapeo SETTINGS ──────────────────────────────────────────────────────────
+// Los toggles van en `notifications` (jsonb). permsPrimed NO se sincroniza: es
+// del dispositivo (si otorgaste permisos nativos EN ESTE teléfono).
+async function pullSettings() {
+  const { data, error } = await supabase.from('settings').select('*').eq('user_id', currentUser.id).maybeSingle()
+  if (!error && data && data.notifications && typeof data.notifications === 'object') {
+    dataStore.saveSettings(data.notifications)
+  }
+}
+async function pushSettings() {
+  const s = dataStore.getSettings()
+  const notifications = {
+    sound: s.sound, reminder: s.reminder, reminderTime: s.reminderTime,
+    streakAlerts: s.streakAlerts, weeklyReport: s.weeklyReport,
+  }
+  const { error } = await supabase.from('settings').upsert(
+    { user_id: currentUser.id, units: dataStore.getProfile()?.weightUnit ?? null, notifications },
+    { onConflict: 'user_id' },
+  )
+  if (error) throw error
+}
+
+// ── Mapeo SUBSCRIPTION (gate premium — la NUBE manda) ───────────────────────
+// El estado premium se LEE de la nube (pull). El cliente NO lo empuja en el sync
+// normal (evita que alguien se ponga premium solo). Solo se sube explícitamente
+// vía pushSubscriptionNow() (unlock demo) y al sembrar en el registro.
+// Con Stripe: el webhook (service_role) escribe esta tabla; se endurece el RLS
+// para que el cliente solo pueda SELECT, y se quita el push del cliente.
+async function pullSubscription() {
+  const { data, error } = await supabase.from('subscriptions').select('*').eq('user_id', currentUser.id).maybeSingle()
+  if (!error && data) {
+    dataStore.setSubscription({
+      status: data.status || 'inactive',
+      plan: data.plan ?? null,
+      currentPeriodEnd: data.current_period_end ?? null,
+    })
+  }
+}
+async function pushSubscription() {
+  const sub = dataStore.getSubscription()
+  // Solo columnas que el cliente "posee" por ahora; NO toca stripe_* (las pone el server).
+  const { error } = await supabase.from('subscriptions').upsert(
+    { user_id: currentUser.id, status: sub.status, plan: sub.plan, current_period_end: sub.currentPeriodEnd },
+    { onConflict: 'user_id' },
+  )
+  if (error) throw error
+}
+
+// Empuje explícito de la suscripción (lo llama el unlock demo). Temporal: se
+// elimina cuando Stripe sea la fuente de verdad.
+export async function pushSubscriptionNow() {
+  if (!isCloudOn()) return
+  try { await pushSubscription() } catch (e) { console.warn('[cloudSync] pushSubscription', e); markDirty() }
+}
+
 async function pullAll() {
   if (!isCloudOn()) return
   applyingRemote = true
   try {
-    const { data, error } = await supabase
-      .from('profiles').select('*').eq('id', currentUser.id).maybeSingle()
-    if (!error && data) applyProfileRow(data)
+    await pullProfile()
+    await pullSettings()
+    await pullSubscription()
   } catch (e) {
     console.warn('[cloudSync] pull falló', e)
   } finally {
@@ -82,11 +146,19 @@ async function pullAll() {
   notifyHydrated()
 }
 
-async function pushAll() {
+// Push de cambios normales: NO incluye subscription (la nube/Stripe manda).
+async function pushChanges() {
   if (!isCloudOn()) return
-  const p = dataStore.getProfile()
-  const { error } = await supabase.from('profiles').upsert(profileRowFromLocal(p), { onConflict: 'id' })
-  if (error) throw error
+  await pushProfile()
+  await pushSettings()
+}
+
+// Push de "siembra" al registrarse: sube todo, incluida la suscripción inicial.
+async function pushSeed() {
+  if (!isCloudOn()) return
+  await pushProfile()
+  await pushSettings()
+  await pushSubscription()
 }
 
 // ── Sesión / disparadores ───────────────────────────────────────────────────
@@ -97,9 +169,9 @@ export async function setUser(session, mode = 'resume') {
   if (!isCloudOn()) return
   try {
     if (mode === 'signup') {
-      await pushAll(); clearDirty()
+      await pushSeed(); clearDirty()
     } else {
-      if (mode === 'resume' && isDirty()) { try { await pushAll(); clearDirty() } catch { /* noop */ } }
+      if (mode === 'resume' && isDirty()) { try { await pushChanges(); clearDirty() } catch { /* noop */ } }
       await pullAll()
     }
   } catch (e) {
@@ -112,7 +184,7 @@ export function clearUser() { currentUser = null }
 async function flush() {
   if (!isCloudOn()) return
   if (typeof navigator !== 'undefined' && navigator.onLine === false) { markDirty(); return }
-  try { await pushAll(); clearDirty() } catch { markDirty() }
+  try { await pushChanges(); clearDirty() } catch { markDirty() }
 }
 
 function schedulePush() {

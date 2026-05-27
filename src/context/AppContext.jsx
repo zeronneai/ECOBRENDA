@@ -73,6 +73,7 @@ export function AppProvider({ children }) {
   // Activa premium (hoy local; mañana lo hará el webhook de Stripe en Supabase).
   const unlock = useCallback(() => {
     setSubscriptionState(dataStore.setSubscription({ status: 'active', plan: selectedPlan }))
+    cloudSync.pushSubscriptionNow() // sube el premium a la nube (demo; con Stripe lo hará el server)
   }, [selectedPlan])
 
   // Detecta el momento EXACTO en que se cruza el umbral de un logro.
