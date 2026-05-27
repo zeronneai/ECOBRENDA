@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../store'
 import { DAY_LABELS } from '../data/onboarding'
+import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
 import Sheet from './Sheet'
 import WheelPicker from './WheelPicker'
 
@@ -26,6 +27,30 @@ export default function AlarmSheet() {
   const [exercise, setExercise] = useState(editingAlarm?.exercise === 'lunges' ? 'lunges' : 'squats')
   const [reps, setReps] = useState(editingAlarm?.reps ?? 10)
   const [days, setDays] = useState(editingAlarm?.days ? [...editingAlarm.days] : [0, 1, 2, 3, 4])
+  const [songId, setSongId] = useState(editingAlarm?.songId || DEFAULT_SONG_ID)
+
+  // Previsualización: objeto Audio aparte (NO toca el <audio> de la alarma ni el
+  // desbloqueo). Se detiene al cambiar de canción o al cerrar el editor.
+  const [previewId, setPreviewId] = useState(null)
+  const previewRef = useRef(null)
+  const stopPreview = () => {
+    if (previewRef.current) { previewRef.current.pause(); previewRef.current = null }
+    setPreviewId(null)
+  }
+  useEffect(() => stopPreview, [])
+
+  const togglePreview = (song) => {
+    if (previewId === song.id) { stopPreview(); return }
+    stopPreview()
+    const a = new Audio(song.url)
+    a.volume = 1.0
+    a.play().catch(() => {})
+    a.onended = () => setPreviewId((cur) => (cur === song.id ? null : cur))
+    previewRef.current = a
+    setPreviewId(song.id)
+  }
+
+  const pickSong = (id) => { setSongId(id); stopPreview() }
 
   // Solo se puede borrar una alarma extra (la primera "Despertar Activo" siempre queda).
   const canDelete = editingAlarm && alarms.length > 1 && alarms[0]?.id !== editingAlarm.id
@@ -42,7 +67,8 @@ export default function AlarmSheet() {
   }
 
   const save = () => {
-    const payload = { hour: computeHour(), exercise, reps, days }
+    stopPreview()
+    const payload = { hour: computeHour(), exercise, reps, days, songId }
     if (editingAlarm) updateAlarm(editingAlarm.id, payload)
     else addAlarm({ ...payload, active: true })
     closeSheet()
@@ -50,6 +76,7 @@ export default function AlarmSheet() {
   }
 
   const remove = () => {
+    stopPreview()
     deleteAlarm(editingAlarm.id)
     closeSheet()
     showToast('Alarma eliminada')
@@ -85,6 +112,28 @@ export default function AlarmSheet() {
       <div className="daysel">
         {DAY_LABELS.map((lbl, d) => (
           <div key={d} className={'d' + (days.includes(d) ? ' on' : '')} onClick={() => toggleDay(d)}>{lbl}</div>
+        ))}
+      </div>
+
+      <div className="sec-h" style={{ margin: '16px 0 12px' }}><h2 style={{ fontSize: 18 }}>SONIDO DE ALARMA</h2></div>
+      <div className="songsel">
+        {ALARM_SONGS.map((song) => (
+          <div
+            key={song.id}
+            className={'songrow' + (songId === song.id ? ' sel' : '')}
+            onClick={() => pickSong(song.id)}
+          >
+            <span className="songradio" />
+            <span className="songname">{song.nombre}</span>
+            <button
+              type="button"
+              className={'songplay' + (previewId === song.id ? ' on' : '')}
+              onClick={(e) => { e.stopPropagation(); togglePreview(song) }}
+              aria-label={previewId === song.id ? 'Detener' : 'Escuchar'}
+            >
+              {previewId === song.id ? '◼' : '▶'}
+            </button>
+          </div>
         ))}
       </div>
 

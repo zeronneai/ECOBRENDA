@@ -109,6 +109,19 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .alarm-delete{text-align:center;color:var(--txt-faint);font-weight:700;font-size:13px;margin-top:16px;cursor:pointer}
 .alarm-delete:active{color:var(--magenta)}
 
+/* selector de canción de la alarma (radio + preview) */
+.songsel{display:flex;flex-direction:column;gap:8px}
+.songrow{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:12px 14px;cursor:pointer;transition:.18s}
+.songrow:active{transform:scale(.99)}
+.songrow.sel{border-color:var(--magenta);background:linear-gradient(120deg,rgba(255,31,107,.14),var(--surface));box-shadow:0 0 16px var(--magenta-glow)}
+.songradio{width:18px;height:18px;border-radius:50%;border:2px solid var(--line-strong);flex-shrink:0;transition:.18s}
+.songrow.sel .songradio{border-color:var(--magenta);background:radial-gradient(circle,var(--magenta) 42%,transparent 46%)}
+.songname{flex:1;font-size:14px;font-weight:700;color:var(--txt);line-height:1.25}
+.songrow.sel .songname{color:#fff}
+.songplay{flex-shrink:0;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--txt);font-size:12px;display:grid;place-items:center;cursor:pointer;transition:.18s}
+.songplay:active{transform:scale(.92)}
+.songplay.on{background:var(--magenta);border-color:var(--magenta);color:#fff;box-shadow:0 0 14px var(--magenta-glow)}
+
 /* ===== ENTRENA (premium) ===== */
 .subtabs{display:flex;gap:8px;margin-bottom:16px}
 .subtab{flex:1;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:12px;font-family:'Archivo';font-weight:800;font-size:14px;letter-spacing:.04em;color:var(--txt-dim);cursor:pointer;transition:.2s}
@@ -522,6 +535,10 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .scan-count{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .scan-count .n{font-family:'Bebas Neue';font-size:88px;line-height:.78;color:#fff}
 .scan-count .g{font-size:15px;color:var(--txt-dim);font-weight:700;letter-spacing:.04em}
+
+/* texto provocador a mitad de rutina (no captura toques → no estorba la cámara) */
+.scan-taunt{position:absolute;inset:0;z-index:6;pointer-events:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px;font-family:'Bebas Neue';font-size:clamp(64px,22vw,120px);line-height:.9;color:var(--magenta);text-shadow:0 0 30px var(--magenta-glow),0 6px 24px rgba(0,0,0,.6);animation:tauntPop 2.5s cubic-bezier(.18,1.5,.35,1) both;-webkit-text-stroke:1px rgba(255,255,255,.18)}
+@keyframes tauntPop{0%{transform:scale(.3) rotate(-6deg);opacity:0}12%{transform:scale(1.14) rotate(-2deg);opacity:1}24%{transform:scale(1) rotate(0)}82%{transform:scale(1);opacity:1}100%{transform:scale(1.16);opacity:0}}
 
 /* ===== CELEBRATION (felicitacion de Brenda al completar) ===== */
 #celebrate{position:absolute;inset:0;z-index:220;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 30px calc(var(--safe-bot) + 30px);background:radial-gradient(120% 90% at 50% 0%,#2a0014,#070708)}

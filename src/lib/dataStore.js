@@ -32,7 +32,7 @@ const DEFAULT_STATE = {
   progressLog: [],  // [{ id, ts, date, weight, note }]
   challengeCount: 0,
   totals: { squat: 0, lunge: 0, reps: 0, workouts: 0 }, // reps REALES por ejercicio
-  // [{ id, hour:'HH:MM', exercise:'squats'|'lunges', reps, days:[0-6], active }]
+  // [{ id, hour:'HH:MM', exercise:'squats'|'lunges', reps, days:[0-6], active, songId }]
   alarms: [],
   // Logros ya anunciados (null = aún sin inicializar/seed).
   announcedAchievements: null,
@@ -265,6 +265,7 @@ function ensureSeedAlarm(s) {
       reps: s.profile.reps || 10,
       days: DEFAULT_DAYS.slice(),
       active: true,
+      songId: 'junior',
     })
   }
 }
@@ -283,6 +284,7 @@ export function addAlarm(alarm = {}) {
     reps: 10,
     days: DEFAULT_DAYS.slice(),
     active: true,
+    songId: 'junior',
     ...alarm,
   }
   s.alarms.push(row)

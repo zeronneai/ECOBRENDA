@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useApp } from '../store'
-import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
+import { songUrlById } from '../data/songs'
 
 export default function AlarmRing() {
   const { profile, ringAlarm, playSong, startWorkout } = useApp()
@@ -9,10 +9,11 @@ export default function AlarmRing() {
   const reps = ringAlarm?.reps ?? 10
   const time = ringAlarm?.hour || profile.wakeTime
 
-  // Al abrirse la pantalla de alarma, suena la canción desde el inicio en loop.
+  // Al abrirse la pantalla de alarma, suena la canción ELEGIDA (songId) desde el
+  // inicio en loop. Si la alarma no tiene songId, cae a la de por defecto.
   useEffect(() => {
-    playSong(ALARM_AUDIO_SRC)
-  }, [playSong])
+    playSong(songUrlById(ringAlarm?.songId))
+  }, [playSong, ringAlarm])
 
   // Misma ruta que los retos rápidos hacia la cámara (la canción ya suena).
   const startCamera = () => {

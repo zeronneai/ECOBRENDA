@@ -3,6 +3,7 @@ import { DrawingUtils, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { useApp } from '../store'
 import { PoseTracker } from '../lib/poseTracker'
 import { RepCounter } from '../lib/repCounter'
+import { tauntTriggerRep, randomTaunt, TAUNT_DURATION_MS } from '../data/taunts'
 
 // Anillo de progreso SVG.
 const R = 92
@@ -20,12 +21,24 @@ export default function CameraScan() {
   const [ready, setReady] = useState(false) // cámara en vivo
   const [reps, setReps] = useState(0)
   const [hud, setHud] = useState({ phase: 'NOT_READY', depth: 0, msg: 'Colócate de cuerpo completo en cuadro' })
+  const [taunt, setTaunt] = useState(null) // frase provocadora a mitad de rutina
 
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const drawerRef = useRef(null)
   const trackerRef = useRef(null)
   const finishedRef = useRef(false)
+  const tauntTimer = useRef(null)
+  const tauntFiredRef = useRef(false) // aparece una sola vez por sesión
+
+  // Dispara el texto a la rep configurada (por defecto, la mitad). NO interrumpe
+  // el conteo: el overlay es puro CSS sobre el video y se borra solo.
+  const maybeTaunt = (n) => {
+    if (tauntFiredRef.current || n < tauntTriggerRep(goal) || n >= goal) return
+    tauntFiredRef.current = true
+    setTaunt(randomTaunt())
+    tauntTimer.current = setTimeout(() => setTaunt(null), TAUNT_DURATION_MS)
+  }
 
   const finish = () => {
     if (finishedRef.current) return
@@ -81,6 +94,7 @@ export default function CameraScan() {
       onRep: (n) => {
         recordRep(exKind)
         setReps(n)
+        maybeTaunt(n)
         if (n >= goal) finish()
       },
       onState: (phase, info) => {
@@ -108,6 +122,7 @@ export default function CameraScan() {
 
     return () => {
       cancelled = true
+      clearTimeout(tauntTimer.current)
       tracker.dispose() // libera cámara + WebGL (evita la fuga de memoria)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,6 +130,9 @@ export default function CameraScan() {
 
   const activate = () => {
     finishedRef.current = false
+    tauntFiredRef.current = false
+    clearTimeout(tauntTimer.current)
+    setTaunt(null)
     setReady(false)
     setReps(0)
     setHud({ phase: 'NOT_READY', depth: 0, msg: 'Colócate de cuerpo completo en cuadro' })
@@ -154,6 +172,9 @@ export default function CameraScan() {
           <button className="scan-go" onClick={activate}>REINTENTAR</button>
         </div>
       )}
+
+      {/* Texto provocador a mitad de rutina (no captura toques → no estorba). */}
+      {taunt && <div className="scan-taunt" key={taunt + reps}>{taunt}</div>}
 
       {stage === 'active' && (
         <>
