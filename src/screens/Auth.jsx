@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { signUp } from '../lib/auth'
+import { signUp, signIn } from '../lib/auth'
 
 /* Pantallas de autenticación (estética 100% Booty Alarm, sin branding Supabase).
    Vistas: 'signup' | 'login' | 'recover'. Por ahora implementada 'signup'
@@ -26,6 +26,17 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
     if (password.length < 6) return setError('La contraseña necesita mínimo 6 caracteres.')
     setBusy(true)
     const r = await signUp(email.trim(), password)
+    setBusy(false)
+    if (r.error) { setError(r.error); return }
+    onAuthed?.(r.session)
+  }
+
+  const doLogin = async () => {
+    setError('')
+    if (!email.trim()) return setError('Escribe tu email.')
+    if (!password) return setError('Escribe tu contraseña.')
+    setBusy(true)
+    const r = await signIn(email.trim(), password)
     setBusy(false)
     if (r.error) { setError(r.error); return }
     onAuthed?.(r.session)
@@ -79,6 +90,55 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
           <div className="auth-links">
             <span>¿Ya tienes cuenta? </span>
             <span className="auth-link" onClick={() => go('login')}>Inicia sesión</span>
+          </div>
+        </div>
+      )}
+
+      {view === 'login' && (
+        <div className="auth-card">
+          <div className="auth-kick">Bienvenida de vuelta 🍑</div>
+          <h1 className="auth-title">INICIA SESIÓN</h1>
+          <p className="auth-sub">Entra para seguir con tu plan.</p>
+
+          <div className="auth-field">
+            <input
+              className="auth-input"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="tu@correo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="auth-field">
+            <input
+              className="auth-input"
+              type={showPw ? 'text' : 'password'}
+              autoComplete="current-password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') doLogin() }}
+            />
+            <button type="button" className="auth-eye" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Ocultar' : 'Mostrar'}>
+              {showPw ? '🙈' : '👁'}
+            </button>
+          </div>
+
+          {error && <div className="auth-error">{error}</div>}
+
+          <button className="cta full auth-cta" onClick={doLogin} disabled={busy}>
+            {busy ? 'ENTRANDO…' : 'INICIAR SESIÓN'}
+          </button>
+
+          <div className="auth-links">
+            <div><span className="auth-link" onClick={() => go('recover')}>¿Olvidaste tu contraseña?</span></div>
+            <div style={{ marginTop: 8 }}>
+              <span>¿No tienes cuenta? </span>
+              <span className="auth-link" onClick={() => go('signup')}>Regístrate</span>
+            </div>
           </div>
         </div>
       )}
