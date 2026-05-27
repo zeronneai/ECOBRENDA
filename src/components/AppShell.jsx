@@ -9,10 +9,11 @@ import Celebration from '../screens/Celebration'
 import AchievementModal from './AchievementModal'
 import Onboarding from '../screens/Onboarding'
 import PermissionsPriming from '../screens/PermissionsPriming'
+import Auth from '../screens/Auth'
 import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
 
 export default function AppShell() {
-  const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef, needsPriming } = useApp()
+  const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef, needsPriming, authOpen, authView, handleAuthed, closeAuth } = useApp()
   return (
     <div className="app" ref={appRef}>
       {/* Audio único (alarma o reto): vive a nivel app para sobrevivir al
@@ -43,6 +44,8 @@ export default function AppShell() {
       {onboarding && <Onboarding />}
       {/* Priming de permisos nativos (solo Android/iOS), tras el onboarding */}
       {needsPriming && <PermissionsPriming />}
+      {/* Auth (login/registro/recuperar) — abierto desde Perfil por ahora */}
+      {authOpen && <Auth initialView={authView} onAuthed={handleAuthed} onClose={closeAuth} />}
     </div>
   )
 }

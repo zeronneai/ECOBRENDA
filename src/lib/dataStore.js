@@ -119,6 +119,11 @@ function migrateFromLegacy() {
 
 let _cache = null
 
+// Pub/sub mínimo: se notifica tras cada save(). Lo usa cloudSync para empujar a
+// la nube. NO afecta a nadie más (la API pública sigue igual y síncrona).
+const _subs = new Set()
+export function subscribe(fn) { _subs.add(fn); return () => _subs.delete(fn) }
+
 export function load() {
   if (_cache) return _cache
   const parsed = safeParse(localStorage.getItem(KEY), null)
@@ -132,6 +137,7 @@ export function save() {
   _cache.version = SCHEMA_VERSION
   try { localStorage.setItem(KEY, JSON.stringify(_cache)) }
   catch (e) { console.warn('[dataStore] no se pudo guardar:', e) }
+  _subs.forEach((fn) => { try { fn() } catch { /* noop */ } })
 }
 
 // ── PERFIL ──────────────────────────────────────────────────────────────

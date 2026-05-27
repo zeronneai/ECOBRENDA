@@ -10,7 +10,7 @@ import { signUp, signIn, resetPassword } from '../lib/auth'
    - recap: texto del chip ("Hola, Brenda · Glúteos · 6:30 AM")
    - onAuthed(session): callback al autenticar (lo usa el Paso 5)
 */
-export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
+export default function Auth({ initialView = 'signup', recap = '', onAuthed, onClose }) {
   const [view, setView] = useState(initialView)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,7 +29,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
     const r = await signUp(email.trim(), password)
     setBusy(false)
     if (r.error) { setError(r.error); return }
-    onAuthed?.(r.session)
+    onAuthed?.(r.session, 'signup')
   }
 
   const doLogin = async () => {
@@ -40,7 +40,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
     const r = await signIn(email.trim(), password)
     setBusy(false)
     if (r.error) { setError(r.error); return }
-    onAuthed?.(r.session)
+    onAuthed?.(r.session, 'login')
   }
 
   const doRecover = async () => {
@@ -56,6 +56,9 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed }) {
 
   return (
     <div id="auth">
+      {onClose && view !== 'recover' && (
+        <button type="button" className="auth-back" onClick={onClose} aria-label="Cerrar">✕</button>
+      )}
       <div className="auth-brand">🍑 BOOTY ALARM</div>
 
       {view === 'signup' && (

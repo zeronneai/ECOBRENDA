@@ -12,7 +12,8 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast } = useApp()
+  const { profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast,
+          cloudEnabled, session, openAuth, signOutAccount } = useApp()
   const { isPremium } = useSubscription()
 
   // Medidas con estado local (para escribir decimales / pies+pulgadas).
@@ -101,6 +102,27 @@ export default function Profile() {
               <button onClick={() => openSheet('paywall')}>Hazte premium</button>
             )}
           </div>
+
+          {/* Cuenta en la nube (sesión) */}
+          {cloudEnabled && (
+            <div className="pf-sec reveal d2">
+              <h3>CUENTA EN LA NUBE</h3>
+              {session ? (
+                <>
+                  <div className="pf-link-row"><span>Sesión</span><span className="v" style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis' }}>{session.user?.email}</span></div>
+                  <button className="pf-danger-btn" onClick={signOutAccount}>Cerrar sesión</button>
+                </>
+              ) : (
+                <>
+                  <div className="set-row"><div><div className="t">Guarda tus datos</div><div className="d">Crea tu cuenta para no perder tu progreso</div></div></div>
+                  <button className="cta full" style={{ marginTop: 12 }} onClick={() => openAuth('signup')}>CREAR CUENTA</button>
+                  <div className="pf-link-row" style={{ justifyContent: 'center', marginTop: 6 }} onClick={() => openAuth('login')}>
+                    <span className="auth-link">Ya tengo cuenta — Iniciar sesión</span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Mi cuenta */}
           <div className="pf-sec reveal d3">

@@ -6,6 +6,9 @@ import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarm
 import { isNativeApp, rescheduleNativeAlarms, onAlarmTapped } from '../lib/nativeAlarm'
 import { primeNativePermissions } from '../lib/nativePerms'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
+import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
+import { isSupabaseConfigured } from '../lib/supabase'
+import * as cloudSync from '../lib/cloudSync'
 
 const AppCtx = createContext(null)
 
@@ -33,6 +36,11 @@ export function AppProvider({ children }) {
   const [weekChart, setWeekChart] = useState(() => dataStore.getWeekChartData())
   // Onboarding solo si el perfil aún no está marcado onboarded.
   const [onboarding, setOnboarding] = useState(() => !dataStore.getProfile()?.onboarded)
+
+  // ── Auth / nube (Supabase) ──
+  const [session, setSession] = useState(null)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authView, setAuthView] = useState('login')
 
   const unlocked = subscription.status === 'active' // gate premium
 
@@ -385,6 +393,54 @@ export function AppProvider({ children }) {
     }
   }, [unlockAudio])
 
+  // ── Auth / sincronización con la nube ──────────────────────────────────────
+  // Relee TODAS las secciones del dataStore al estado de React (tras un pull).
+  const rehydrate = useCallback(() => {
+    setProfileState({ ...DEFAULT_PROFILE, ...(dataStore.getProfile() || {}) })
+    setSubscriptionState(dataStore.getSubscription())
+    setStreak(dataStore.getStreak())
+    setChallengesDone(dataStore.getChallengeCount())
+    setTotals({ ...dataStore.getTotals() })
+    setWorkoutLogState([...dataStore.getWorkoutLog()])
+    setProgressLogState([...dataStore.getProgressLog()])
+    setSettingsState({ ...dataStore.getSettings() })
+    setAlarmsState([...dataStore.getAlarms()])
+    setWeekChart(dataStore.getWeekChartData())
+    setOnboarding(!dataStore.getProfile()?.onboarded)
+  }, [])
+
+  // Sesión: al montar comprueba si hay sesión guardada (resume -> pull). Escucha
+  // cambios de auth. Rehidrata cuando la nube baja datos. Solo si está configurado.
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    const offHy = cloudSync.onHydrated(() => rehydrate())
+    getSession().then((s) => {
+      setSession(s)
+      if (s) cloudSync.setUser(s, 'resume')
+    })
+    const unsub = onAuthChange((s) => {
+      setSession(s)
+      if (!s) cloudSync.clearUser()
+    })
+    return () => { offHy(); unsub() }
+  }, [rehydrate])
+
+  // Llamado por las pantallas de Auth al registrarse/iniciar sesión.
+  const handleAuthed = useCallback(async (s, mode) => {
+    setSession(s)
+    setAuthOpen(false)
+    await cloudSync.setUser(s, mode) // signup -> sube local; login -> baja nube
+    rehydrate()
+  }, [rehydrate])
+
+  const openAuth = useCallback((view = 'login') => { setAuthView(view); setAuthOpen(true) }, [])
+  const closeAuth = useCallback(() => setAuthOpen(false), [])
+  const signOutAccount = useCallback(async () => {
+    await authSignOut()
+    cloudSync.clearUser()
+    setSession(null)
+  }, [])
+
   const value = {
     profile, updateProfile,
     subscription, unlocked, unlock,
@@ -395,6 +451,8 @@ export function AppProvider({ children }) {
     progressLog, addProgressEntry, deleteProgressEntry,
     settings, saveSettings, resetProgress,
     needsPriming, primePermissions,
+    cloudEnabled: isSupabaseConfigured,
+    session, authOpen, authView, openAuth, closeAuth, handleAuthed, signOutAccount,
     achievementQueue, dismissAchievement,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,
