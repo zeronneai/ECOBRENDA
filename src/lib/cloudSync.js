@@ -114,15 +114,8 @@ async function pullSubscription() {
     })
   }
 }
-async function pushSubscription() {
-  const sub = dataStore.getSubscription()
-  // Solo columnas que el cliente "posee" por ahora; NO toca stripe_* (las pone el server).
-  const { error } = await supabase.from('subscriptions').upsert(
-    { user_id: currentUser.id, status: sub.status, plan: sub.plan, current_period_end: sub.currentPeriodEnd },
-    { onConflict: 'user_id' },
-  )
-  if (error) throw error
-}
+// (pushSubscription se eliminó al integrar Stripe: el cliente solo LEE la
+// suscripción; el webhook con service_role la escribe.)
 
 // ── Mapeo TOTALS (reps reales + retos) ──────────────────────────────────────
 async function pullTotals() {
@@ -233,12 +226,9 @@ async function pullProgressLogs() {
   }
 }
 
-// Empuje explícito de la suscripción (lo llama el unlock demo). Temporal: se
-// elimina cuando Stripe sea la fuente de verdad.
-export async function pushSubscriptionNow() {
-  if (!isCloudOn()) return
-  try { await pushSubscription() } catch (e) { console.warn('[cloudSync] pushSubscription', e); markDirty() }
-}
+// (Antes existía pushSubscriptionNow() para el demo unlock. Con Stripe en su
+// lugar y RLS endurecido, el cliente NO escribe subscriptions; el webhook con
+// service_role es el único que actualiza el premium.)
 
 async function pullAll() {
   if (!isCloudOn()) return
@@ -270,12 +260,12 @@ async function pushChanges() {
   await pushProgressLogs()
 }
 
-// Push de "siembra" al registrarse: sube todo, incluida la suscripción inicial.
+// Push de "siembra" al registrarse: sube todo lo que el cliente PUEDE escribir.
+// subscriptions NO va aquí (la crea el webhook de Stripe).
 async function pushSeed() {
   if (!isCloudOn()) return
   await pushProfile()
   await pushSettings()
-  await pushSubscription()
   await pushTotals()
   await pushStreak()
   await pushWorkoutLogs()
@@ -286,7 +276,9 @@ async function pushSeed() {
 // de estas tablas, la crea con sus valores default (solo user_id; las columnas
 // default del esquema rellenan el resto). Evita romper para usuarios futuros o
 // si agregamos tablas. No pisa filas existentes (insert solo si no hay).
-const SEED_TABLES = ['subscriptions', 'settings', 'totals', 'wake_streaks']
+// subscriptions queda FUERA: con Stripe el RLS solo permite SELECT al cliente;
+// la fila la crea el webhook (service_role) al primer checkout.
+const SEED_TABLES = ['settings', 'totals', 'wake_streaks']
 async function ensureSeed() {
   if (!isCloudOn()) return
   for (const table of SEED_TABLES) {

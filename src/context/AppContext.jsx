@@ -83,9 +83,12 @@ export function AppProvider({ children }) {
   }, [])
 
   // Activa premium (hoy local; mañana lo hará el webhook de Stripe en Supabase).
+  // Demo local: solo activa premium en localStorage (sin tocar la nube).
+  // Con Stripe configurado, la UI llamará al checkout y el webhook (service_role)
+  // será el ÚNICO que escriba public.subscriptions. Útil aún en modo offline (sin
+  // Supabase) y para pruebas locales rápidas.
   const unlock = useCallback(() => {
     setSubscriptionState(dataStore.setSubscription({ status: 'active', plan: selectedPlan }))
-    cloudSync.pushSubscriptionNow() // sube el premium a la nube (demo; con Stripe lo hará el server)
   }, [selectedPlan])
 
   // Detecta el momento EXACTO en que se cruza el umbral de un logro.
