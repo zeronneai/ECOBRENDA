@@ -165,6 +165,74 @@ async function pushStreak() {
   if (error) throw error
 }
 
+// ── Colecciones que crecen: WORKOUT_LOGS y PROGRESS_LOGS ────────────────────
+// Estrategia "reemplazar las filas del usuario": borro sus filas y reinserto el
+// set local. Para no reinsertar en cada cambio, salto si la firma no cambió.
+// Nota: workout_logs reaprovecha columnas existentes (workout_id=source,
+// title=exercise, calories=reps) para no requerir cambios de esquema.
+const lastSig = { workout_logs: null, progress_logs: null }
+
+function workoutRows() {
+  return dataStore.getWorkoutLog().map((w) => ({
+    user_id: currentUser.id,
+    workout_id: w.source ?? null,
+    title: w.exercise ?? null,
+    calories: typeof w.reps === 'number' ? w.reps : null,
+    date: w.date ?? null,
+    completed_at: w.ts ? new Date(w.ts).toISOString() : new Date().toISOString(),
+  }))
+}
+function progressRows() {
+  return dataStore.getProgressLog().map((p) => ({
+    user_id: currentUser.id,
+    date: p.date ?? null,
+    weight: typeof p.weight === 'number' ? p.weight : (p.weight != null ? Number(p.weight) : null),
+    notes: p.note ?? p.notes ?? null,
+  }))
+}
+
+async function replaceCollection(table, rows) {
+  const sig = JSON.stringify(rows)
+  if (sig === lastSig[table]) return // sin cambios -> no reinsertar
+  const del = await supabase.from(table).delete().eq('user_id', currentUser.id)
+  if (del.error) throw del.error
+  if (rows.length) {
+    const { error } = await supabase.from(table).insert(rows)
+    if (error) throw error
+  }
+  lastSig[table] = sig
+}
+async function pushWorkoutLogs() { await replaceCollection('workout_logs', workoutRows()) }
+async function pushProgressLogs() { await replaceCollection('progress_logs', progressRows()) }
+
+async function pullWorkoutLogs() {
+  const { data, error } = await supabase.from('workout_logs').select('*').eq('user_id', currentUser.id).order('completed_at', { ascending: false })
+  if (!error && Array.isArray(data)) {
+    dataStore.setWorkoutLog(data.map((r) => ({
+      id: r.id,
+      source: r.workout_id || 'alarm',
+      exercise: r.title || 'squat',
+      reps: r.calories ?? 0,
+      date: r.date,
+      ts: r.completed_at ? new Date(r.completed_at).getTime() : Date.now(),
+    })))
+    lastSig.workout_logs = JSON.stringify(workoutRows()) // evita re-push inmediato
+  }
+}
+async function pullProgressLogs() {
+  const { data, error } = await supabase.from('progress_logs').select('*').eq('user_id', currentUser.id).order('date', { ascending: false })
+  if (!error && Array.isArray(data)) {
+    dataStore.setProgressLog(data.map((r) => ({
+      id: r.id,
+      date: r.date,
+      weight: r.weight,
+      note: r.notes || undefined,
+      ts: r.date ? new Date(r.date + 'T12:00:00').getTime() : Date.now(),
+    })))
+    lastSig.progress_logs = JSON.stringify(progressRows())
+  }
+}
+
 // Empuje explícito de la suscripción (lo llama el unlock demo). Temporal: se
 // elimina cuando Stripe sea la fuente de verdad.
 export async function pushSubscriptionNow() {
@@ -181,6 +249,8 @@ async function pullAll() {
     await pullSubscription()
     await pullTotals()
     await pullStreak()
+    await pullWorkoutLogs()
+    await pullProgressLogs()
   } catch (e) {
     console.warn('[cloudSync] pull falló', e)
   } finally {
@@ -196,6 +266,8 @@ async function pushChanges() {
   await pushSettings()
   await pushTotals()
   await pushStreak()
+  await pushWorkoutLogs()
+  await pushProgressLogs()
 }
 
 // Push de "siembra" al registrarse: sube todo, incluida la suscripción inicial.
@@ -206,6 +278,8 @@ async function pushSeed() {
   await pushSubscription()
   await pushTotals()
   await pushStreak()
+  await pushWorkoutLogs()
+  await pushProgressLogs()
 }
 
 // Auto-seed (defensa en profundidad): si al usuario le falta la fila en alguna

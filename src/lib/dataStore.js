@@ -191,6 +191,13 @@ export function completeWakeWorkout() {
 
 // ── REGISTRO DE ENTRENAMIENTOS ──────────────────────────────────────────
 export function getWorkoutLog() { return load().workoutLog }
+// Reemplaza la lista completa (lo usa el pull de la nube).
+export function setWorkoutLog(list) {
+  const s = load()
+  s.workoutLog = Array.isArray(list) ? list : []
+  save()
+  return s.workoutLog
+}
 export function logWorkout(entry) {
   const s = load()
   const row = { id: uid(), ts: Date.now(), date: ymd(), ...entry }
@@ -228,6 +235,13 @@ export function getWeekChartData() {
 
 // ── PROGRESO (peso) ─────────────────────────────────────────────────────
 export function getProgressLog() { return load().progressLog }
+// Reemplaza la lista completa (lo usa el pull de la nube).
+export function setProgressLog(list) {
+  const s = load()
+  s.progressLog = Array.isArray(list) ? list : []
+  save()
+  return s.progressLog
+}
 export function addProgressEntry(entry) {
   const s = load()
   const row = { id: uid(), ts: Date.now(), date: ymd(), ...entry }
