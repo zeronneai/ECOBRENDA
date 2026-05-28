@@ -249,9 +249,31 @@ export function incrementChallenge() {
   save()
   return s.challengeCount
 }
+// Aplica un valor absoluto (lo usa el pull de la nube).
+export function setChallengeCount(n) {
+  const s = load()
+  s.challengeCount = Number(n) || 0
+  save()
+  return s.challengeCount
+}
+
+// Aplica valores absolutos de la racha (pull de la nube).
+export function setWakeStreak(patch) {
+  const s = load()
+  s.wakeStreak = { ...s.wakeStreak, ...patch }
+  save()
+  return s.wakeStreak
+}
 
 // ── TOTALES DE REPS REALES ──────────────────────────────────────────────
 export function getTotals() { return load().totals }
+// Aplica valores absolutos de totales (pull de la nube).
+export function setTotals(patch) {
+  const s = load()
+  s.totals = { ...s.totals, ...patch }
+  save()
+  return s.totals
+}
 export function recordRep(exercise) {
   const s = load()
   if (exercise === 'squat' || exercise === 'lunge') s.totals[exercise] += 1

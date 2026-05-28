@@ -420,6 +420,11 @@ export function AppProvider({ children }) {
     setAlarmsState([...dataStore.getAlarms()])
     setWeekChart(dataStore.getWeekChartData())
     setOnboarding(!dataStore.getProfile()?.onboarded)
+    // Tras un pull: marca como YA anunciados los logros que correspondan al
+    // progreso de la nube, para NO celebrar logros ganados en otro dispositivo.
+    const unlocked = ACHIEVEMENTS.filter((a) => a.check(dataStore.getStreak(), dataStore.getTotals().workouts)).map((a) => a.id)
+    const announced = dataStore.getAnnouncedAchievements() || []
+    dataStore.setAnnouncedAchievements(Array.from(new Set([...announced, ...unlocked])))
   }, [])
 
   // Sesión: al montar comprueba si hay sesión guardada (resume -> pull). Escucha

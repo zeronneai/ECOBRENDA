@@ -124,6 +124,47 @@ async function pushSubscription() {
   if (error) throw error
 }
 
+// ── Mapeo TOTALS (reps reales + retos) ──────────────────────────────────────
+async function pullTotals() {
+  const { data, error } = await supabase.from('totals').select('*').eq('user_id', currentUser.id).maybeSingle()
+  if (!error && data) {
+    const squat = data.squat || 0
+    const lunge = data.lunge || 0
+    dataStore.setTotals({ squat, lunge, workouts: data.workouts || 0, reps: squat + lunge })
+    dataStore.setChallengeCount(data.challenges_completed || 0)
+  }
+}
+async function pushTotals() {
+  const t = dataStore.getTotals()
+  const { error } = await supabase.from('totals').upsert(
+    {
+      user_id: currentUser.id,
+      squat: t.squat || 0,
+      lunge: t.lunge || 0,
+      workouts: t.workouts || 0,
+      challenges_completed: dataStore.getChallengeCount() || 0,
+    },
+    { onConflict: 'user_id' },
+  )
+  if (error) throw error
+}
+
+// ── Mapeo WAKE_STREAKS (racha de despertar) ─────────────────────────────────
+async function pullStreak() {
+  const { data, error } = await supabase.from('wake_streaks').select('*').eq('user_id', currentUser.id).maybeSingle()
+  if (!error && data) {
+    dataStore.setWakeStreak({ current: data.current || 0, best: data.best || 0, lastCompleted: data.last_completed || '' })
+  }
+}
+async function pushStreak() {
+  const ws = dataStore.getWakeStreak()
+  const { error } = await supabase.from('wake_streaks').upsert(
+    { user_id: currentUser.id, current: ws.current || 0, best: ws.best || 0, last_completed: ws.lastCompleted || null },
+    { onConflict: 'user_id' },
+  )
+  if (error) throw error
+}
+
 // Empuje explícito de la suscripción (lo llama el unlock demo). Temporal: se
 // elimina cuando Stripe sea la fuente de verdad.
 export async function pushSubscriptionNow() {
@@ -138,6 +179,8 @@ async function pullAll() {
     await pullProfile()
     await pullSettings()
     await pullSubscription()
+    await pullTotals()
+    await pullStreak()
   } catch (e) {
     console.warn('[cloudSync] pull falló', e)
   } finally {
@@ -151,6 +194,8 @@ async function pushChanges() {
   if (!isCloudOn()) return
   await pushProfile()
   await pushSettings()
+  await pushTotals()
+  await pushStreak()
 }
 
 // Push de "siembra" al registrarse: sube todo, incluida la suscripción inicial.
@@ -159,6 +204,8 @@ async function pushSeed() {
   await pushProfile()
   await pushSettings()
   await pushSubscription()
+  await pushTotals()
+  await pushStreak()
 }
 
 // Auto-seed (defensa en profundidad): si al usuario le falta la fila en alguna
