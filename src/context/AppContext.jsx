@@ -76,6 +76,7 @@ export function AppProvider({ children }) {
   const audioRef = useRef(null)            // <audio> único (alarma o reto), vive en AppShell
   const gestureRef = useRef(null)          // handler de reintento ante autoplay bloqueado
   const audioUnlockedRef = useRef(false)   // ¿ya se "bendijo" el audio con un gesto?
+  const realPlayIdRef = useRef(0)          // contador de plays "reales" (playSong); el unlock async no debe pisar uno nuevo
 
   const plan = useMemo(() => getBrendaPlan(profile), [profile])
 
@@ -248,12 +249,17 @@ export function AppProvider({ children }) {
   }, [disarmAudioFallback])
 
   // Arranca una canción desde el inicio, en loop, a volumen máximo.
+  // Marca un "play real" (realPlayIdRef++) para que el unlock async en curso NO
+  // lo sabotee con un pause() tardío. Y fuerza muted=false / volume=1 ANTES de
+  // cambiar src y de play(), por si el unlock dejó el elemento muteado.
   const playSong = useCallback((src) => {
     const el = audioRef.current
     if (!el) return
+    realPlayIdRef.current += 1
+    el.muted = false
+    el.volume = 1.0
     if (src && el.src !== src) el.src = src
     el.currentTime = 0
-    el.volume = 1.0
     el.loop = true
     const p = el.play()
     if (p && typeof p.catch === 'function') p.catch(() => armAudioFallback())
@@ -274,23 +280,31 @@ export function AppProvider({ children }) {
   // Desbloqueo de audio: en el PRIMER gesto del usuario (cualquier toque) hace
   // un play/pause SILENCIOSO del mismo <audio> que usará la alarma, para
   // "bendecirlo" y que el play() del scheduler (sin gesto) suene SOLO después.
-  // Actúa una sola vez; nunca toca una reproducción real (guard audioUnlockedRef).
+  // Actúa una sola vez; nunca toca una reproducción real. Si entre el play
+  // silencioso del unlock y su pause llega un playSong real (caso clásico: el
+  // PRIMER gesto del usuario es tocar una tarjeta de reto), el done/catch NO
+  // pausa ni cambia muted — solo se marca como desbloqueado. Esto evita que el
+  // unlock asincrónico mate la canción del reto.
   const unlockAudio = useCallback(() => {
     const el = audioRef.current
     if (!el || audioUnlockedRef.current) return
+    const startId = realPlayIdRef.current
+    const realPlayCameIn = () => realPlayIdRef.current !== startId
     try {
       const prevVol = el.volume
       el.muted = true
       const p = el.play()
       const done = () => {
+        if (realPlayCameIn()) { audioUnlockedRef.current = true; return }
         try { el.pause(); el.currentTime = 0 } catch { /* noop */ }
         el.muted = false
         el.volume = prevVol
         audioUnlockedRef.current = true
       }
-      if (p && typeof p.then === 'function') p.then(done).catch(() => { el.muted = false })
-      else done()
-    } catch { el.muted = false }
+      if (p && typeof p.then === 'function') {
+        p.then(done).catch(() => { if (!realPlayCameIn()) el.muted = false })
+      } else { done() }
+    } catch { if (!realPlayCameIn()) el.muted = false }
   }, [])
 
   // Ruta ÚNICA hacia la cámara real. La usan igual la alarma y los retos.
