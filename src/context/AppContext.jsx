@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useMemo, useRef, useCallback, useE
 import { getBrendaPlan } from '../data/plans'
 import { ACHIEVEMENTS } from '../data/achievements'
 import { goalLabel } from '../data/onboarding'
+import { songUrlById } from '../data/songs'
 import * as dataStore from '../lib/dataStore'
 import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
 import { isNativeApp, rescheduleNativeAlarms, onAlarmTapped } from '../lib/nativeAlarm'
@@ -15,6 +16,26 @@ import { Capacitor } from '@capacitor/core'
 import { App as CapApp } from '@capacitor/app'
 
 const AppCtx = createContext(null)
+
+// iOS: política de autoplay distinta a Android/web — el truco "muted play+pause"
+// sobre el <audio> principal NO funciona (iOS no respeta muted y el pause de
+// microtask no cancela). Por eso desbloqueamos con un <audio> descartable que
+// reproduce un WAV silencioso (data URL inline) y se descarta, sin tocar el
+// principal. Esto evita el leak de 1ms y el "atorado" en EDITAR ALARMA.
+const isIOS = () => { try { return Capacitor.getPlatform() === 'ios' } catch { return false } }
+const SILENT_WAV_DATA_URL = (() => {
+  if (typeof btoa !== 'function') return ''
+  // 46-byte WAV: PCM mono 8kHz/8-bit, 2 samples de silencio (0x80 = center).
+  const bytes = [
+    0x52,0x49,0x46,0x46, 0x26,0x00,0x00,0x00, 0x57,0x41,0x56,0x45,
+    0x66,0x6d,0x74,0x20, 0x10,0x00,0x00,0x00, 0x01,0x00, 0x01,0x00,
+    0x40,0x1f,0x00,0x00, 0x40,0x1f,0x00,0x00, 0x01,0x00, 0x08,0x00,
+    0x64,0x61,0x74,0x61, 0x02,0x00,0x00,0x00, 0x80,0x80,
+  ]
+  let s = ''
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i])
+  return 'data:audio/wav;base64,' + btoa(s)
+})()
 
 // 'HH:MM' (24h) -> '6:30 AM' para el chip de recap.
 function fmt12(hhmm) {
@@ -266,28 +287,49 @@ export function AppProvider({ children }) {
   }, [armAudioFallback])
 
   // Único modo de detenerla: completar las reps (cámara). Detiene canción +
-  // pitido in-app + el servicio de alarma nativo (Android).
+  // pitido in-app + el servicio de alarma nativo (Android). En iOS además llama
+  // a el.load() — el pause() puede no surtir efecto si el media element está en
+  // un estado raro tras un cambio de src/promesa async; load() lo resetea duro.
   const stopSong = useCallback(() => {
     disarmAudioFallback()
     stopAlarmTone()
     stopAndroidAlarm()
     const el = audioRef.current
     if (!el) return
-    el.pause()
-    el.currentTime = 0
+    try { el.pause() } catch { /* noop */ }
+    try { el.currentTime = 0 } catch { /* noop */ }
+    try { el.load() } catch { /* noop */ } // C: fuerza reset (clave en iOS)
   }, [disarmAudioFallback])
 
   // Desbloqueo de audio: en el PRIMER gesto del usuario (cualquier toque) hace
-  // un play/pause SILENCIOSO del mismo <audio> que usará la alarma, para
-  // "bendecirlo" y que el play() del scheduler (sin gesto) suene SOLO después.
-  // Actúa una sola vez; nunca toca una reproducción real. Si entre el play
-  // silencioso del unlock y su pause llega un playSong real (caso clásico: el
-  // PRIMER gesto del usuario es tocar una tarjeta de reto), el done/catch NO
-  // pausa ni cambia muted — solo se marca como desbloqueado. Esto evita que el
-  // unlock asincrónico mate la canción del reto.
+  // un play/pause SILENCIOSO para "bendecir" la política de autoplay.
+  //
+  // iOS: NO toca el <audio> principal (WebKit no respeta muted y el pause
+  // asincrónico no cancela -> deja el principal "atorado" reproduciendo). En
+  // su lugar reproduce un <audio> DESCARTABLE con un WAV silencioso (data URL).
+  // Esto bendice la política sin afectar al principal -> sin leak ni atorado.
+  //
+  // Android/web: mantiene el truco original sobre el principal (sí funciona ahí).
+  // Si entre el play silencioso del unlock y su pause llega un playSong real,
+  // el done/catch NO pausa ni cambia muted — solo marca desbloqueado.
   const unlockAudio = useCallback(() => {
+    if (audioUnlockedRef.current) return
+
+    if (isIOS()) {
+      try {
+        if (!SILENT_WAV_DATA_URL) { audioUnlockedRef.current = true; return }
+        const a = new Audio(SILENT_WAV_DATA_URL)
+        a.muted = true; a.volume = 0
+        const cleanup = () => { try { a.pause() } catch { /* noop */ } try { a.src = '' } catch { /* noop */ } audioUnlockedRef.current = true }
+        const p = a.play()
+        if (p && typeof p.then === 'function') p.then(cleanup).catch(cleanup)
+        else cleanup()
+      } catch { audioUnlockedRef.current = true }
+      return
+    }
+
     const el = audioRef.current
-    if (!el || audioUnlockedRef.current) return
+    if (!el) return
     const startId = realPlayIdRef.current
     const realPlayCameIn = () => realPlayIdRef.current !== startId
     try {
@@ -389,9 +431,22 @@ export function AppProvider({ children }) {
     }
     if (!isNativeApp()) return
     let off = () => {}
-    onAlarmTapped((id) => triggerAlarmById(id)).then((fn) => { off = fn })
+    onAlarmTapped((id) => {
+      // D — iOS: el tap de la notificación ES el gesto. Aprovéchalo SÍNCRONO
+      // para resumir el AudioContext y bendecir el <audio> antes de que el
+      // AlarmRing useEffect corra (ahí ya estamos fuera del gesto).
+      if (isIOS()) {
+        try { unlockAlarmAudio() } catch { /* noop */ }
+        const a = (schedRef.current.alarms || []).find((x) => String(x.id) === String(id))
+        if (a) {
+          try { startAlarmTone() } catch { /* noop */ }
+          try { playSong(songUrlById(a.songId)) } catch { /* noop */ }
+        }
+      }
+      triggerAlarmById(id)
+    }).then((fn) => { off = fn })
     return () => off()
-  }, [triggerAlarmById])
+  }, [triggerAlarmById, playSong])
 
   // Permisos nativos: pedir UNA vez (cámara + notificaciones) tras el onboarding.
   const needsPriming = isNativeApp() && !onboarding && profile.onboarded && !settings.permsPrimed
