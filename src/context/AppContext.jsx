@@ -10,6 +10,9 @@ import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndro
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
 import { isSupabaseConfigured } from '../lib/supabase'
 import * as cloudSync from '../lib/cloudSync'
+import { startCheckout, openBillingPortal, closeNativeBrowser } from '../lib/stripeClient'
+import { Capacitor } from '@capacitor/core'
+import { App as CapApp } from '@capacitor/app'
 
 const AppCtx = createContext(null)
 
@@ -463,6 +466,51 @@ export function AppProvider({ children }) {
     setSession(null)
   }, [])
 
+  // ── Stripe: re-jala suscripción con polling tras volver del pago ───────────
+  // Después de pagar, el webhook puede tardar 1-3s en escribir la fila. Hacemos
+  // varios intentos hasta ver status='active' (o agotar tries).
+  const refreshPremium = useCallback(async ({ tries = 6, delay = 1000 } = {}) => {
+    if (!isSupabaseConfigured) return
+    for (let i = 0; i < tries; i++) {
+      try { await cloudSync.refreshSubscription() } catch { /* noop */ }
+      if (dataStore.getSubscription().status === 'active') return
+      if (i < tries - 1) await new Promise((r) => setTimeout(r, delay))
+    }
+  }, [])
+
+  // Al volver al foreground (web visibilitychange / native appStateChange) o al
+  // recibir el deep link de retorno, re-jala la suscripción.
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    const onVis = () => { if (!document.hidden && session) refreshPremium({ tries: 3, delay: 800 }) }
+    document.addEventListener('visibilitychange', onVis)
+    let stateSub, urlSub
+    if (Capacitor?.isNativePlatform?.()) {
+      CapApp.addListener('appStateChange', ({ isActive }) => { if (isActive && session) refreshPremium({ tries: 3, delay: 800 }) }).then((s) => { stateSub = s })
+      CapApp.addListener('appUrlOpen', ({ url }) => {
+        if (typeof url === 'string' && url.includes('premium-return')) {
+          closeNativeBrowser().catch(() => {})
+          refreshPremium({ tries: 8, delay: 1000 })
+        }
+      }).then((s) => { urlSub = s })
+    }
+    return () => {
+      document.removeEventListener('visibilitychange', onVis)
+      try { stateSub?.remove?.() } catch { /* noop */ }
+      try { urlSub?.remove?.() } catch { /* noop */ }
+    }
+  }, [session, refreshPremium])
+
+  // Llamados desde el Paywall / Perfil. Si Supabase no está configurado, el
+  // paywall cae al demo local (unlock).
+  const checkoutPlan = useCallback(async (plan) => {
+    if (!isSupabaseConfigured) { unlock(); return }
+    try { await startCheckout(plan) } catch (e) { showToast(e.message || 'No se pudo iniciar el pago') }
+  }, [unlock])
+  const openPortal = useCallback(async () => {
+    try { await openBillingPortal() } catch (e) { showToast(e.message || 'No se pudo abrir el portal') }
+  }, [])
+
   // Cuenta OBLIGATORIA (Opción B): con Supabase configurado, tras el onboarding y
   // sin sesión, hay que crear cuenta para entrar. Sin Supabase (dev) -> se omite.
   const needsAccount = isSupabaseConfigured && authChecked && !session && !!profile.onboarded
@@ -485,6 +533,7 @@ export function AppProvider({ children }) {
     cloudEnabled: isSupabaseConfigured,
     session, authOpen, authView, openAuth, closeAuth, handleAuthed, signOutAccount,
     needsAccount, accountRecap,
+    checkoutPlan, openPortal, refreshPremium,
     achievementQueue, dismissAchievement,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,

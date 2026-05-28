@@ -13,7 +13,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 export default function Profile() {
   const navigate = useNavigate()
   const { profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast,
-          cloudEnabled, session, openAuth, signOutAccount } = useApp()
+          cloudEnabled, session, openAuth, signOutAccount, openPortal } = useApp()
   const { isPremium } = useSubscription()
 
   // Medidas con estado local (para escribir decimales / pies+pulgadas).
@@ -97,7 +97,7 @@ export default function Profile() {
               <div className="pf-sub-d">{isPremium ? `Plan ${subscription.plan || 'activo'} · activo` : 'Booty Alarm · alarma incluida'}</div>
             </div>
             {isPremium ? (
-              <button onClick={() => showToast('Gestión de suscripción próximamente')}>Gestionar</button>
+              <button onClick={() => openPortal()}>Gestionar</button>
             ) : (
               <button onClick={() => openSheet('paywall')}>Hazte premium</button>
             )}

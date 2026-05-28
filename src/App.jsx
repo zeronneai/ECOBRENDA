@@ -8,6 +8,7 @@ import Nutricion from './screens/Nutricion'
 import Progreso from './screens/Progreso'
 import Privacy from './screens/Privacy'
 import Profile from './screens/Profile'
+import PremiumReturn from './screens/PremiumReturn'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/progreso" element={<Progreso />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/premium-return" element={<PremiumReturn />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

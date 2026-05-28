@@ -117,6 +117,15 @@ async function pullSubscription() {
 // (pushSubscription se eliminó al integrar Stripe: el cliente solo LEE la
 // suscripción; el webhook con service_role la escribe.)
 
+// Re-jala SOLO la fila de suscripción. Lo llama el AppContext al volver del
+// pago (deep link o foreground) para reflejar el cambio del webhook.
+export async function refreshSubscription() {
+  if (!isCloudOn()) return
+  applyingRemote = true
+  try { await pullSubscription() } finally { applyingRemote = false }
+  notifyHydrated()
+}
+
 // ── Mapeo TOTALS (reps reales + retos) ──────────────────────────────────────
 async function pullTotals() {
   const { data, error } = await supabase.from('totals').select('*').eq('user_id', currentUser.id).maybeSingle()

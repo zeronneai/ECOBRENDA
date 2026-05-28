@@ -109,6 +109,19 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .alarm-delete{text-align:center;color:var(--txt-faint);font-weight:700;font-size:13px;margin-top:16px;cursor:pointer}
 .alarm-delete:active{color:var(--magenta)}
 
+/* paywall Stripe: dos tarjetas con precio tachado + EMPEZAR */
+.pwgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 14px}
+.pwcard{position:relative;background:var(--surface);border:1px solid var(--line-strong);border-radius:18px;padding:18px 12px;text-align:center;transition:.2s}
+.pwcard.best{border-color:var(--magenta);background:linear-gradient(160deg,rgba(255,31,107,.14),var(--surface));box-shadow:0 0 22px var(--magenta-glow)}
+.pwbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--magenta);color:#fff;font-size:10px;font-weight:900;letter-spacing:.06em;padding:4px 10px;border-radius:30px;white-space:nowrap;box-shadow:0 4px 14px var(--magenta-glow)}
+.pwname{font-family:'Bebas Neue';font-size:22px;letter-spacing:.06em;margin-top:4px;color:#fff}
+.pwold{font-size:13px;color:var(--txt-faint);text-decoration:line-through;margin-top:4px;letter-spacing:.02em}
+.pwprice{font-family:'Bebas Neue';font-size:44px;line-height:.95;color:#fff;margin-top:2px}
+.pwprice small{font-size:13px;color:var(--txt-dim);font-family:'Archivo';font-weight:700;margin-left:3px;letter-spacing:.02em}
+.pwsub{font-size:11.5px;color:var(--txt-dim);margin:6px 0 12px;line-height:1.35;min-height:32px}
+.pwgo{padding:12px 0;font-size:14px;letter-spacing:.06em}
+.pwfeats{margin:10px 0 6px;display:flex;flex-direction:column;gap:6px}
+
 /* link "ya tengo cuenta" en el primer paso del onboarding */
 .ob-haveaccount{margin-top:20px;text-align:center;font-size:14px;color:var(--txt-dim)}
 
