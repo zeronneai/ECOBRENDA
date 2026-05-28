@@ -161,6 +161,21 @@ async function pushSeed() {
   await pushSubscription()
 }
 
+// Auto-seed (defensa en profundidad): si al usuario le falta la fila en alguna
+// de estas tablas, la crea con sus valores default (solo user_id; las columnas
+// default del esquema rellenan el resto). Evita romper para usuarios futuros o
+// si agregamos tablas. No pisa filas existentes (insert solo si no hay).
+const SEED_TABLES = ['subscriptions', 'settings', 'totals', 'wake_streaks']
+async function ensureSeed() {
+  if (!isCloudOn()) return
+  for (const table of SEED_TABLES) {
+    try {
+      const { data } = await supabase.from(table).select('user_id').eq('user_id', currentUser.id).maybeSingle()
+      if (!data) await supabase.from(table).insert({ user_id: currentUser.id })
+    } catch { /* noop */ }
+  }
+}
+
 // ── Sesión / disparadores ───────────────────────────────────────────────────
 // mode: 'signup' (sube local), 'login' o 'resume' (baja nube). En resume, si hay
 // cambios locales sin sincronizar (dirty), primero empuja y luego baja.
@@ -174,6 +189,7 @@ export async function setUser(session, mode = 'resume') {
       if (mode === 'resume' && isDirty()) { try { await pushChanges(); clearDirty() } catch { /* noop */ } }
       await pullAll()
     }
+    await ensureSeed() // crea filas default que falten (subs/settings/totals/streaks)
   } catch (e) {
     console.warn('[cloudSync] setUser', e)
   }

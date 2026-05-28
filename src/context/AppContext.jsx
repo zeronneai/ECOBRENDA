@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { getBrendaPlan } from '../data/plans'
 import { ACHIEVEMENTS } from '../data/achievements'
+import { goalLabel } from '../data/onboarding'
 import * as dataStore from '../lib/dataStore'
 import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
 import { isNativeApp, rescheduleNativeAlarms, onAlarmTapped } from '../lib/nativeAlarm'
@@ -11,6 +12,16 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import * as cloudSync from '../lib/cloudSync'
 
 const AppCtx = createContext(null)
+
+// 'HH:MM' (24h) -> '6:30 AM' para el chip de recap.
+function fmt12(hhmm) {
+  if (!hhmm) return ''
+  const [H, M] = String(hhmm).split(':').map(Number)
+  const ap = H >= 12 ? 'PM' : 'AM'
+  let h = H % 12
+  if (h === 0) h = 12
+  return `${h}:${String(M || 0).padStart(2, '0')} ${ap}`
+}
 
 const DEFAULT_PROFILE = {
   name: '',
@@ -39,6 +50,7 @@ export function AppProvider({ children }) {
 
   // ── Auth / nube (Supabase) ──
   const [session, setSession] = useState(null)
+  const [authChecked, setAuthChecked] = useState(!isSupabaseConfigured) // ¿ya sabemos si hay sesión?
   const [authOpen, setAuthOpen] = useState(false)
   const [authView, setAuthView] = useState('login')
 
@@ -417,6 +429,7 @@ export function AppProvider({ children }) {
     const offHy = cloudSync.onHydrated(() => rehydrate())
     getSession().then((s) => {
       setSession(s)
+      setAuthChecked(true)
       if (s) cloudSync.setUser(s, 'resume')
     })
     const unsub = onAuthChange((s) => {
@@ -442,6 +455,15 @@ export function AppProvider({ children }) {
     setSession(null)
   }, [])
 
+  // Cuenta OBLIGATORIA (Opción B): con Supabase configurado, tras el onboarding y
+  // sin sesión, hay que crear cuenta para entrar. Sin Supabase (dev) -> se omite.
+  const needsAccount = isSupabaseConfigured && authChecked && !session && !!profile.onboarded
+  const accountRecap = useMemo(() => {
+    const g = goalLabel(profile.goal)
+    const t = fmt12(profile.wakeTime)
+    return `Hola, ${profile.name || ''}${g ? ' · ' + g : ''}${t ? ' · ' + t : ''}`
+  }, [profile.name, profile.goal, profile.wakeTime])
+
   const value = {
     profile, updateProfile,
     subscription, unlocked, unlock,
@@ -454,6 +476,7 @@ export function AppProvider({ children }) {
     needsPriming, primePermissions,
     cloudEnabled: isSupabaseConfigured,
     session, authOpen, authView, openAuth, closeAuth, handleAuthed, signOutAccount,
+    needsAccount, accountRecap,
     achievementQueue, dismissAchievement,
     weekChart,
     alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm,

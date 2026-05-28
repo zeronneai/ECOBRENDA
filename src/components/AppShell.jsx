@@ -13,7 +13,8 @@ import Auth from '../screens/Auth'
 import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
 
 export default function AppShell() {
-  const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef, needsPriming, authOpen, authView, handleAuthed, closeAuth } = useApp()
+  const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef, needsPriming,
+          authOpen, authView, handleAuthed, closeAuth, needsAccount, accountRecap } = useApp()
   return (
     <div className="app" ref={appRef}>
       {/* Audio único (alarma o reto): vive a nivel app para sobrevivir al
@@ -44,8 +45,16 @@ export default function AppShell() {
       {onboarding && <Onboarding />}
       {/* Priming de permisos nativos (solo Android/iOS), tras el onboarding */}
       {needsPriming && <PermissionsPriming />}
-      {/* Auth (login/registro/recuperar) — abierto desde Perfil por ahora */}
-      {authOpen && <Auth initialView={authView} onAuthed={handleAuthed} onClose={closeAuth} />}
+      {/* Auth: gate OBLIGATORIO tras el onboarding (needsAccount, sin cerrar) o
+          manual desde Perfil / link de onboarding (authOpen, con cerrar). */}
+      {(needsAccount || authOpen) && (
+        <Auth
+          initialView={needsAccount ? 'signup' : authView}
+          recap={needsAccount ? accountRecap : ''}
+          onAuthed={handleAuthed}
+          onClose={needsAccount ? undefined : closeAuth}
+        />
+      )}
     </div>
   )
 }
