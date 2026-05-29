@@ -76,7 +76,7 @@ export async function rescheduleNativeAlarms(alarms = []) {
         title: '🍑 Booty Alarm',
         body: `Hora de tus ${a.reps} ${exLabel}. No se apaga hasta que completes tus reps.`,
         channelId: CHANNEL_ID,           // Android: el sonido lo pone el channel (res/raw/alarm).
-        sound: 'alarm.wav',              // iOS: archivo empaquetado en el bundle (ios/App/App/alarm.wav). ≤30s.
+        sound: 'alarm.caf',              // iOS: archivo CAF empaquetado en el bundle (formato nativo de Apple, más fiable que WAV con LocalNotifications). ≤30s.
         schedule: { on: { weekday: WEEKDAY_BY_DOW[dow], hour: hh, minute: mm }, allowWhileIdle: true },
         extra: { alarmId: a.id },
       })

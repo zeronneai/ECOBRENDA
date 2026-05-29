@@ -53,18 +53,22 @@ En Xcode, panel izquierdo (Project Navigator):
    - **Bundle Identifier**: debe decir **`com.zeronne.bootyalarm`** (igual que Android). Si dice otra cosa, corrígelo a esto.
 5. Xcode crea automáticamente el provisioning profile. Si ves errores rojos, espera unos segundos y dale a **"Try Again"**.
 
-## 4. Empacar el sonido de la alarma (`alarm.wav`)
+## 4. Empacar el sonido de la alarma (`alarm.caf`)
 
-Capacitor genera el proyecto pero **no agrega `alarm.wav` automáticamente** al target. Tienes que arrastrarlo una vez:
+Usamos **`.caf`** (Core Audio Format de Apple) en lugar de `.wav`: es el formato preferido de iOS para sonidos de notificación y resuelve casos donde `.wav` no se reproducía.
+
+Capacitor genera el proyecto pero **no agrega `alarm.caf` automáticamente** al target. Tienes que arrastrarlo una vez:
 
 1. En el Project Navigator (izquierda), click derecho en la carpeta **App** (la que contiene `Info.plist`, `AppDelegate.swift`, etc.) → **Add Files to "App"…**
-2. Navega hasta `ios/App/App/alarm.wav` (ya está ahí — yo lo dejé).
+2. Navega hasta `ios/App/App/alarm.caf` (ya está ahí — yo lo dejé).
 3. En el diálogo de Add Files, verifica:
    - **☑ Copy items if needed** (puede quedar OFF si el archivo ya está en su sitio; ambos funcionan).
    - **Add to targets: ☑ App** (¡importante! que esté marcado).
 4. Click **Add**.
 
-Verificación: en Project Navigator debe aparecer `alarm.wav` (icono de altavoz) bajo la carpeta App. Para confirmar que se empaqueta: selecciona el target App → **Build Phases → Copy Bundle Resources** → debe estar `alarm.wav` en la lista.
+Verificación: en Project Navigator debe aparecer `alarm.caf` (icono de altavoz) bajo la carpeta App. Para confirmar que se empaqueta: selecciona el target App → **Build Phases → Copy Bundle Resources** → debe estar `alarm.caf` en la lista.
+
+> Si vienes de la versión anterior (que usaba `alarm.wav`): puedes quitar `alarm.wav` de Copy Bundle Resources (no hace daño dejarlo, pero ya no se usa). Lo que cuenta es que **`alarm.caf` esté en la lista**.
 
 ## 5. Probar en tu iPhone (rápido, sin TestFlight)
 
@@ -119,5 +123,5 @@ La primera vez que abras la app aparecen las pantallas de priming + iOS te pedir
 - **"No accounts have been found"** al elegir Team → ve a Xcode → Settings → Accounts → +Apple ID.
 - **"Code signing error"** → desmarca y vuelve a marcar "Automatically manage signing", o cierra y reabre Xcode.
 - **`pod install` falló / no existe** → no lo necesitas. Capacitor 8 usa Swift Package Manager (SPM), no CocoaPods.
-- **El sonido de la notificación no suena** → confirma en Xcode → target App → Build Phases → Copy Bundle Resources que `alarm.wav` está en la lista. Si no, re-arrastra (paso 4).
+- **El sonido de la notificación no suena** → confirma en Xcode → target App → Build Phases → Copy Bundle Resources que `alarm.caf` está en la lista. Si no, re-arrastra (paso 4). También revisa la palanca lateral de silencio del iPhone y Ajustes → Notificaciones → Booty Alarm → Sounds = ON.
 - **Premium no se activa tras pagar en TestFlight** → es lo mismo que en web/Android: al volver del navegador in-app, la app re-jala la suscripción con polling. Si no, verifica que `https://ecobrenda.vercel.app/api/stripe-webhook` esté recibiendo eventos (Stripe Dashboard → Webhooks → tu endpoint).
