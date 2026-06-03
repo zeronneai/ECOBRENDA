@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
+import { isIOSNative } from '../lib/platform'
+import PremiumLockedIOS from '../components/PremiumLockedIOS'
 import { ACHIEVEMENTS } from '../data/achievements'
 
 export default function Progreso() {
@@ -24,16 +26,20 @@ export default function Progreso() {
             <div><div className="hi">Premium</div><div className="name">PROGRESO</div></div>
           </div>
           <div className="pad reveal d2">
-            <div className="brenda-promo" style={{ minHeight: 220 }}>
-              <div className="glow" /><div className="shimmer" />
-              <div className="lock-pill">🔒 PREMIUM</div>
-              <div className="inner">
-                <div className="kick">Tu evolución</div>
-                <h3>REGISTRA TU PROGRESO</h3>
-                <p>Peso, gráficas y logros desbloqueables. Disponible con Brenda.</p>
-                <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+            {isIOSNative() ? (
+              <PremiumLockedIOS />
+            ) : (
+              <div className="brenda-promo" style={{ minHeight: 220 }}>
+                <div className="glow" /><div className="shimmer" />
+                <div className="lock-pill">🔒 PREMIUM</div>
+                <div className="inner">
+                  <div className="kick">Tu evolución</div>
+                  <h3>REGISTRA TU PROGRESO</h3>
+                  <p>Peso, gráficas y logros desbloqueables. Disponible con Brenda.</p>
+                  <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

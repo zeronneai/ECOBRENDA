@@ -4,6 +4,7 @@ import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
 import { GOALS, LEVELS, DAYS_OPTIONS, goalLabel } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
+import { isIOSNative } from '../lib/platform'
 
 const kgToLb = (kg) => Math.round(kg * 2.20462)
 const lbToKg = (lb) => Math.round(lb / 2.20462)
@@ -92,15 +93,18 @@ export default function Profile() {
           </div>
 
           {/* Suscripción */}
-          <div className={'pf-sub reveal d2' + (isPremium ? ' prem' : '')}>
+          <div className={'pf-sub reveal d2' + (isPremium ? ' prem' : '') + (isIOSNative() && !isPremium ? ' info-only' : '')}>
             <div>
               <div className="pf-sub-t">{isPremium ? 'Premium · Brenda Fitness' : 'Plan gratuito'}</div>
               <div className="pf-sub-d">{isPremium ? `Plan ${subscription.plan || 'activo'} · activo` : 'Booty Alarm · alarma incluida'}</div>
             </div>
+            {/* iOS sin premium: SIN botón (App Store Rule 3.1.1). Con premium:
+                "Gestionar" abre Customer Portal — Apple lo permite porque el
+                usuario ya es suscriptor, no es un flujo de compra nueva. */}
             {isPremium ? (
               <button onClick={() => openPortal()}>Gestionar</button>
             ) : (
-              <button onClick={() => openSheet('paywall')}>Hazte premium</button>
+              !isIOSNative() && <button onClick={() => openSheet('paywall')}>Hazte premium</button>
             )}
           </div>
 

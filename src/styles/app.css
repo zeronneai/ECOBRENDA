@@ -122,6 +122,16 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pwgo{padding:12px 0;font-size:14px;letter-spacing:.06em}
 .pwfeats{margin:10px 0 6px;display:flex;flex-direction:column;gap:6px}
 
+/* ===== Card neutra para iOS (App Store Rule 3.1.1) — sin precios, sin CTA, sin links externos ===== */
+.premium-locked{background:linear-gradient(160deg,rgba(255,31,107,.10),var(--surface));border:1px solid var(--line-strong);border-radius:22px;padding:36px 26px;text-align:center;animation:rise .5s ease}
+.premium-locked-ic{font-size:48px;margin-bottom:14px;line-height:1}
+.premium-locked-title{font-family:'Bebas Neue';font-size:30px;line-height:.95;letter-spacing:.06em;color:#fff;margin-bottom:12px}
+.premium-locked-text{font-family:'Archivo',sans-serif;font-size:14.5px;line-height:1.55;color:var(--txt-dim);max-width:320px;margin:0 auto}
+
+/* iOS, no premium: card de suscripción sin botón -> el texto ocupa todo el ancho limpio */
+.pf-sub.info-only{justify-content:flex-start}
+.pf-sub.info-only > div{flex:1}
+
 /* ===== Páginas legales públicas (/privacy, /terms) ===== */
 #legal{position:relative;min-height:100vh;background:#070708;color:var(--txt);overflow-y:auto;font-family:'Archivo',system-ui,sans-serif}
 .legal-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-top) + 14px) 22px 14px;background:linear-gradient(180deg,#070708 75%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}

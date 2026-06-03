@@ -3,6 +3,7 @@ import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
 import { goalLabel, formatDays } from '../data/onboarding'
 import { CHALLENGE_AUDIO_SRC } from '../lib/alarmAudio'
+import { isIOSNative } from '../lib/platform'
 
 function greetingFor(h) {
   return h < 12 ? 'Buen día' : h < 19 ? 'Buena tarde' : 'Buena noche'
@@ -122,7 +123,9 @@ export default function Home() {
                 <div className="kick">Nutrición + Rutinas</div>
                 <h3 id="promoTitle">{promoTitle}</h3>
                 <p id="promoDesc">{promoDesc}</p>
-                <button className="unlock" onClick={() => openSheet('paywall')}>DESBLOQUEAR →</button>
+                {!isIOSNative() && (
+                  <button className="unlock" onClick={() => openSheet('paywall')}>DESBLOQUEAR →</button>
+                )}
               </div>
             </div>
           </div>

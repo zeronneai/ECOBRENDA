@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useApp } from '../store'
 import Sheet from './Sheet'
+import PremiumLockedIOS from './PremiumLockedIOS'
+import { isIOSNative } from '../lib/platform'
 
 /* Paywall con dos planes, precio tachado y "EMPEZAR" por tarjeta.
    Los precios mostrados son visuales; los reales vienen de los Price IDs de
@@ -29,6 +31,16 @@ const PLANS = [
 export default function Paywall() {
   const { closeSheet, checkoutPlan } = useApp()
   const [busy, setBusy] = useState(null)
+
+  // iOS: defensa en profundidad — si alguien abre el paywall en iOS, mostramos
+  // SOLO la card neutra. Sin precios, sin "EMPEZAR", sin mención a Stripe/web.
+  if (isIOSNative()) {
+    return (
+      <Sheet>
+        <PremiumLockedIOS />
+      </Sheet>
+    )
+  }
 
   const go = async (plan) => {
     if (busy) return

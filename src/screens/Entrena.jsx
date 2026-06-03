@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
 import { ROUTINES, PROGRAMS, CATEGORIES, difficultyColor } from '../data/workouts'
+import { isIOSNative } from '../lib/platform'
+import PremiumLockedIOS from '../components/PremiumLockedIOS'
 
 function RoutineCard({ r, onClick }) {
   return (
@@ -43,16 +45,20 @@ export default function Entrena() {
           <div className="topgap" />
           <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">ENTRENA</div></div></div>
           <div className="pad reveal d2">
-            <div className="brenda-promo" style={{ minHeight: 240 }}>
-              <div className="glow" /><div className="shimmer" />
-              <div className="lock-pill">🔒 PREMIUM</div>
-              <div className="inner">
-                <div className="kick">Biblioteca de entrenamientos</div>
-                <h3>RUTINAS Y PROGRAMAS<br />HECHOS PARA TI</h3>
-                <p>Decenas de rutinas guiadas y programas de varias semanas. Desbloquéalo con Brenda.</p>
-                <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+            {isIOSNative() ? (
+              <PremiumLockedIOS />
+            ) : (
+              <div className="brenda-promo" style={{ minHeight: 240 }}>
+                <div className="glow" /><div className="shimmer" />
+                <div className="lock-pill">🔒 PREMIUM</div>
+                <div className="inner">
+                  <div className="kick">Biblioteca de entrenamientos</div>
+                  <h3>RUTINAS Y PROGRAMAS<br />HECHOS PARA TI</h3>
+                  <p>Decenas de rutinas guiadas y programas de varias semanas. Desbloquéalo con Brenda.</p>
+                  <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

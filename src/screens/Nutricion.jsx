@@ -3,6 +3,8 @@ import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
 import { goalLabel } from '../data/onboarding'
 import { calculateMacros } from '../lib/dataStore'
+import { isIOSNative } from '../lib/platform'
+import PremiumLockedIOS from '../components/PremiumLockedIOS'
 import { PLANS, RECIPES, RECIPE_CATEGORIES, SUPPLEMENTS, getPlan, getRecipe, getSupplement, recipeDifficultyColor, supplementColor } from '../data/nutrition'
 
 function MacroWidget({ profile }) {
@@ -145,16 +147,20 @@ export default function Nutricion() {
           <div className="topgap" />
           <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">NUTRICIÓN</div></div></div>
           <div className="pad reveal d2">
-            <div className="brenda-promo" style={{ minHeight: 240 }}>
-              <div className="glow" /><div className="shimmer" />
-              <div className="lock-pill">🔒 PREMIUM</div>
-              <div className="inner">
-                <div className="kick">Nutrición de Brenda</div>
-                <h3>PLANES, RECETAS<br />Y SUPLEMENTOS</h3>
-                <p>Planes de comida según tu objetivo, recetas fáciles y guía de suplementos.</p>
-                <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+            {isIOSNative() ? (
+              <PremiumLockedIOS />
+            ) : (
+              <div className="brenda-promo" style={{ minHeight: 240 }}>
+                <div className="glow" /><div className="shimmer" />
+                <div className="lock-pill">🔒 PREMIUM</div>
+                <div className="inner">
+                  <div className="kick">Nutrición de Brenda</div>
+                  <h3>PLANES, RECETAS<br />Y SUPLEMENTOS</h3>
+                  <p>Planes de comida según tu objetivo, recetas fáciles y guía de suplementos.</p>
+                  <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
