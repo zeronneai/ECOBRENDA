@@ -1,8 +1,8 @@
 # Política de Privacidad — Booty Alarm
 
-**Última actualización:** 28 de mayo de 2026
+**Última actualización:** 3 de junio de 2026
 
-Esta Política de Privacidad describe cómo Primo AI Studio ("nosotros", "nuestro" o "la empresa") recopila, usa y protege la información personal de los usuarios ("tú" o "usuario") que utilizan la aplicación móvil **Booty Alarm** ("la App").
+Esta Política de Privacidad describe cómo Purple Roots Agency ("nosotros", "nuestro" o "la empresa") recopila, usa y protege la información personal de los usuarios ("tú" o "usuario") que utilizan la aplicación móvil **Booty Alarm** ("la App").
 
 Al usar la App, aceptas las prácticas descritas en este documento. Si no estás de acuerdo, por favor no uses la App.
 
@@ -10,9 +10,9 @@ Al usar la App, aceptas las prácticas descritas en este documento. Si no estás
 
 ## 1. Quiénes somos
 
-**Operador de la App:** Primo AI Studio
+**Operador de la App:** Purple Roots Agency
 **Ubicación:** El Paso, Texas, Estados Unidos
-**Contacto:** primostudio.us@gmail.com
+**Contacto:** p.rootsagency@gmail.com
 
 La App se distribuye en México y Estados Unidos a través de Apple App Store y Google Play Store.
 
@@ -139,7 +139,7 @@ Puedes ver toda la información que tenemos sobre ti dentro de la App (en la sec
 Puedes editar tu información personal directamente desde la App.
 
 ### 6.3 Eliminación
-Puedes solicitar la eliminación total de tu cuenta y todos los datos asociados desde la sección "Zona de peligro" en tu Perfil, o escribiendo a primostudio.us@gmail.com.
+Puedes solicitar la eliminación total de tu cuenta y todos los datos asociados desde la sección "Zona de peligro" en tu Perfil, o escribiendo a p.rootsagency@gmail.com.
 
 **Cuando eliminas tu cuenta:**
 - Tus datos personales se eliminan de forma permanente de nuestros servidores
@@ -147,7 +147,7 @@ Puedes solicitar la eliminación total de tu cuenta y todos los datos asociados 
 - El proceso es irreversible
 
 ### 6.4 Portabilidad
-Puedes solicitar una copia de tus datos en formato legible escribiendo a primostudio.us@gmail.com.
+Puedes solicitar una copia de tus datos en formato legible escribiendo a p.rootsagency@gmail.com.
 
 ### 6.5 Oposición
 Puedes oponerte al procesamiento de tus datos cancelando tu cuenta.
@@ -222,8 +222,8 @@ La fecha de "Última actualización" al inicio de este documento indica cuándo 
 
 Si tienes preguntas, comentarios o quieres ejercer cualquiera de tus derechos sobre tus datos personales, contáctanos:
 
-**Email:** primostudio.us@gmail.com
-**Operador:** Primo AI Studio
+**Email:** p.rootsagency@gmail.com
+**Operador:** Purple Roots Agency
 
 Responderemos a tu solicitud en un plazo razonable, generalmente dentro de 30 días.
 

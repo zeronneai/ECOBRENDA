@@ -1,8 +1,8 @@
 # Términos y Condiciones — Booty Alarm
 
-**Última actualización:** 28 de mayo de 2026
+**Última actualización:** 3 de junio de 2026
 
-Bienvenido a **Booty Alarm** (la "App"). Estos Términos y Condiciones (los "Términos") rigen el uso de la App operada por **Primo AI Studio** ("nosotros", "nuestro" o "la empresa").
+Bienvenido a **Booty Alarm** (la "App"). Estos Términos y Condiciones (los "Términos") rigen el uso de la App operada por **Purple Roots Agency** ("nosotros", "nuestro" o "la empresa").
 
 Al descargar, instalar o usar la App, aceptas estar legalmente sujeto a estos Términos. Si no estás de acuerdo con alguna parte, por favor no uses la App.
 
@@ -111,7 +111,7 @@ El incumplimiento puede resultar en la suspensión o eliminación de tu cuenta s
 ## 6. Contenido y propiedad intelectual
 
 ### 6.1 Nuestro contenido
-Todo el contenido de la App (rutinas, recetas, videos, textos, gráficos, diseño, código, logos, marcas) es propiedad de Primo AI Studio o de sus licenciantes y está protegido por leyes de propiedad intelectual.
+Todo el contenido de la App (rutinas, recetas, videos, textos, gráficos, diseño, código, logos, marcas) es propiedad de Purple Roots Agency o de sus licenciantes y está protegido por leyes de propiedad intelectual.
 
 ### 6.2 Licencia de uso
 Te otorgamos una licencia personal, limitada, no exclusiva, no transferible y revocable para usar la App únicamente para tu uso personal y no comercial.
@@ -220,7 +220,7 @@ Tras la terminación:
 
 ## 12. Indemnización
 
-Aceptas indemnizar y mantener libre de responsabilidad a Primo AI Studio, sus empleados, socios y proveedores ante cualquier reclamación, daño, pérdida o gasto (incluyendo honorarios legales razonables) derivado de:
+Aceptas indemnizar y mantener libre de responsabilidad a Purple Roots Agency, sus empleados, socios y proveedores ante cualquier reclamación, daño, pérdida o gasto (incluyendo honorarios legales razonables) derivado de:
 - Tu uso de la App
 - Tu incumplimiento de estos Términos
 - Tu violación de derechos de terceros
@@ -257,12 +257,12 @@ No puedes ceder estos Términos sin nuestro consentimiento previo por escrito. N
 
 Para preguntas sobre estos Términos:
 
-**Email:** primostudio.us@gmail.com
-**Operador:** Primo AI Studio
+**Email:** p.rootsagency@gmail.com
+**Operador:** Purple Roots Agency
 **Ubicación:** El Paso, Texas, Estados Unidos
 
 ---
 
 **Al usar Booty Alarm, confirmas que has leído, entendido y aceptado estos Términos y Condiciones, así como nuestra Política de Privacidad.**
 
-*Última actualización: 28 de mayo de 2026*
+*Última actualización: 3 de junio de 2026*
