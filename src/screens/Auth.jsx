@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { signUp, signIn, resetPassword } from '../lib/auth'
+import { openLegal } from '../lib/openLegal'
 
 /* Pantallas de autenticación (estética 100% Booty Alarm, sin branding Supabase).
    Vistas: 'signup' | 'login' | 'recover'. Por ahora implementada 'signup'
@@ -101,6 +102,13 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
           <button className="cta full auth-cta" onClick={doSignup} disabled={busy}>
             {busy ? 'CREANDO CUENTA…' : 'CREAR CUENTA'}
           </button>
+
+          <div className="auth-consent">
+            Al crear cuenta aceptas nuestros{' '}
+            <span className="auth-link" onClick={() => openLegal('/terms')}>Términos</span>
+            {' '}y la{' '}
+            <span className="auth-link" onClick={() => openLegal('/privacy')}>Política de Privacidad</span>.
+          </div>
 
           <div className="auth-links">
             <span>¿Ya tienes cuenta? </span>

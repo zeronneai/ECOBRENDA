@@ -122,6 +122,35 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pwgo{padding:12px 0;font-size:14px;letter-spacing:.06em}
 .pwfeats{margin:10px 0 6px;display:flex;flex-direction:column;gap:6px}
 
+/* ===== Páginas legales públicas (/privacy, /terms) ===== */
+#legal{position:relative;min-height:100vh;background:#070708;color:var(--txt);overflow-y:auto;font-family:'Archivo',system-ui,sans-serif}
+.legal-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-top) + 14px) 22px 14px;background:linear-gradient(180deg,#070708 75%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.legal-back{font-size:18px;font-weight:800;color:var(--magenta-soft);text-decoration:none;letter-spacing:.02em}
+.legal-back:active{opacity:.6}
+.legal-brand{font-size:12px;font-weight:800;letter-spacing:.22em;color:var(--magenta-soft)}
+.legal-spacer{width:56px} /* equilibra el header (mismo ancho aprox que el back) */
+.legal-content{max-width:720px;margin:0 auto;padding:28px 22px calc(var(--safe-bot) + 60px);line-height:1.65;font-size:15px}
+.legal-content h1{font-family:'Bebas Neue';font-size:44px;line-height:1;color:var(--magenta);letter-spacing:.02em;margin:8px 0 14px}
+.legal-content h2{font-family:'Bebas Neue';font-size:30px;line-height:1.05;color:var(--lime);letter-spacing:.04em;margin:32px 0 12px}
+.legal-content h3{font-family:'Archivo',sans-serif;font-size:17px;font-weight:900;color:#fff;letter-spacing:.01em;margin:22px 0 8px;text-transform:uppercase}
+.legal-content p{margin:10px 0;color:var(--txt)}
+.legal-content strong{color:#fff;font-weight:800}
+.legal-content em{color:var(--lime);font-style:normal}
+.legal-content ul, .legal-content ol{margin:10px 0 14px;padding-left:22px}
+.legal-content li{margin:5px 0;color:var(--txt)}
+.legal-content li::marker{color:var(--magenta-soft)}
+.legal-content a{color:var(--magenta);text-decoration:none;border-bottom:1px dotted var(--magenta-soft)}
+.legal-content a:hover{color:var(--magenta-soft);border-bottom-style:solid}
+.legal-content hr{border:none;border-top:1px solid var(--line-strong);margin:26px 0;opacity:.7}
+.legal-content blockquote{border-left:3px solid var(--magenta);padding:8px 14px;margin:14px 0;color:var(--txt-dim);background:rgba(255,31,107,.05);border-radius:0 8px 8px 0}
+.legal-content code{background:var(--surface);padding:2px 6px;border-radius:4px;font-size:13px;color:var(--lime)}
+
+@media (max-width: 480px){
+  .legal-content{padding:22px 18px calc(var(--safe-bot) + 40px);font-size:14.5px}
+  .legal-content h1{font-size:36px}
+  .legal-content h2{font-size:26px}
+}
+
 /* link "ya tengo cuenta" en el primer paso del onboarding */
 .ob-haveaccount{margin-top:20px;text-align:center;font-size:14px;color:var(--txt-dim)}
 
@@ -142,6 +171,8 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .auth-error{color:var(--magenta-soft);font-size:13px;font-weight:700;margin:2px 2px 12px;animation:authShake .35s}
 @keyframes authShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .auth-cta{margin-top:6px}
+.auth-consent{margin:14px 4px 0;font-size:12px;line-height:1.45;color:var(--txt-faint);text-align:center}
+.auth-consent .auth-link{font-size:12px}
 .cta.full:disabled{opacity:.6}
 .auth-links{margin-top:18px;text-align:center;font-size:14px;color:var(--txt-dim)}
 .auth-link{color:var(--magenta-soft);font-weight:800;cursor:pointer}

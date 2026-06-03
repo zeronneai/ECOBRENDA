@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
 import { GOALS, LEVELS, DAYS_OPTIONS, goalLabel } from '../data/onboarding'
+import { openLegal } from '../lib/openLegal'
 
 const kgToLb = (kg) => Math.round(kg * 2.20462)
 const lbToKg = (lb) => Math.round(lb / 2.20462)
@@ -206,11 +207,14 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Acerca de */}
+          {/* Legal */}
           <div className="pf-sec reveal d6">
-            <h3>ACERCA DE</h3>
-            <div className="pf-link-row" onClick={() => navigate('/privacy')}>
-              <span>Privacidad</span><span className="v">›</span>
+            <h3>LEGAL</h3>
+            <div className="pf-link-row" onClick={() => openLegal('/privacy')}>
+              <span>Política de Privacidad</span><span className="v">›</span>
+            </div>
+            <div className="pf-link-row" onClick={() => openLegal('/terms')}>
+              <span>Términos y Condiciones</span><span className="v">›</span>
             </div>
             <div className="pf-link-row">
               <span>Versión</span><span className="v">0.1.0</span>
