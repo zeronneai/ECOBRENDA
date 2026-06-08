@@ -307,7 +307,7 @@ function ensureSeedAlarm(s) {
       reps: s.profile.reps || 10,
       days: DEFAULT_DAYS.slice(),
       active: true,
-      songId: 'junior',
+      songId: 'would',
     })
   }
 }
@@ -326,7 +326,7 @@ export function addAlarm(alarm = {}) {
     reps: 10,
     days: DEFAULT_DAYS.slice(),
     active: true,
-    songId: 'junior',
+    songId: 'would',
     ...alarm,
   }
   s.alarms.push(row)

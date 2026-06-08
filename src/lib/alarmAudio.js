@@ -22,10 +22,12 @@
    Nota: el volumen del elemento es 1.0 (máximo); el volumen real depende del
    volumen de medios del dispositivo, que la web no puede forzar. */
 
-// Canción de la alarma de la mañana.
+// Canción de la alarma por defecto (usada para preload en AppShell).
+// Debe coincidir con DEFAULT_SONG_ID de src/data/songs.js. Todas son libres
+// de derechos, empaquetadas en la cuenta de Cloudinary del proyecto.
 export const ALARM_AUDIO_SRC =
-  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1775536848/Junior_H_con_Banda_-_El_Hijo_Mayor_En_Vivo_rofzm5.mp3'
+  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1780939526/Would_It_Matter_-_Rose_Campbell_uvmool.mp3'
 
-// Canción de los retos rápidos (distinta de la alarma).
+// Canción FIJA de los retos rápidos (distinta de la alarma).
 export const CHALLENGE_AUDIO_SRC =
-  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1775681660/Eden_Mu%C3%B1oz_Cosme_Tadeo_-_La_Nena_LETRA_e70dkv.mp3'
+  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1780939523/Fearless_-_The_Soundlings_feat._Ruby_Jay_wwfgha.mp3'
