@@ -51,6 +51,10 @@
 	<string>Booty Alarm usa la cámara para contar tus repeticiones en tiempo real. El video no se sube a ningún lado.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>No usamos el micrófono. iOS pide este permiso por la API de cámara, pero el audio no se graba.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta app puede solicitar acceso a tu biblioteca de fotos si decides cambiar tu foto de perfil en el futuro. Actualmente no accedemos a tus fotos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Esta app puede solicitar guardar imágenes en tu galería si decides exportar tu progreso en el futuro. Actualmente no escribimos en tu galería.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
