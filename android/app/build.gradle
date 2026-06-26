@@ -1,5 +1,25 @@
 apply plugin: 'com.android.application'
 
+// ── Firma de release ─────────────────────────────────────────────────────────
+// Las credenciales NUNCA viven en el repo. Se leen de dos fuentes, en orden:
+//   1) Variables de entorno (lo que usa GitHub Actions desde Secrets):
+//        KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+//   2) Un archivo local 'android/keystore.properties' (para builds en tu PC
+//        con Android Studio). Ese archivo está en .gitignore y no se sube.
+// Si no hay ninguna, el build de release simplemente queda sin firmar (el
+// debug sigue funcionando igual).
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
+def ksPath     = System.getenv("KEYSTORE_PATH")     ?: keystoreProps.getProperty("storeFile")
+def ksPassword = System.getenv("KEYSTORE_PASSWORD") ?: keystoreProps.getProperty("storePassword")
+def ksAlias    = System.getenv("KEY_ALIAS")         ?: keystoreProps.getProperty("keyAlias")
+def ksKeyPass  = System.getenv("KEY_PASSWORD")      ?: keystoreProps.getProperty("keyPassword")
+def hasSigning = ksPath != null && ksPassword != null && ksAlias != null && ksKeyPass != null
+
 android {
     namespace = "com.zeronne.bootyalarm"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -8,7 +28,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,10 +36,26 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasSigning) {
+            release {
+                storeFile file(ksPath)
+                storePassword ksPassword
+                keyAlias ksAlias
+                keyPassword ksKeyPass
+            }
+        }
+    }
     buildTypes {
         release {
+            // ProGuard/R8 APAGADO en este primer release: minificar puede romper
+            // Capacitor/MediaPipe (reflexión nativa). Optimizar después con cuidado.
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (hasSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

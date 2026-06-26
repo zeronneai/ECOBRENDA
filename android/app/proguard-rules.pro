@@ -19,3 +19,26 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ── Reglas de seguridad para cuando se active minifyEnabled en el futuro ──────
+# Hoy minifyEnabled = false, así que estas reglas no se aplican todavía, pero
+# quedan listas para no romper Capacitor ni MediaPipe al optimizar.
+
+# Capacitor / Cordova: usan reflexión para resolver plugins por nombre.
+-keep class com.getcapacitor.** { *; }
+-keep class org.apache.cordova.** { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-keepclassmembers class * extends com.getcapacitor.Plugin { *; }
+
+# Plugins nativos propios de la alarma (AlarmPlugin, receivers, etc.)
+-keep class com.zeronne.bootyalarm.** { *; }
+
+# MediaPipe Tasks Vision: carga clases/JNI por reflexión.
+-keep class com.google.mediapipe.** { *; }
+-keep class com.google.protobuf.** { *; }
+-dontwarn com.google.mediapipe.**
+
+# WebView con interfaz JS (Capacitor bridge).
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
