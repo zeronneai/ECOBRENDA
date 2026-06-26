@@ -1,0 +1,83 @@
+name: Android Release APK
+
+# Compila el APK de RELEASE firmado con tu keystore, en la nube de GitHub (que
+# SÍ tiene acceso a Google; el contenedor de desarrollo lo tiene bloqueado).
+# Este APK es el que se sube a la landing page para que usuarios reales lo
+# instalen. El keystore NUNCA vive en el repo: llega como Secret en base64 y se
+# decodifica solo durante el build.
+#
+# Secrets necesarios (Settings -> Secrets and variables -> Actions):
+#   KEYSTORE_BASE64     -> el keystore .keystore convertido a base64
+#   KEYSTORE_PASSWORD   -> password del almacén (storePassword)
+#   KEY_ALIAS           -> bootyalarm
+#   KEY_PASSWORD        -> password de la clave (keyPassword)
+#   VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY (igual que el workflow debug)
+
+on:
+  workflow_dispatch: {}        # solo manual: botón "Run workflow" en Actions
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar plataforma Android 36 + aceptar licencias
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" || sdkmanager "platforms;android-36"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build web (Vite)
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Capacitor sync (copia web + plugins a android/)
+        run: npx cap sync android
+
+      - name: Decodificar keystore desde Secret
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/bootyalarm-release.keystore
+          echo "Keystore decodificado ($(stat -c%s android/app/bootyalarm-release.keystore) bytes)"
+
+      - name: Compilar APK release firmado
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+        env:
+          KEYSTORE_PATH: bootyalarm-release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Borrar keystore del runner
+        if: always()
+        run: rm -f android/app/bootyalarm-release.keystore
+
+      - name: Subir APK release como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: booty-alarm-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
