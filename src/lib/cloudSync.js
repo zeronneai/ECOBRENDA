@@ -46,6 +46,9 @@ function profileRowFromLocal(p) {
     wake_time: p.wakeTime ?? null,
     alarm_exercise: p.exercise ?? null,
     alarm_reps: p.reps ?? null,
+    allergies: p.allergies ?? null,
+    diet_pref: p.dietPref ?? null,
+    dislikes: p.dislikes ?? null,
   }
 }
 function applyProfileRow(r) {
@@ -62,6 +65,9 @@ function applyProfileRow(r) {
     wakeTime: r.wake_time,
     exercise: r.alarm_exercise,
     reps: r.alarm_reps,
+    allergies: r.allergies ?? [],
+    dietPref: r.diet_pref ?? null,
+    dislikes: r.dislikes ?? '',
     onboarded: true, // si ya tiene perfil en la nube, ya hizo onboarding
     ...(r.created_at ? { createdAt: r.created_at } : {}),
   })

@@ -24,7 +24,8 @@ const ACTIVITY_FACTOR = 1.5
 
 const DEFAULT_STATE = {
   version: SCHEMA_VERSION,
-  // { name, age, gender, weight, height, goal, wakeTime, exercise, createdAt }
+  // { name, age, gender, weight, height, goal, level, daysPerWeek, wakeTime,
+  //   exercise, reps, allergies:[], dietPref, dislikes, createdAt }
   profile: null,
   subscription: { status: 'inactive', plan: null, currentPeriodEnd: null },
   wakeStreak: { current: 0, best: 0, lastCompleted: '' }, // racha de la alarma diaria
