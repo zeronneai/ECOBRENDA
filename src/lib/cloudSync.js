@@ -46,10 +46,21 @@ function profileRowFromLocal(p) {
     wake_time: p.wakeTime ?? null,
     alarm_exercise: p.exercise ?? null,
     alarm_reps: p.reps ?? null,
-    allergies: p.allergies ?? null,
+    allergies: Array.isArray(p.allergies) ? p.allergies : null,
     diet_pref: p.dietPref ?? null,
-    dislikes: p.dislikes ?? null,
+    dislikes: dislikesToArray(p.dislikes),
   }
+}
+
+// dislikes se captura como texto libre pero la columna es text[]: normaliza a
+// array (split por comas, sin vacíos). '' / null -> null. Un array pasa igual.
+function dislikesToArray(v) {
+  if (Array.isArray(v)) return v.length ? v : null
+  if (typeof v === 'string') {
+    const arr = v.split(',').map((s) => s.trim()).filter(Boolean)
+    return arr.length ? arr : null
+  }
+  return null
 }
 function applyProfileRow(r) {
   dataStore.saveProfile({
@@ -67,7 +78,7 @@ function applyProfileRow(r) {
     reps: r.alarm_reps,
     allergies: r.allergies ?? [],
     dietPref: r.diet_pref ?? null,
-    dislikes: r.dislikes ?? '',
+    dislikes: Array.isArray(r.dislikes) ? r.dislikes.join(', ') : (r.dislikes ?? ''),
     onboarded: true, // si ya tiene perfil en la nube, ya hizo onboarding
     ...(r.created_at ? { createdAt: r.created_at } : {}),
   })
