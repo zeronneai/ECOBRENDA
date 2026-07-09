@@ -997,3 +997,32 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
   .wk-done{background:#2a121e}
   .wk-done.on{background:#20260a}
 }
+
+/* ============================================================
+   NUTRICIÓN rediseño — hero macros + dias con kcal (nu-*)
+   ============================================================ */
+.nu-hero-note{display:flex;gap:10px;align-items:flex-start;margin:6px 0 14px}
+.nu-hero-note .b{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:'Archivo Black','Archivo';font-weight:900;color:#fff;background:linear-gradient(135deg,var(--magenta),#7a28ff)}
+.nu-hero-note p{font-size:13px;line-height:1.45;color:var(--txt);font-style:italic}
+.nu-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.nu-macro{border-radius:14px;padding:13px 4px;text-align:center;border:1px solid transparent}
+.nu-macro .n{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;line-height:1;transform:skewX(-6deg);display:inline-block}
+.nu-macro .k{font-size:10px;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.03em;margin-top:4px}
+.nu-macro.kcal{background:linear-gradient(150deg,rgba(255,31,107,.22),rgba(255,31,107,.05));border-color:rgba(255,31,107,.28)}
+.nu-macro.kcal .n{color:var(--magenta-soft)}
+.nu-macro.prot{background:linear-gradient(150deg,rgba(198,255,0,.18),rgba(198,255,0,.05));border-color:rgba(198,255,0,.26)}
+.nu-macro.prot .n{color:var(--lime)}
+.nu-macro.carb{background:linear-gradient(150deg,rgba(245,196,81,.2),rgba(245,196,81,.05));border-color:rgba(245,196,81,.28)}
+.nu-macro.carb .n{color:var(--gold)}
+.nu-macro.fat{background:linear-gradient(150deg,rgba(122,40,255,.22),rgba(122,40,255,.05));border-color:rgba(122,40,255,.3)}
+.nu-macro.fat .n{color:#a678ff}
+
+.nu-days{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.nu-day{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
+.nu-day-head{width:100%;display:flex;align-items:center;gap:12px;padding:15px;background:none;border:none;color:var(--txt);cursor:pointer;text-align:left}
+.nu-day-badge{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--surface-2)}
+.nu-day-t{flex:1;min-width:0}
+.nu-day-t b{display:block;font-family:'Archivo';font-weight:800;font-size:15px}
+.nu-day-t .kc{font-size:12px;color:var(--magenta-soft)}
+.nu-day-chev{flex:none;font-size:18px;color:var(--txt-faint);width:20px;text-align:center}
+.nu-day-body{padding:0 15px 14px}
