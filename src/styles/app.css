@@ -1057,3 +1057,12 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .al-meta .t{font-family:'Archivo';font-weight:800;font-size:14px}
 .al-meta .d{font-size:13px;color:var(--txt-dim);margin-top:2px}
 .al-new{margin-top:18px}
+
+/* Flash "día completado" (Entrena) — mensaje festivo de Brenda */
+.brenda-flash{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:34px}
+.brenda-flash .bf-card{max-width:340px;text-align:center;padding:26px 28px;border-radius:22px;
+  background:linear-gradient(135deg,rgba(255,31,107,.96),rgba(122,40,255,.92));
+  box-shadow:0 20px 60px rgba(255,31,107,.5);animation:flashPop 2.5s ease forwards}
+.brenda-flash .bf-emoji{font-size:44px;margin-bottom:6px}
+.brenda-flash .bf-msg{font-family:'Archivo';font-weight:900;font-size:18px;line-height:1.3;color:#fff}
+@keyframes flashPop{0%{transform:scale(.7);opacity:0}12%{transform:scale(1.05);opacity:1}82%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}

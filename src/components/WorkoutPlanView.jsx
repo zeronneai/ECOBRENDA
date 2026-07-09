@@ -6,16 +6,18 @@
      completar un día por primera vez cuenta como 1 workout (vía AppContext). */
 import { useMemo, useState } from 'react'
 import { useApp } from '../store'
+import { getBrendaMessage } from '../data/brendaMessages'
 import DestelloCard from './ui/DestelloCard'
 import AiPlanFooter from './AiPlanFooter'
 
 export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDevForce }) {
-  const { getPlanCompletions, toggleExerciseDone } = useApp()
+  const { getPlanCompletions, toggleExerciseDone, showToast, confetti } = useApp()
   const days = plan?.days || []
   const planKey = `${plan?.title || 'plan'}::${days.length}`
 
   const [open, setOpen] = useState(0)
   const [comp, setComp] = useState(() => getPlanCompletions(planKey))
+  const [flash, setFlash] = useState('')
 
   const kpis = useMemo(() => {
     let ex = 0, sets = 0
@@ -33,8 +35,22 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDev
 
   const toggle = (di, ei, exCount, focus) => {
     const next = !isDone(di, ei)
+    const wasComplete = dayComplete(di)
     const updated = toggleExerciseDone(planKey, di, ei, next, exCount, focus)
     setComp(updated)
+    if (next) {
+      const nowDone = Object.keys(updated[di] || {}).length
+      const nowComplete = exCount > 0 && nowDone >= exCount
+      if (nowComplete && !wasComplete) {
+        // Día completado por primera vez: celebración destacada.
+        confetti?.(60)
+        setFlash(getBrendaMessage('dayCompleted'))
+        setTimeout(() => setFlash(''), 2500)
+      } else {
+        // Micro-mensaje sutil por ejercicio marcado.
+        showToast?.(getBrendaMessage('exerciseDone'))
+      }
+    }
   }
 
   return (
@@ -108,6 +124,15 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDev
       </div>
 
       <AiPlanFooter locked={locked} daysLeft={daysLeft} onRenew={onRenew} onDevForce={onDevForce} />
+
+      {flash && (
+        <div className="brenda-flash">
+          <div className="bf-card">
+            <div className="bf-emoji">🔥</div>
+            <div className="bf-msg">{flash}</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
