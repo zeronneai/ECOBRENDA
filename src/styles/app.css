@@ -1070,3 +1070,30 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 /* Mensaje retador de Brenda en la alarma sonando (solo visual) */
 .ring-brenda{font-family:'Archivo';font-weight:900;font-size:19px;line-height:1.3;color:var(--lime);
   text-align:center;max-width:320px;margin:14px auto 6px;padding:0 8px;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+
+/* ============================================================
+   FIX overflow — pills de alergias + blindaje general
+   ============================================================ */
+/* Alergias (multi-select): pills que se ajustan al texto y envuelven la fila,
+   así el texto NUNCA se sale del recuadro. */
+.allergy-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.allergy-chip{display:inline-flex;align-items:center;gap:8px;max-width:100%;
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:50px;
+  padding:11px 16px;cursor:pointer;color:var(--txt);font-family:'Archivo';font-weight:700;font-size:14px;transition:.2s}
+.allergy-chip .ae{font-size:18px;line-height:1;flex:none}
+.allergy-chip .al{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.allergy-chip:active{transform:scale(.96)}
+.allergy-chip.sel{border-color:var(--magenta);background:linear-gradient(120deg,rgba(255,31,107,.16),var(--surface));color:#fff;box-shadow:0 0 16px var(--magenta-glow)}
+
+/* Blindaje: palabras largas dentro de chips cortos pueden partirse si hiciera falta */
+.chip span{overflow-wrap:break-word;word-break:break-word}
+
+/* KPIs / macros: números grandes no rompen el bloque (grid items pueden desbordar
+   por el min-width:auto por defecto). */
+.pg2-kpis>div,.wk-kpis>div,.hm-kpis>div,.nu-macros>div{min-width:0}
+.pg2-kpi,.wk-kpi,.hm-kpi,.nu-macro{overflow:hidden}
+.pg2-kpi .n,.wk-kpi .n,.hm-kpi .n,.nu-macro .n{max-width:100%}
+
+/* Títulos de plan y de sección (Anton): textos largos envuelven, no desbordan */
+.destello-title{max-width:100%;overflow-wrap:break-word}
+.ai-plan-title,.wk-ex-top h4,.ai-meal-name,.al-meta .d,.pg2-hrow-main b{overflow-wrap:break-word;word-break:break-word}

@@ -272,11 +272,17 @@ export default function Onboarding() {
             <div className="ob-kick">Tu alimentación</div>
             <div className="ob-q">¿ALGUNA ALERGIA<br />O INTOLERANCIA?</div>
             <div className="ob-sub">Brenda evitará estos alimentos en tu plan. Marca todas las que apliquen.</div>
-            <div className="chip-row" style={{ flexWrap: 'wrap' }}>
+            <div className="allergy-grid">
               {ALLERGIES.map((a) => (
-                <div key={a.id} className={'chip' + (allergies.includes(a.id) ? ' sel' : '')} onClick={() => toggleAllergy(a.id)}>
-                  {a.emoji}<span>{a.label}</span>
-                </div>
+                <button
+                  type="button"
+                  key={a.id}
+                  className={'allergy-chip' + (allergies.includes(a.id) ? ' sel' : '')}
+                  onClick={() => toggleAllergy(a.id)}
+                >
+                  <span className="ae">{a.emoji}</span>
+                  <span className="al">{a.label}</span>
+                </button>
               ))}
             </div>
           </div>
