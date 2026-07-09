@@ -658,3 +658,39 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 
 /* confetti dot */
 .cf{position:absolute;width:8px;height:8px;z-index:250;pointer-events:none;border-radius:2px}
+
+/* ============================================================
+   PLANES IA (invitación · generando · render) — Etapa 3
+   ============================================================ */
+
+/* — Invitación premium — */
+.ai-intro{position:relative;overflow:hidden;margin:8px 0 0;padding:30px 22px 26px;border-radius:var(--radius);
+  background:linear-gradient(160deg,#1a1020,#141418 60%);border:1px solid var(--line-strong);text-align:center}
+.ai-intro-glow{position:absolute;top:-60px;left:50%;width:220px;height:220px;transform:translateX(-50%);
+  background:radial-gradient(circle,var(--magenta-glow),transparent 70%);filter:blur(8px);pointer-events:none}
+.ai-intro-badge{position:relative;display:inline-block;font-family:'Archivo';font-weight:800;font-size:11px;letter-spacing:.14em;
+  color:var(--lime);background:rgba(216,255,62,.08);border:1px solid rgba(216,255,62,.22);padding:5px 12px;border-radius:50px;margin-bottom:16px}
+.ai-intro-kick{position:relative;color:var(--magenta-soft);font-weight:700;font-size:13px;letter-spacing:.02em;margin-bottom:6px}
+.ai-intro-title{position:relative;font-family:'Archivo Black','Archivo';font-weight:900;font-size:26px;line-height:1.05;
+  letter-spacing:-.01em;text-transform:uppercase;margin-bottom:12px}
+.ai-intro-sub{position:relative;color:var(--txt-dim);font-size:15px;line-height:1.5;max-width:320px;margin:0 auto 22px}
+.ai-intro-error{position:relative;color:var(--magenta-soft);background:rgba(255,31,107,.08);border:1px solid rgba(255,31,107,.2);
+  border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:16px}
+.ai-intro-cta{position:relative;width:100%;background:linear-gradient(135deg,var(--magenta),#b8004a);color:#fff;border:none;
+  padding:18px;border-radius:16px;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.03em;text-transform:uppercase;
+  cursor:pointer;box-shadow:0 12px 30px var(--magenta-glow);animation:avPulse 2.6s ease-in-out infinite}
+.ai-intro-cta:active{transform:scale(.98)}
+.ai-intro-foot{position:relative;color:var(--txt-faint);font-size:12px;margin-top:14px}
+
+/* — Generando — */
+.ai-gen{display:flex;flex-direction:column;align-items:center;text-align:center;padding:60px 24px}
+.ai-gen-orb{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;margin-bottom:26px;
+  background:linear-gradient(135deg,var(--magenta),#7a28ff);box-shadow:0 0 0 0 var(--magenta-glow);animation:pulse 1.8s ease-in-out infinite}
+.ai-gen-orb span{font-family:'Archivo Black','Archivo';font-weight:900;font-size:44px;color:#fff}
+.ai-gen-title{font-family:'Archivo';font-weight:800;font-size:20px;margin-bottom:10px}
+.ai-gen-sub{color:var(--txt-dim);font-size:14px;line-height:1.5;max-width:300px;margin-bottom:26px}
+.ai-gen-bar{width:100%;max-width:260px;height:6px;border-radius:50px;background:var(--surface-2);overflow:hidden}
+.ai-gen-bar i{display:block;width:40%;height:100%;border-radius:50px;background:linear-gradient(90deg,var(--magenta),var(--lime));
+  animation:aiBar 1.4s ease-in-out infinite}
+@keyframes aiBar{0%{margin-left:-40%}100%{margin-left:100%}}
+.ai-loading-min{min-height:200px}
