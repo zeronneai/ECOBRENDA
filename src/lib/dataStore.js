@@ -38,6 +38,10 @@ const DEFAULT_STATE = {
   // Logros ya anunciados (null = aún sin inicializar/seed).
   announcedAchievements: null,
   settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false, permsPrimed: false },
+  // Ejercicios de la rutina IA marcados como hechos (checklist, solo local).
+  //   completions: { [planKey]: { [dayIdx]: { [exIdx]: true } } }
+  //   loggedDays:   { [planKey]: { [dayIdx]: true } }  (guard anti-doble-conteo)
+  planProgress: { completions: {}, loggedDays: {} },
 }
 
 const DEFAULT_DAYS = [0, 1, 2, 3, 4] // Lun–Vie
@@ -92,6 +96,10 @@ function migrate(s) {
     workoutLog: Array.isArray(s.workoutLog) ? s.workoutLog : [],
     progressLog: Array.isArray(s.progressLog) ? s.progressLog : [],
     alarms: Array.isArray(s.alarms) ? s.alarms : [],
+    planProgress: {
+      completions: (s.planProgress && s.planProgress.completions) || {},
+      loggedDays: (s.planProgress && s.planProgress.loggedDays) || {},
+    },
   }
 }
 
@@ -210,6 +218,35 @@ export function logWorkout(entry) {
 export function removeWorkoutLog(id) {
   const s = load()
   s.workoutLog = s.workoutLog.filter((w) => w.id !== id)
+  save()
+}
+
+// ── Completados de la rutina IA (checklist por ejercicio, solo local) ─────────
+export function getPlanCompletions(planKey) {
+  if (!planKey) return {}
+  return load().planProgress.completions[planKey] || {}
+}
+// Marca/desmarca un ejercicio. Devuelve las completions del plan.
+export function setExerciseDone(planKey, dayIdx, exIdx, done) {
+  const s = load()
+  const comp = s.planProgress.completions
+  const plan = comp[planKey] || (comp[planKey] = {})
+  const day = plan[dayIdx] || (plan[dayIdx] = {})
+  if (done) day[exIdx] = true
+  else delete day[exIdx]
+  save()
+  return { ...plan }
+}
+export function isDayLogged(planKey, dayIdx) {
+  const days = load().planProgress.loggedDays[planKey]
+  return !!(days && days[dayIdx])
+}
+// Marca un día como ya contado (guard: no se vuelve a contar nunca).
+export function markDayLogged(planKey, dayIdx) {
+  const s = load()
+  const ld = s.planProgress.loggedDays
+  const plan = ld[planKey] || (ld[planKey] = {})
+  plan[dayIdx] = true
   save()
 }
 

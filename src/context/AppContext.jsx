@@ -162,6 +162,20 @@ export function AppProvider({ children }) {
     syncAchievements()
   }, [syncAchievements])
 
+  // ── Rutina IA: marcar ejercicios hechos (checklist) ──
+  const getPlanCompletions = useCallback((planKey) => dataStore.getPlanCompletions(planKey), [])
+  // Marca/desmarca un ejercicio; si el día queda 100% y no estaba contado,
+  // registra 1 workout (cuenta para totals/Progreso/logros) una sola vez.
+  const toggleExerciseDone = useCallback((planKey, dayIdx, exIdx, done, exCount, focus) => {
+    const dayComp = dataStore.setExerciseDone(planKey, dayIdx, exIdx, done)
+    const doneCount = Object.keys(dayComp[dayIdx] || {}).length
+    if (doneCount >= exCount && exCount > 0 && !dataStore.isDayLogged(planKey, dayIdx)) {
+      dataStore.markDayLogged(planKey, dayIdx)
+      logWorkout({ source: 'plan', title: focus || 'Rutina', exercise: 'plan', reps: 0 })
+    }
+    return dayComp
+  }, [logWorkout])
+
   // ── Progreso (peso) ──
   const addProgressEntry = useCallback((entry) => {
     dataStore.addProgressEntry(entry)
@@ -596,6 +610,7 @@ export function AppProvider({ children }) {
     streak, completeWakeWorkout,
     challengesDone, incrementChallenge,
     totals, recordRep, logWorkout, workoutLog,
+    getPlanCompletions, toggleExerciseDone,
     progressLog, addProgressEntry, deleteProgressEntry,
     settings, saveSettings, resetProgress,
     needsPriming, primePermissions,
