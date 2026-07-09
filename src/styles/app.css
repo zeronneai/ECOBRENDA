@@ -948,3 +948,52 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pf-pe-title{font-size:20px;color:var(--txt)}
 .pf-pe-sub{font-size:13px;color:var(--txt-dim)}
 .pf-pe-chev{flex:none;font-size:26px;color:var(--txt-dim)}
+
+/* ============================================================
+   ENTRENA rediseño — hero de rutina, progreso por día, DONE (wk-*)
+   ============================================================ */
+.wk-hero-note{display:flex;gap:10px;align-items:flex-start;margin:6px 0 14px}
+.wk-hero-note .b{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:'Archivo Black','Archivo';font-weight:900;color:#fff;background:linear-gradient(135deg,var(--magenta),#7a28ff)}
+.wk-hero-note p{font-size:13px;line-height:1.45;color:var(--txt);font-style:italic}
+.wk-kpis{display:flex;gap:10px;margin-top:14px}
+.wk-kpi{flex:1;text-align:center;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:12px 6px}
+.wk-kpi .n{font-family:'Anton',sans-serif;font-weight:400;font-size:26px;line-height:1;transform:skewX(-6deg);display:inline-block;color:var(--lime)}
+.wk-kpi:first-child .n{color:var(--magenta-soft)}
+.wk-kpi .k{font-size:10px;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+
+.wk-days{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.wk-day{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
+.wk-day.done{border-color:var(--lime);box-shadow:0 0 14px rgba(216,255,62,.16)}
+.wk-day-head{width:100%;display:flex;align-items:center;gap:12px;padding:15px;background:none;border:none;color:var(--txt);cursor:pointer;text-align:left}
+.wk-day-badge{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-family:'Archivo';font-weight:900;font-size:14px;background:var(--surface-2);color:var(--txt-dim)}
+.wk-day.done .wk-day-badge{background:var(--lime);color:#0a0a0a}
+.wk-day-t{flex:1;min-width:0}
+.wk-day-t b{display:block;font-family:'Archivo';font-weight:800;font-size:15px}
+.wk-day-t .focus{font-size:12px;color:var(--magenta-soft)}
+.wk-dayprog{display:flex;align-items:center;gap:8px;margin-top:6px}
+.wk-bar{flex:1;height:5px;border-radius:50px;background:var(--surface-2);overflow:hidden}
+.wk-bar i{display:block;height:100%;border-radius:50px;background:linear-gradient(90deg,var(--magenta),var(--lime));transition:width .3s ease}
+.wk-dayprog .c{font-size:11px;color:var(--txt-dim);font-weight:700;white-space:nowrap}
+.wk-day-chev{flex:none;font-size:18px;color:var(--txt-faint);width:20px;text-align:center}
+
+.wk-day-body{padding:0 15px 14px}
+.wk-warmup{font-size:13px;line-height:1.45;color:var(--txt-dim);background:var(--bg-soft);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.wk-warmup b{color:var(--txt)}
+.wk-ex{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.wk-ex-info{flex:1;min-width:0}
+.wk-ex-top{display:flex;align-items:baseline;gap:10px}
+.wk-ex-top h4{font-family:'Archivo';font-weight:700;font-size:15px}
+.wk-ex.done .wk-ex-top h4{text-decoration:line-through;color:var(--txt-faint)}
+.wk-ex-sr{flex:none;font-family:'Archivo';font-weight:900;font-size:13px;color:var(--lime)}
+.wk-ex-meta{font-size:12px;color:var(--txt-faint);margin-top:2px}
+.wk-ex-tip{font-size:12px;line-height:1.4;color:var(--txt-dim);margin-top:5px}
+.wk-done{flex:none;display:inline-flex;align-items:center;gap:6px;border-radius:12px;padding:10px 14px;cursor:pointer;
+  font-family:'Archivo';font-weight:800;font-size:13px;color:#fff;
+  background:var(--glass-magenta-bg);border:1px solid var(--glass-border);box-shadow:var(--glass-inner-light);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:transform .08s ease,background .2s ease}
+.wk-done:active{transform:scale(.95)}
+.wk-done.on{background:var(--glass-lima-bg);border-color:rgba(198,255,0,.5);color:var(--lime)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .wk-done{background:#2a121e}
+  .wk-done.on{background:#20260a}
+}
