@@ -8,6 +8,23 @@
 
 import { Capacitor } from '@capacitor/core'
 import { supabase } from './supabase'
+import { MOCK_WORKOUT, MOCK_DIET } from '../../lib/ai/mockPlans'
+
+/* USE_MOCK_PLANS: bandera de DESARROLLO.
+   - true  → NO se llama la API (0 créditos): generate* simula una espera y
+     devuelve el mock; getLatestPlan devuelve null (para ver siempre la
+     invitación). Además el frontend hace bypass del gate premium (dev).
+   - false → comportamiento de PRODUCCIÓN: endpoints reales de Etapa 2 y el gate
+     premium bloquea normal (paywall web / PremiumLockedIOS en iOS).
+   Se puede forzar por env (VITE_USE_MOCK_PLANS='true'|'false'); por defecto,
+   activo solo en desarrollo (import.meta.env.DEV). */
+const envFlag = import.meta.env.VITE_USE_MOCK_PLANS
+export const USE_MOCK_PLANS = envFlag != null
+  ? String(envFlag) === 'true'
+  : Boolean(import.meta.env.DEV)
+
+const MOCK_DELAY_MS = 2500
+const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const API_BASE = Capacitor.isNativePlatform()
   ? (import.meta.env.VITE_API_BASE || 'https://ecobrenda.vercel.app')
@@ -35,12 +52,14 @@ async function authedPost(path) {
 
 // Genera y persiste una rutina nueva. Devuelve el plan (content).
 export async function generateWorkout() {
+  if (USE_MOCK_PLANS) { await wait(MOCK_DELAY_MS); return MOCK_WORKOUT }
   const { plan } = await authedPost('/api/generate-workout')
   return plan
 }
 
 // Genera y persiste una dieta nueva. Devuelve el plan (content).
 export async function generateDiet() {
+  if (USE_MOCK_PLANS) { await wait(MOCK_DELAY_MS); return MOCK_DIET }
   const { plan } = await authedPost('/api/generate-diet')
   return plan
 }
@@ -48,6 +67,7 @@ export async function generateDiet() {
 // Trae el plan más reciente 'ready' de un tipo ('workout' | 'diet').
 // Devuelve el content (objeto) o null si no hay ninguno.
 export async function getLatestPlan(kind) {
+  if (USE_MOCK_PLANS) return null // en dev siempre arranca en la invitación
   if (!supabase) return null
   const { data } = await supabase.auth.getSession()
   const uid = data.session?.user?.id
