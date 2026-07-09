@@ -55,7 +55,7 @@ export default function UiDemo() {
 
       <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right">
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.1em', color: 'var(--lime)', textTransform: 'uppercase' }}>Plan activo</div>
-        <h3 style={{ fontFamily: 'Archivo Black, Archivo', fontSize: 22, margin: '6px 0 4px', textTransform: 'uppercase' }}>Glúteo & Fuerza</h3>
+        <h3 className="destello-title" style={{ fontSize: 30, margin: '6px 0 6px', color: 'var(--txt)' }}>Glúteo y Fuerza</h3>
         <p style={{ fontSize: 13, color: 'var(--txt-dim)', marginBottom: 14 }}>Semana 1 · 4 días · hecho por Brenda para ti</p>
         <div style={{ display: 'flex', gap: 18, marginBottom: 16 }}>
           <div><div style={{ fontFamily: 'Archivo', fontWeight: 900, fontSize: 20, color: 'var(--magenta-soft)' }}>4</div><div style={{ fontSize: 11, color: 'var(--txt-dim)' }}>días/sem</div></div>

@@ -852,3 +852,9 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .destello-card{background:#140c14}
 }
+/* Título principal de una DestelloCard: Anton en mayúsculas, inclinado (Torque).
+   display:inline-block + transform-origin izquierda para que el skew salga
+   limpio; padding-right para que la inclinación no corte la última letra. */
+.destello-title{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;
+  transform:skewX(-6deg);transform-origin:left center;display:inline-block;
+  letter-spacing:.02em;line-height:1.02;padding-right:.14em}
