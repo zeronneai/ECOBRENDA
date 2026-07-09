@@ -1,16 +1,26 @@
-# ⚠️ PENDIENTES CRÍTICOS antes de cualquier build a Apple / producción
+# ⚠️ PENDIENTES antes del submit a Apple / producción
 
-Lista viva de cosas que DEBEN resolverse antes de un release. Revisar antes de
-mergear `feature/ai-plans` a producción o subir a App Store / Google Play.
+Lista viva. Revisar antes de mergear `feature/ai-plans` a producción o subir a
+App Store / Google Play.
 
-## 🔴 Eliminar la pantalla de demo temporal
-- **Ruta `/demo-ui` + `src/screens/UiDemo.jsx`** — demo del kit premium (Fase 3).
-  Es solo para desarrollo/referencia. Un reviewer de Apple podría marcar una
-  ruta "demo" accesible por URL.
-- **Acción:** quitar la `<Route path="/demo-ui" ...>` de `src/App.jsx`, borrar el
-  import y eliminar `src/screens/UiDemo.jsx`.
-- **Cuándo:** al terminar la Fase 3 de rediseño (antes del build de release).
+## ✅ Hecho
+- Eliminada la pantalla de demo temporal `/demo-ui` + `UiDemo.jsx`.
+- Eliminado `WorkoutDetail.jsx` (código muerto con placeholder "próximamente").
+- Retirada la ruta `/entrena/:id` del router.
 
-## Notas
-- `WorkoutDetail` (`/entrena/:id`) ya se retiró del router (queda como fallback
-  en código, sin acceso por URL).
+## 🔴 Antes del submit
+- **S1 — Acceso premium en iOS (raíz del rechazo 5.6/3.1.1).** No se implementa
+  IAP por ahora. Estrategia: **cuenta demo premium** para el reviewer.
+    - Marcar la cuenta demo con `subscriptions.status = 'active'` en Supabase.
+    - Recomendado: **pre-generar** una rutina y una dieta para esa cuenta, para
+      que el reviewer vea el contenido premium COMPLETO (no solo la invitación).
+    - Incluir email + contraseña de la cuenta demo en las "App Review notes".
+    - No requiere cambios de código: el gate es `subscription.status==='active'`.
+- **S2 — La generación IA debe funcionar en producción.** Configurar
+  `ANTHROPIC_API_KEY` + créditos en Vercel producción y probar una generación
+  real ANTES del submit. No submitear sin esto.
+
+## 🟡 Recomendado / verificar
+- **M2 — Precios del Paywall** (`Paywall.jsx`: $99/mes, $999/año) deben coincidir
+  con los Stripe Price IDs reales (solo web/Android; en iOS están ocultos).
+- Verificar que la imagen de Cloudinary de `Celebration.jsx` cargue en el review.

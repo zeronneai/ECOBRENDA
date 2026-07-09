@@ -9,7 +9,6 @@ import Privacy from './screens/Privacy'
 import Terms from './screens/Terms'
 import Profile from './screens/Profile'
 import PremiumReturn from './screens/PremiumReturn'
-import UiDemo from './screens/UiDemo'
 
 export default function App() {
   return (
@@ -20,15 +19,12 @@ export default function App() {
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
 
-      {/* ⚠️ TEMPORAL — demo del kit premium (Fase 3). Eliminar al terminar. */}
-      <Route path="/demo-ui" element={<UiDemo />} />
-
       <Route element={<AppShell />}>
         <Route path="/" element={<Home />} />
         <Route path="/alarm" element={<Alarm />} />
         <Route path="/entrena" element={<Entrena />} />
-        {/* /entrena/:id (WorkoutDetail) retirado: era contenido hardcodeado viejo,
-            huerfano tras el rediseno IA. El archivo queda como fallback en codigo. */}
+        {/* /entrena/:id (WorkoutDetail) eliminado: contenido hardcodeado viejo,
+            huerfano tras el rediseno IA. */}
         <Route path="/nutricion" element={<Nutricion />} />
         <Route path="/progreso" element={<Progreso />} />
         <Route path="/profile" element={<Profile />} />
