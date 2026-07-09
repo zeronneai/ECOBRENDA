@@ -1026,3 +1026,21 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .nu-day-t .kc{font-size:12px;color:var(--magenta-soft)}
 .nu-day-chev{flex:none;font-size:18px;color:var(--txt-faint);width:20px;text-align:center}
 .nu-day-body{padding:0 15px 14px}
+
+/* ============================================================
+   HOME rediseño — KPIs y accesos rapidos (hm-*)
+   ============================================================ */
+.hm-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 18px}
+.hm-kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center}
+.hm-kpi .n{font-family:'Anton',sans-serif;font-weight:400;font-size:24px;line-height:1;transform:skewX(-6deg);display:inline-block;color:var(--magenta-soft)}
+.hm-kpi:nth-child(2) .n{color:var(--lime)}
+.hm-kpi:nth-child(3) .n{color:var(--gold)}
+.hm-kpi .k{font-size:10px;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+.hm-quick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px}
+.hm-qbtn{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 6px;text-align:center;cursor:pointer;color:var(--txt)}
+.hm-qbtn:active{transform:scale(.97)}
+.hm-qbtn .e{font-size:26px}
+.hm-qbtn .l{font-family:'Archivo';font-weight:800;font-size:12px;margin-top:6px}
+.hm-hero-t{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--lime)}
+.hm-hero-h{font-family:'Anton',sans-serif;font-weight:400;font-size:24px;transform:skewX(-6deg);display:inline-block;margin:6px 0 4px}
+.hm-hero-p{font-size:13px;color:var(--txt-dim);line-height:1.45;margin-bottom:14px}
