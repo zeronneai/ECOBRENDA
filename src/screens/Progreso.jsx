@@ -11,7 +11,10 @@ import PremiumLockedIOS from '../components/PremiumLockedIOS'
 import { ACHIEVEMENTS } from '../data/achievements'
 import { getWakeStreak } from '../lib/dataStore'
 import { weightSeries, workoutsByWeek, squatLungeSplit } from '../lib/progressStats'
+import { getBrendaMessage } from '../data/brendaMessages'
 import Button3D from '../components/ui/Button3D'
+
+const EMPTY_PROGRESS_MSG = getBrendaMessage('emptyProgress')
 
 const MAGENTA = '#ff1f6b'
 const LIME = '#d8ff3e'
@@ -258,7 +261,7 @@ export default function Progreso() {
           {progressLog.length === 0 ? (
             <div className="pg2-empty reveal d6">
               <div className="pg2-empty-emoji">📝</div>
-              <p>Aún no has registrado tu peso. Empieza arriba 👆</p>
+              <p>{EMPTY_PROGRESS_MSG}</p>
             </div>
           ) : (
             <div className="pg2-hist reveal d6">
