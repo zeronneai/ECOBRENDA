@@ -161,7 +161,7 @@ export default function Nutricion() {
       <section className="screen active" id="s-nutricion">
         <div className="scroll">
           <div className="topgap" />
-          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">NUTRICIÓN</div></div></div>
+          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">NUTRICIÓN</div></div></div>
           <div className="pad reveal d2">
             {isIOSNative() ? (
               <PremiumLockedIOS />
@@ -187,7 +187,7 @@ export default function Nutricion() {
     <section className="screen active" id="s-nutricion">
       <div className="scroll">
         <div className="topgap" />
-        <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">NUTRICIÓN</div></div></div>
+        <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">NUTRICIÓN</div></div></div>
         <div className="pad">
           <AiPlanFlow
             kind="diet"
