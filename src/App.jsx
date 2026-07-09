@@ -10,6 +10,7 @@ import Privacy from './screens/Privacy'
 import Terms from './screens/Terms'
 import Profile from './screens/Profile'
 import PremiumReturn from './screens/PremiumReturn'
+import UiDemo from './screens/UiDemo'
 
 export default function App() {
   return (
@@ -19,6 +20,9 @@ export default function App() {
           Apple/Google que abren la URL directo. */}
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
+
+      {/* ⚠️ TEMPORAL — demo del kit premium (Fase 3). Eliminar al terminar. */}
+      <Route path="/demo-ui" element={<UiDemo />} />
 
       <Route element={<AppShell />}>
         <Route path="/" element={<Home />} />
