@@ -938,3 +938,13 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pg2-confirm{display:flex;gap:6px}
 .pg2-confirm button{border:none;border-radius:8px;padding:6px 12px;font-family:'Archivo';font-weight:800;font-size:13px;cursor:pointer;background:var(--magenta);color:#fff}
 .pg2-confirm button.no{background:var(--surface-2);color:var(--txt-dim)}
+
+/* Acceso "Mi Progreso" en Perfil (tarjeta premium, antes huérfano) */
+.pf-progress-entry{padding:0;margin-bottom:14px}
+.pf-pe-btn{width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;cursor:pointer;padding:18px;text-align:left;color:var(--txt)}
+.pf-pe-btn:active{transform:scale(.99)}
+.pf-pe-ic{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,var(--magenta),#7a28ff)}
+.pf-pe-tx{flex:1;display:flex;flex-direction:column;gap:3px}
+.pf-pe-title{font-size:20px;color:var(--txt)}
+.pf-pe-sub{font-size:13px;color:var(--txt-dim)}
+.pf-pe-chev{flex:none;font-size:26px;color:var(--txt-dim)}

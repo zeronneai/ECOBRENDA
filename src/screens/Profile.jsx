@@ -5,6 +5,7 @@ import { useSubscription } from '../hooks/useSubscription'
 import { GOALS, LEVELS, DAYS_OPTIONS, goalLabel } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
 import { isIOSNative } from '../lib/platform'
+import DestelloCard from '../components/ui/DestelloCard'
 
 const kgToLb = (kg) => Math.round(kg * 2.20462)
 const lbToKg = (lb) => Math.round(lb / 2.20462)
@@ -91,6 +92,18 @@ export default function Profile() {
               {memberSince && <div className="pf-since">Miembro desde {memberSince}</div>}
             </div>
           </div>
+
+          {/* Acceso a Mi Progreso — antes huérfano (solo por URL). Visible arriba. */}
+          <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right" className="pf-progress-entry reveal d1">
+            <button className="pf-pe-btn" onClick={() => navigate('/progreso')}>
+              <div className="pf-pe-ic">📊</div>
+              <div className="pf-pe-tx">
+                <span className="destello-title pf-pe-title">Mi Progreso</span>
+                <span className="pf-pe-sub">Peso, gráficas, racha y logros</span>
+              </div>
+              <div className="pf-pe-chev">›</div>
+            </button>
+          </DestelloCard>
 
           {/* Suscripción */}
           <div className={'pf-sub reveal d2' + (isPremium ? ' prem' : '') + (isIOSNative() && !isPremium ? ' info-only' : '')}>
