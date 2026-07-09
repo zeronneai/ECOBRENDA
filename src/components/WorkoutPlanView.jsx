@@ -1,45 +1,110 @@
-/* Render de la RUTINA generada (Entrena). Esquema: title, note, days[] con
-   focus/warmup/exercises[]. Acordeón por día (primer día abierto). */
-import { useState } from 'react'
+/* Render premium de la RUTINA generada (Entrena). Esquema: title, note, days[]
+   con focus/warmup/exercises[]{name,sets,reps,rest,tip}.
+   - Hero (DestelloCard) con título Anton + note de Brenda + KPIs reales.
+   - Acordeón por día con progreso X/Y + barra; día completo en lima.
+   - Botón DONE por ejercicio (glass → lima ✓), persistido en localStorage; al
+     completar un día por primera vez cuenta como 1 workout (vía AppContext). */
+import { useMemo, useState } from 'react'
+import { useApp } from '../store'
+import DestelloCard from './ui/DestelloCard'
 import AiPlanFooter from './AiPlanFooter'
 
 export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDevForce }) {
-  const [open, setOpen] = useState(0)
+  const { getPlanCompletions, toggleExerciseDone } = useApp()
   const days = plan?.days || []
+  const planKey = `${plan?.title || 'plan'}::${days.length}`
+
+  const [open, setOpen] = useState(0)
+  const [comp, setComp] = useState(() => getPlanCompletions(planKey))
+
+  const kpis = useMemo(() => {
+    let ex = 0, sets = 0
+    for (const d of days) {
+      const list = d.exercises || []
+      ex += list.length
+      for (const e of list) sets += Number(e.sets) || 0
+    }
+    return { days: days.length, ex, sets }
+  }, [days])
+
+  const doneCount = (di) => Object.keys(comp[di] || {}).length
+  const isDone = (di, ei) => !!(comp[di] && comp[di][ei])
+  const dayComplete = (di) => (days[di]?.exercises?.length || 0) > 0 && doneCount(di) >= days[di].exercises.length
+
+  const toggle = (di, ei, exCount, focus) => {
+    const next = !isDone(di, ei)
+    const updated = toggleExerciseDone(planKey, di, ei, next, exCount, focus)
+    setComp(updated)
+  }
 
   return (
     <div className="ai-plan reveal d2">
-      <div className="ai-plan-note">
-        <div className="ai-plan-note-b">B</div>
-        <p>{plan.note}</p>
-      </div>
+      {/* Hero */}
+      <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right">
+        <span className="destello-title" style={{ fontSize: 26, color: 'var(--txt)' }}>{plan.title}</span>
+        <div className="wk-hero-note">
+          <div className="b">B</div>
+          <p>{plan.note}</p>
+        </div>
+        <div className="wk-kpis">
+          <div className="wk-kpi"><span className="n">{kpis.days}</span><div className="k">Días</div></div>
+          <div className="wk-kpi"><span className="n">{kpis.ex}</span><div className="k">Ejercicios</div></div>
+          <div className="wk-kpi"><span className="n">{kpis.sets}</span><div className="k">Series</div></div>
+        </div>
+      </DestelloCard>
 
-      <h2 className="ai-plan-title">{plan.title}</h2>
-
-      <div className="ai-days">
-        {days.map((d, i) => (
-          <div className={'ai-day' + (open === i ? ' open' : '')} key={i}>
-            <button className="ai-day-head" onClick={() => setOpen(open === i ? -1 : i)}>
-              <div className="ai-day-t"><b>{d.day}</b><span>{d.focus}</span></div>
-              <div className="ai-day-chev">{open === i ? '−' : '+'}</div>
-            </button>
-            {open === i && (
-              <div className="ai-day-body">
-                {d.warmup && <div className="ai-warmup"><b>🔥 Calentamiento:</b> {d.warmup}</div>}
-                {(d.exercises || []).map((e, j) => (
-                  <div className="ai-ex" key={j}>
-                    <div className="ai-ex-top">
-                      <h4>{e.name}</h4>
-                      <span className="ai-ex-sr">{e.sets}×{e.reps}</span>
-                    </div>
-                    <div className="ai-ex-meta">Descanso {e.rest}</div>
-                    {e.tip && <div className="ai-ex-tip">💡 {e.tip}</div>}
+      {/* Días */}
+      <div className="wk-days">
+        {days.map((d, di) => {
+          const total = (d.exercises || []).length
+          const done = doneCount(di)
+          const complete = dayComplete(di)
+          const pct = total ? Math.round((done / total) * 100) : 0
+          return (
+            <div className={'wk-day' + (complete ? ' done' : '')} key={di}>
+              <button className="wk-day-head" onClick={() => setOpen(open === di ? -1 : di)}>
+                <div className="wk-day-badge">{complete ? '✓' : di + 1}</div>
+                <div className="wk-day-t">
+                  <b>{d.day}</b>
+                  <span className="focus">{d.focus}</span>
+                  <div className="wk-dayprog">
+                    <div className="wk-bar"><i style={{ width: pct + '%' }} /></div>
+                    <span className="c">{done}/{total}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+                </div>
+                <div className="wk-day-chev">{open === di ? '−' : '+'}</div>
+              </button>
+
+              {open === di && (
+                <div className="wk-day-body">
+                  {d.warmup && <div className="wk-warmup"><b>🔥 Calentamiento:</b> {d.warmup}</div>}
+                  {(d.exercises || []).map((e, ei) => {
+                    const on = isDone(di, ei)
+                    return (
+                      <div className={'wk-ex' + (on ? ' done' : '')} key={ei}>
+                        <div className="wk-ex-info">
+                          <div className="wk-ex-top">
+                            <h4>{e.name}</h4>
+                            <span className="wk-ex-sr">{e.sets}×{e.reps}</span>
+                          </div>
+                          <div className="wk-ex-meta">Descanso {e.rest}</div>
+                          {e.tip && <div className="wk-ex-tip">💡 {e.tip}</div>}
+                        </div>
+                        <button
+                          className={'wk-done' + (on ? ' on' : '')}
+                          onClick={() => toggle(di, ei, total, d.focus)}
+                          aria-pressed={on}
+                        >
+                          {on ? '✓ Hecho' : 'Marcar'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
 
       <AiPlanFooter locked={locked} daysLeft={daysLeft} onRenew={onRenew} onDevForce={onDevForce} />
