@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useApp } from '../store'
 import { songUrlById } from '../data/songs'
 import { startAlarmTone } from '../lib/alarmTone'
 import { isAndroid } from '../lib/androidAlarm'
+import { getBrendaMessage } from '../data/brendaMessages'
 
 export default function AlarmRing() {
   const { profile, ringAlarm, playSong, startWorkout } = useApp()
@@ -10,6 +11,8 @@ export default function AlarmRing() {
   const exercise = ringAlarm?.exercise === 'lunges' ? 'lunges' : 'squats'
   const reps = ringAlarm?.reps ?? 10
   const time = ringAlarm?.hour || profile.wakeTime
+  // Solo visual: mensaje retador de Brenda (uno nuevo por cada sonada).
+  const alarmMsg = useMemo(() => getBrendaMessage('alarm'), [])
 
   // En Android el SERVICIO NATIVO ya reproduce la canción en loop (sonido
   // imparable), así que el JS NO arranca su propio audio (evita doble sonido).
@@ -31,6 +34,7 @@ export default function AlarmRing() {
       <div className="ring-lbl">⏰ Booty Alarm</div>
       <div className="ring-time" id="ringTime">{time}</div>
       <div className="pulse">🍑</div>
+      <div className="ring-brenda">{alarmMsg}</div>
       <div className="ring-msg">
         No se apaga hasta que completes <b style={{ color: '#fff' }}>{reps} {exercise}</b>. La cámara los cuenta.
       </div>
