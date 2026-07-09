@@ -1044,3 +1044,16 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .hm-hero-t{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--lime)}
 .hm-hero-h{font-family:'Anton',sans-serif;font-weight:400;font-size:24px;transform:skewX(-6deg);display:inline-block;margin:6px 0 4px}
 .hm-hero-p{font-size:13px;color:var(--txt-dim);line-height:1.45;margin-bottom:14px}
+
+/* ============================================================
+   ALARMA (lista) rediseño premium — al-*
+   ============================================================ */
+.al-list{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.al-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;cursor:pointer}
+.al-card.on{border-color:var(--line-strong)}
+.al-time{font-family:'Anton',sans-serif;font-weight:400;font-size:38px;line-height:1;transform:skewX(-6deg);display:inline-block;color:var(--txt)}
+.al-card:not(.on) .al-time{opacity:.4}
+.al-meta{flex:1;min-width:0}
+.al-meta .t{font-family:'Archivo';font-weight:800;font-size:14px}
+.al-meta .d{font-size:13px;color:var(--txt-dim);margin-top:2px}
+.al-new{margin-top:18px}
