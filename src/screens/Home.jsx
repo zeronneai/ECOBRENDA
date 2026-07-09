@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
@@ -5,6 +6,7 @@ import { formatDays } from '../data/onboarding'
 import { CHALLENGE_AUDIO_SRC } from '../lib/alarmAudio'
 import { isIOSNative } from '../lib/platform'
 import { getWakeStreak } from '../lib/dataStore'
+import { getBrendaMessage } from '../data/brendaMessages'
 import DestelloCard from '../components/ui/DestelloCard'
 
 function greetingFor(h) {
@@ -27,6 +29,15 @@ export default function Home() {
   const avatarLetter = firstName[0] || 'B'
   const greeting = greetingFor(new Date().getHours())
   const best = getWakeStreak().best || 0
+
+  // Saludo dinámico con la voz de Brenda según el estado de la racha.
+  // Estable por render (no reshuffle) vía useMemo sobre la categoría.
+  const streakCategory = streak > 0 ? 'homeStreak' : best > 0 ? 'homeStreakBroken' : 'homeNoWorkoutYet'
+  const brendaGreeting = useMemo(
+    () => getBrendaMessage(streakCategory, { streak }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [streakCategory],
+  )
 
   // Alarma principal (la primera de la lista real).
   const primary = alarms[0]
@@ -57,9 +68,7 @@ export default function Home() {
         <div className="streak reveal d2">
           <div className="lbl">Racha actual</div>
           <div className="big"><span id="streakNum">{streak}</span><span>días</span></div>
-          <div className="sub" id="streakSub">
-            {streak > 0 ? '¡Vas con todo! Sigue tu racha 🔥' : 'Empieza hoy tu primera racha 🔥'}
-          </div>
+          <div className="sub" id="streakSub">{brendaGreeting}</div>
           <div className="week">
             {weekChart.map((d, i) => (
               <div key={i} className={'day' + (d.done ? ' done' : '') + (d.today ? ' today' : '')}>{d.key}</div>
