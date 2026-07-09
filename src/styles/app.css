@@ -774,3 +774,81 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .ai-renew-btn:active{transform:scale(.98)}
 .ai-devforce{display:block;margin:12px auto 0;background:none;border:1px dashed var(--line-strong);color:var(--txt-faint);
   padding:8px 14px;border-radius:10px;font-family:'Archivo';font-size:12px;cursor:pointer}
+
+/* ============================================================
+   KIT PREMIUM — Rediseño Fase 3 (variables + componentes ui/)
+   Solo AGREGA. Reutiliza la paleta existente. CSS puro.
+   ============================================================ */
+:root{
+  /* Sombras */
+  --shadow-3d:0 6px 0 #a8104a;
+  --shadow-3d-press:0 2px 0 #a8104a;
+  --shadow-glow-magenta:0 10px 30px rgba(255,26,107,.4);
+  --shadow-glow-lima:0 10px 30px rgba(198,255,0,.28);
+  --shadow-card-deep:0 20px 50px rgba(0,0,0,.55);
+  /* Glass */
+  --glass-magenta-bg:rgba(255,26,107,.14);
+  --glass-lima-bg:rgba(198,255,0,.12);
+  --glass-border:rgba(255,255,255,.16);
+  --glass-inner-light:inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+/* — 1) Button3D — acción principal — */
+.btn3d{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:16px;padding:16px 26px;cursor:pointer;
+  font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.03em;text-transform:uppercase;color:#fff;
+  background:linear-gradient(180deg,#ff1a6b,#e91e63);
+  box-shadow:var(--shadow-3d),var(--shadow-glow-magenta);
+  border-top:1px solid rgba(255,255,255,.35);
+  transition:transform .08s ease,box-shadow .08s ease}
+.btn3d.full{display:flex;width:100%}
+.btn3d:active:not(:disabled){transform:translateY(4px);box-shadow:var(--shadow-3d-press),0 6px 18px rgba(255,26,107,.32)}
+.btn3d:disabled{opacity:.5;cursor:not-allowed;box-shadow:var(--shadow-3d-press)}
+
+/* — 2) GlassButton — acción secundaria / DONE — */
+.glassbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:14px;padding:14px 22px;cursor:pointer;
+  font-family:'Archivo';font-weight:800;font-size:15px;letter-spacing:.02em;color:#fff;
+  background:var(--glass-magenta-bg);border:1px solid var(--glass-border);
+  box-shadow:var(--glass-inner-light);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  transition:transform .08s ease,background .2s ease}
+.glassbtn.full{display:flex;width:100%}
+.glassbtn--lima{background:var(--glass-lima-bg);color:var(--lime)}
+.glassbtn:active:not(:disabled){transform:scale(.98)}
+.glassbtn:disabled{opacity:.5;cursor:not-allowed}
+/* Fallback gama baja (sin backdrop-filter): color sólido */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glassbtn{background:#2a121e}
+  .glassbtn--lima{background:#20260a}
+}
+
+/* — 3) GlowButton — estados especiales / urgencia — */
+.glowbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:14px;padding:14px 22px;cursor:pointer;
+  font-family:'Archivo';font-weight:900;font-size:15px;letter-spacing:.03em;text-transform:uppercase;
+  background:#150c15;color:var(--magenta-soft);
+  border:1px solid var(--magenta);
+  box-shadow:0 0 20px rgba(255,26,107,.45),inset 0 0 12px rgba(255,26,107,.12);
+  transition:transform .08s ease,box-shadow .2s ease}
+.glowbtn.full{display:flex;width:100%}
+.glowbtn--lima{color:var(--lime);border-color:var(--lime);box-shadow:0 0 20px rgba(198,255,0,.35),inset 0 0 12px rgba(198,255,0,.1)}
+.glowbtn:active:not(:disabled){transform:scale(.98);box-shadow:0 0 10px rgba(255,26,107,.3),inset 0 0 8px rgba(255,26,107,.1)}
+.glowbtn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+
+/* — 4) DestelloCard — cards destacadas — */
+.destello-card{position:relative;overflow:hidden;border-radius:var(--radius);padding:20px;
+  background:rgba(20,12,20,.72);border:1px solid var(--line-strong);
+  box-shadow:var(--shadow-card-deep);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.destello-card>*{position:relative;z-index:1}
+.destello-card::before{content:'';position:absolute;z-index:0;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,var(--dc-glow,var(--magenta-glow)),transparent 68%);
+  filter:blur(6px);pointer-events:none}
+.destello-card.dc-top-right::before{top:-90px;right:-70px}
+.destello-card.dc-top-left::before{top:-90px;left:-70px}
+.destello-card.dc-bottom-right::before{bottom:-90px;right:-70px}
+.destello-card.dc-bottom-left::before{bottom:-90px;left:-70px}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .destello-card{background:#140c14}
+}
