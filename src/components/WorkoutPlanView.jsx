@@ -1,8 +1,9 @@
 /* Render de la RUTINA generada (Entrena). Esquema: title, note, days[] con
    focus/warmup/exercises[]. Acordeón por día (primer día abierto). */
 import { useState } from 'react'
+import AiPlanFooter from './AiPlanFooter'
 
-export default function WorkoutPlanView({ plan, onRegenerate }) {
+export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDevForce }) {
   const [open, setOpen] = useState(0)
   const days = plan?.days || []
 
@@ -41,7 +42,7 @@ export default function WorkoutPlanView({ plan, onRegenerate }) {
         ))}
       </div>
 
-      <button className="ai-regen" onClick={onRegenerate}>↻ Generar otra rutina</button>
+      <AiPlanFooter locked={locked} daysLeft={daysLeft} onRenew={onRenew} onDevForce={onDevForce} />
     </div>
   )
 }

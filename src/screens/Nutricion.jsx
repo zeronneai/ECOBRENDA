@@ -193,7 +193,7 @@ export default function Nutricion() {
             kind="diet"
             intro={INTRO}
             generate={generateDiet}
-            renderPlan={(plan, onRegen) => <DietPlanView plan={plan} onRegenerate={onRegen} />}
+            renderPlan={(plan, meta) => <DietPlanView plan={plan} {...meta} />}
           />
         </div>
       </div>

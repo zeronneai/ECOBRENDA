@@ -1,8 +1,9 @@
 /* Render de la DIETA generada (Nutrición). Esquema: title, note, macros{},
    days[] con meals[]. Macros destacados + acordeón por día (primer día abierto). */
 import { useState } from 'react'
+import AiPlanFooter from './AiPlanFooter'
 
-export default function DietPlanView({ plan, onRegenerate }) {
+export default function DietPlanView({ plan, locked, daysLeft, onRenew, onDevForce }) {
   const [open, setOpen] = useState(0)
   const days = plan?.days || []
   const m = plan?.macros || {}
@@ -50,7 +51,7 @@ export default function DietPlanView({ plan, onRegenerate }) {
         ))}
       </div>
 
-      <button className="ai-regen" onClick={onRegenerate}>↻ Generar otro plan</button>
+      <AiPlanFooter locked={locked} daysLeft={daysLeft} onRenew={onRenew} onDevForce={onDevForce} />
     </div>
   )
 }

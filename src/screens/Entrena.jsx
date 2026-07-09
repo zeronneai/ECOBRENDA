@@ -82,7 +82,7 @@ export default function Entrena() {
             kind="workout"
             intro={INTRO}
             generate={generateWorkout}
-            renderPlan={(plan, onRegen) => <WorkoutPlanView plan={plan} onRegenerate={onRegen} />}
+            renderPlan={(plan, meta) => <WorkoutPlanView plan={plan} {...meta} />}
           />
         </div>
       </div>
