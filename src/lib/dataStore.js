@@ -25,7 +25,8 @@ const ACTIVITY_FACTOR = 1.5
 const DEFAULT_STATE = {
   version: SCHEMA_VERSION,
   // { name, age, gender, weight, height, goal, level, daysPerWeek, wakeTime,
-  //   exercise, reps, allergies:[], dietPref, dislikes, createdAt }
+  //   exercise, reps, allergies:[], dietPref, dislikes, createdAt,
+  //   aiConsent:{ accepted:true, date:ISO } }  ← consentimiento de IA (5.1.2i)
   profile: null,
   subscription: { status: 'inactive', plan: null, currentPeriodEnd: null },
   wakeStreak: { current: 0, best: 0, lastCompleted: '' }, // racha de la alarma diaria

@@ -49,6 +49,7 @@ function profileRowFromLocal(p) {
     allergies: Array.isArray(p.allergies) ? p.allergies : null,
     diet_pref: p.dietPref ?? null,
     dislikes: dislikesToArray(p.dislikes),
+    ai_consent_at: p.aiConsent?.date ?? null,
   }
 }
 
@@ -79,6 +80,9 @@ function applyProfileRow(r) {
     allergies: r.allergies ?? [],
     dietPref: r.diet_pref ?? null,
     dislikes: Array.isArray(r.dislikes) ? r.dislikes.join(', ') : (r.dislikes ?? ''),
+    // Consentimiento de IA: reconstruye el flag desde la columna (sobrevive
+    // reinstalación si inició sesión).
+    ...(r.ai_consent_at ? { aiConsent: { accepted: true, date: r.ai_consent_at } } : {}),
     onboarded: true, // si ya tiene perfil en la nube, ya hizo onboarding
     ...(r.created_at ? { createdAt: r.created_at } : {}),
   })
