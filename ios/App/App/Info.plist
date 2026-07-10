@@ -47,6 +47,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Booty Alarm usa la cámara para contar tus repeticiones en tiempo real. El video no se sube a ningún lado.</string>
 	<key>NSMicrophoneUsageDescription</key>
