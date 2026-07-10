@@ -1,8 +1,5 @@
 {
   "appId": "com.zeronne.bootyalarm",
   "appName": "Booty Alarm",
-  "webDir": "dist",
-  "ios": {
-    "scheme": "Booty Alarm"
-  }
+  "webDir": "dist"
 }

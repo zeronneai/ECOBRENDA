@@ -12,6 +12,7 @@ import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
 import { isSupabaseConfigured } from '../lib/supabase'
 import * as cloudSync from '../lib/cloudSync'
 import { startCheckout, openBillingPortal, closeNativeBrowser } from '../lib/stripeClient'
+import { deleteAccountRequest } from '../lib/account'
 import { Capacitor } from '@capacitor/core'
 import { App as CapApp } from '@capacitor/app'
 
@@ -549,6 +550,27 @@ export function AppProvider({ children }) {
     setSession(null)
   }, [])
 
+  // Borra TODOS los datos locales (bf:/bac:) y reinicia al onboarding.
+  const wipeLocalAndRestart = () => {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith('bf:') || k.startsWith('bac:'))
+      .forEach((k) => localStorage.removeItem(k))
+    window.location.reload()
+  }
+
+  // Elimina la cuenta (Apple 5.1.1v). Con cuenta en la nube: borra en el
+  // servidor (cascada + cancela Stripe), cierra sesión y limpia local. Solo
+  // local: limpia local. Lanza error si el servidor falla (el caller lo maneja).
+  const deleteAccount = useCallback(async () => {
+    if (session) {
+      await deleteAccountRequest() // throws si falla → no limpiamos nada
+      try { await authSignOut() } catch { /* la sesión ya no existe */ }
+      cloudSync.clearUser()
+      setSession(null)
+    }
+    wipeLocalAndRestart()
+  }, [session])
+
   // ── Stripe: re-jala suscripción con polling tras volver del pago ───────────
   // Después de pagar, el webhook puede tardar 1-3s en escribir la fila. Hacemos
   // varios intentos hasta ver status='active' (o agotar tries).
@@ -615,7 +637,7 @@ export function AppProvider({ children }) {
     settings, saveSettings, resetProgress,
     needsPriming, primePermissions,
     cloudEnabled: isSupabaseConfigured,
-    session, authOpen, authView, openAuth, closeAuth, handleAuthed, signOutAccount,
+    session, authOpen, authView, openAuth, closeAuth, handleAuthed, signOutAccount, deleteAccount,
     needsAccount, accountRecap,
     checkoutPlan, openPortal, refreshPremium,
     achievementQueue, dismissAchievement,
