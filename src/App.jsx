@@ -3,7 +3,6 @@ import AppShell from './components/AppShell'
 import Home from './screens/Home'
 import Alarm from './screens/Alarm'
 import Entrena from './screens/Entrena'
-import WorkoutDetail from './screens/WorkoutDetail'
 import Nutricion from './screens/Nutricion'
 import Progreso from './screens/Progreso'
 import Privacy from './screens/Privacy'
@@ -24,7 +23,8 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/alarm" element={<Alarm />} />
         <Route path="/entrena" element={<Entrena />} />
-        <Route path="/entrena/:id" element={<WorkoutDetail />} />
+        {/* /entrena/:id (WorkoutDetail) eliminado: contenido hardcodeado viejo,
+            huerfano tras el rediseno IA. */}
         <Route path="/nutricion" element={<Nutricion />} />
         <Route path="/progreso" element={<Progreso />} />
         <Route path="/profile" element={<Profile />} />

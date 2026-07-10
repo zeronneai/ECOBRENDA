@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../store'
-import { GOALS, LEVELS, GENDERS, DAYS_OPTIONS, DAY_LABELS } from '../data/onboarding'
+import { GOALS, LEVELS, GENDERS, DAYS_OPTIONS, DAY_LABELS, ALLERGIES, DIET_PREFS } from '../data/onboarding'
 import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
 import RulerPicker from '../components/RulerPicker'
 import WheelPicker from '../components/WheelPicker'
 
-const OB_TOTAL = 8
+const OB_TOTAL = 11
 
 const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1))
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
@@ -34,6 +34,9 @@ export default function Onboarding() {
   const [goal, setGoal] = useState('tonificar')
   const [level, setLevel] = useState('principiante')
   const [daysPerWeek, setDaysPerWeek] = useState(4)
+  const [allergies, setAllergies] = useState([])
+  const [dietPref, setDietPref] = useState('todo')
+  const [dislikes, setDislikes] = useState('')
   const [hour, setHour] = useState('6')
   const [minute, setMinute] = useState('30')
   const [ampm, setAmpm] = useState('AM')
@@ -69,6 +72,15 @@ export default function Onboarding() {
     setAlarmDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort((a, b) => a - b)))
   }
 
+  // Alergias: "ninguna" es exclusiva. Marcarla limpia el resto; marcar otra la quita.
+  const toggleAllergy = (id) => {
+    setAllergies((prev) => {
+      if (id === 'ninguna') return prev.includes('ninguna') ? [] : ['ninguna']
+      const base = prev.filter((x) => x !== 'ninguna')
+      return base.includes(id) ? base.filter((x) => x !== id) : [...base, id]
+    })
+  }
+
   const computeWakeTime = () => {
     let H = parseInt(hour, 10)
     if (ampm === 'PM' && H !== 12) H += 12
@@ -90,6 +102,9 @@ export default function Onboarding() {
       goal,
       level,
       daysPerWeek,
+      allergies,
+      dietPref,
+      dislikes: dislikes.trim(),
       wakeTime,
       exercise,
       reps,
@@ -251,8 +266,64 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* 7 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
+        {/* 7 — ALERGIAS (multi-select) */}
         {step === 7 && (
+          <div className="ob-step active">
+            <div className="ob-kick">Tu alimentación</div>
+            <div className="ob-q">¿ALGUNA ALERGIA<br />O INTOLERANCIA?</div>
+            <div className="ob-sub">Brenda evitará estos alimentos en tu plan. Marca todas las que apliquen.</div>
+            <div className="allergy-grid">
+              {ALLERGIES.map((a) => (
+                <button
+                  type="button"
+                  key={a.id}
+                  className={'allergy-chip' + (allergies.includes(a.id) ? ' sel' : '')}
+                  onClick={() => toggleAllergy(a.id)}
+                >
+                  <span className="ae">{a.emoji}</span>
+                  <span className="al">{a.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 8 — PREFERENCIA DIETÉTICA (single-select) */}
+        {step === 8 && (
+          <div className="ob-step active">
+            <div className="ob-kick">Tu alimentación</div>
+            <div className="ob-q">¿CÓMO PREFIERES<br />COMER?</div>
+            <div className="ob-sub">Brenda arma tu dieta con base en esto.</div>
+            <div>
+              {DIET_PREFS.map((d) => (
+                <div key={d.id} className={'opt' + (d.id === dietPref ? ' sel' : '')} onClick={() => setDietPref(d.id)}>
+                  <div className="oe">{d.emoji}</div>
+                  <div className="ol"><b>{d.label}</b><span>{d.desc}</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 9 — ALIMENTOS QUE NO TE GUSTAN (texto libre, opcional) */}
+        {step === 9 && (
+          <div className="ob-step active">
+            <div className="ob-kick">Tu alimentación</div>
+            <div className="ob-q">¿ALGO QUE NO<br />TE GUSTE?</div>
+            <div className="ob-sub">Opcional. Escribe alimentos que prefieres evitar (ej. brócoli, atún). Puedes saltarlo.</div>
+            <input
+              className="ob-name-input"
+              placeholder="Ej. brócoli, hígado, cilantro…"
+              autoComplete="off"
+              value={dislikes}
+              onChange={(e) => setDislikes(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') next() }}
+            />
+          </div>
+        )}
+
+        {/* 10 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
+        {step === 10 && (
           <div className="ob-step active">
             <div className="ob-kick">Despertar Activo</div>
             <div className="ob-q">CONFIGURA<br />TU ALARMA</div>

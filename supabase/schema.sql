@@ -21,6 +21,9 @@ create table if not exists public.profiles (
   wake_time       text,
   alarm_exercise  text,
   alarm_reps      int,
+  allergies       text[],
+  diet_pref       text,
+  dislikes        text[],
   created_at      timestamptz not null default now()
 );
 
@@ -95,6 +98,23 @@ create table if not exists public.settings (
   notifications  jsonb default '{}'::jsonb
 );
 
+-- ── AI_PLANS (planes de dieta/rutina generados por IA) ───────────────────────
+-- El cliente SOLO lee; la Vercel Function con service_role es la única que
+-- escribe. Ver también supabase/ai_plans.sql (misma definición, idempotente).
+create table if not exists public.ai_plans (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references auth.users(id) on delete cascade,
+  kind          text not null,                      -- 'diet' | 'workout'
+  content       jsonb,
+  inputs        jsonb,
+  model         text,
+  status        text default 'generating',           -- 'generating' | 'ready' | 'error'
+  locked_until  timestamptz,
+  created_at    timestamptz not null default now()
+);
+create index if not exists ai_plans_user_kind_idx
+  on public.ai_plans (user_id, kind, created_at desc);
+
 -- ============================================================================
 -- RLS: activar en todas las tablas
 -- ============================================================================
@@ -106,6 +126,7 @@ alter table public.wake_streaks   enable row level security;
 alter table public.alarms         enable row level security;
 alter table public.totals         enable row level security;
 alter table public.settings       enable row level security;
+alter table public.ai_plans       enable row level security;
 
 -- ============================================================================
 -- POLÍTICAS: cada usuario solo accede a SUS filas.
@@ -191,3 +212,7 @@ create policy "settings_select" on public.settings for select using (auth.uid() 
 create policy "settings_insert" on public.settings for insert with check (auth.uid() = user_id);
 create policy "settings_update" on public.settings for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "settings_delete" on public.settings for delete using (auth.uid() = user_id);
+
+-- AI_PLANS (solo SELECT del dueño; la Function con service_role escribe)
+drop policy if exists "ai_plans_select" on public.ai_plans;
+create policy "ai_plans_select" on public.ai_plans for select using (auth.uid() = user_id);

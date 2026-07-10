@@ -6,7 +6,15 @@ import { calculateMacros } from '../lib/dataStore'
 import { isIOSNative } from '../lib/platform'
 import PremiumLockedIOS from '../components/PremiumLockedIOS'
 import { PLANS, RECIPES, RECIPE_CATEGORIES, SUPPLEMENTS, getPlan, getRecipe, getSupplement, recipeDifficultyColor, supplementColor } from '../data/nutrition'
+import { USE_MOCK_PLANS, generateDiet } from '../lib/aiPlans'
+import AiPlanFlow from '../components/AiPlanFlow'
+import DietPlanView from '../components/DietPlanView'
 
+/* NOTA: el contenido hardcodeado viejo (PLANS/RECIPES/SUPPLEMENTS + PlanDetail/
+   RecipeDetail/MacroWidget) queda en el código como FALLBACK pero ya NO se
+   renderiza — ahora Nutrición muestra la dieta generada por IA (AiPlanFlow). */
+
+// eslint-disable-next-line no-unused-vars
 function MacroWidget({ profile }) {
   const m = calculateMacros(profile)
   return (
@@ -22,6 +30,7 @@ function MacroWidget({ profile }) {
   )
 }
 
+// eslint-disable-next-line no-unused-vars
 function PlanDetail({ plan, profile, onBack }) {
   const [open, setOpen] = useState({})
   const m = calculateMacros(profile)
@@ -95,6 +104,7 @@ function PlanDetail({ plan, profile, onBack }) {
   )
 }
 
+// eslint-disable-next-line no-unused-vars
 function RecipeDetail({ recipe, onBack }) {
   return (
     <>
@@ -131,21 +141,27 @@ function RecipeDetail({ recipe, onBack }) {
     </>
   )
 }
+// Referencias para conservar imports de fallback sin romper el build.
+void PLANS; void RECIPES; void RECIPE_CATEGORIES; void SUPPLEMENTS; void getPlan; void getRecipe; void supplementColor
+
+const INTRO = {
+  kick: 'Tu plan de comidas personalizado',
+  title: 'BRENDA TIENE TU PLAN DE COMIDAS',
+  sub: 'Hecho para tu cuerpo y tus metas. ¿Vas a poder seguirlo? 💪',
+  cta: 'GENERAR MI PLAN CON BRENDA',
+}
 
 export default function Nutricion() {
-  const { profile, openSheet } = useApp()
+  const { openSheet } = useApp()
   const { isPremium } = useSubscription()
-  const [tab, setTab] = useState('planes')
-  const [planId, setPlanId] = useState(null)
-  const [recipeId, setRecipeId] = useState(null)
-  const [recipeCat, setRecipeCat] = useState('Todos')
 
-  if (!isPremium) {
+  // Gate premium (PRODUCCIÓN). El bypass solo ocurre con USE_MOCK_PLANS (dev).
+  if (!isPremium && !USE_MOCK_PLANS) {
     return (
       <section className="screen active" id="s-nutricion">
         <div className="scroll">
           <div className="topgap" />
-          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">NUTRICIÓN</div></div></div>
+          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">NUTRICIÓN</div></div></div>
           <div className="pad reveal d2">
             {isIOSNative() ? (
               <PremiumLockedIOS />
@@ -167,102 +183,19 @@ export default function Nutricion() {
     )
   }
 
-  const plan = planId ? getPlan(planId) : null
-  const recipe = recipeId ? getRecipe(recipeId) : null
-  const recipeList = RECIPES.filter((r) => recipeCat === 'Todos' || r.category === recipeCat)
-
   return (
     <section className="screen active" id="s-nutricion">
       <div className="scroll">
-        {plan ? (
-          <PlanDetail plan={plan} profile={profile} onBack={() => setPlanId(null)} />
-        ) : recipe ? (
-          <RecipeDetail recipe={recipe} onBack={() => setRecipeId(null)} />
-        ) : (
-          <>
-            <div className="topgap" />
-            <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">NUTRICIÓN</div></div></div>
-
-            <div className="subtabs pad reveal d2">
-              <button className={'subtab' + (tab === 'planes' ? ' sel' : '')} onClick={() => setTab('planes')}>Planes</button>
-              <button className={'subtab' + (tab === 'recetas' ? ' sel' : '')} onClick={() => setTab('recetas')}>Recetas</button>
-              <button className={'subtab' + (tab === 'suplementos' ? ' sel' : '')} onClick={() => setTab('suplementos')}>Suplementos</button>
-            </div>
-
-            {tab === 'planes' && (
-              <div className="pad">
-                <div className="brenda-signature reveal d3" style={{ margin: '0 0 16px' }}>
-                  <div className="ba">B</div>
-                  <div className="bt"><b>Tip de Brenda</b><br /><span>Tu cuerpo se construye en la cocina. Apunta a tu proteína cada día y el resto fluye 💕</span></div>
-                </div>
-
-                <MacroWidget profile={profile} />
-
-                <div className="nplan-list reveal d4">
-                  {PLANS.map((p) => (
-                    <div className="nplan-card" key={p.id} onClick={() => setPlanId(p.id)}>
-                      <div className="nplan-thumb" style={{ background: p.gradient }}>{p.emoji}</div>
-                      <div className="nplan-info">
-                        <h4>{p.title}</h4>
-                        <p>{p.tagline}</p>
-                      </div>
-                      <div className="nplan-arrow">›</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {tab === 'recetas' && (
-              <>
-                <div className="cat-row reveal d3">
-                  {RECIPE_CATEGORIES.map((c) => (
-                    <button key={c} className={'cat-pill' + (recipeCat === c ? ' sel' : '')} onClick={() => setRecipeCat(c)}>{c}</button>
-                  ))}
-                </div>
-                {recipeList.length === 0 ? (
-                  <div className="wempty pad reveal d4">
-                    <div className="wempty-emoji">🔍</div>
-                    <h4>Sin recetas</h4>
-                    <p>No hay recetas en esta categoría.</p>
-                  </div>
-                ) : (
-                  <div className="rgrid pad reveal d4">
-                    {recipeList.map((r) => (
-                      <div className="rcard" key={r.id} onClick={() => setRecipeId(r.id)}>
-                        <div className="rcard-emoji">{r.emoji}</div>
-                        <h4>{r.name}</h4>
-                        <div className="rcard-meta">
-                          {r.time} min · <span style={{ color: recipeDifficultyColor(r.difficulty) }}>{r.difficulty}</span> · {r.kcal} cal
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-            {tab === 'suplementos' && (
-              <div className="pad reveal d3">
-                <div className="supp-disclaimer">
-                  ⚠ Los suplementos complementan una buena alimentación, no la reemplazan. Consulta a un profesional de la salud antes de empezar.
-                </div>
-                {SUPPLEMENTS.map((s) => (
-                  <div className="supp-card" key={s.id} style={{ '--acc': supplementColor(s.color) }}>
-                    <div className="supp-emoji">{s.emoji}</div>
-                    <div className="supp-info">
-                      <h4>{s.name}</h4>
-                      <p>{s.desc}</p>
-                      <div className="supp-meta">
-                        <span><b>Dosis:</b> {s.dose}</span>
-                        <span><b>Cuándo:</b> {s.timing}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+        <div className="topgap" />
+        <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">NUTRICIÓN</div></div></div>
+        <div className="pad">
+          <AiPlanFlow
+            kind="diet"
+            intro={INTRO}
+            generate={generateDiet}
+            renderPlan={(plan, meta) => <DietPlanView plan={plan} {...meta} />}
+          />
+        </div>
       </div>
     </section>
   )

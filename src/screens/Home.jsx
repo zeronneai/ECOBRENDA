@@ -1,9 +1,13 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
-import { goalLabel, formatDays } from '../data/onboarding'
+import { formatDays } from '../data/onboarding'
 import { CHALLENGE_AUDIO_SRC } from '../lib/alarmAudio'
 import { isIOSNative } from '../lib/platform'
+import { getWakeStreak } from '../lib/dataStore'
+import { getBrendaMessage } from '../data/brendaMessages'
+import DestelloCard from '../components/ui/DestelloCard'
 
 function greetingFor(h) {
   return h < 12 ? 'Buen día' : h < 19 ? 'Buena tarde' : 'Buena noche'
@@ -18,18 +22,22 @@ const QUICK_CHALLENGES = [
 
 export default function Home() {
   const navigate = useNavigate()
-  const { profile, plan, streak, weekChart, challengesDone, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
+  const { profile, streak, weekChart, challengesDone, totals, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
   const { isPremium } = useSubscription()
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
   const avatarLetter = firstName[0] || 'B'
   const greeting = greetingFor(new Date().getHours())
+  const best = getWakeStreak().best || 0
 
-  const promoTitle = 'PLAN ' + plan.workout.title.toUpperCase()
-  const promoDesc = `Brenda preparó "${plan.workout.title}" para tu meta de ${goalLabel(profile.goal).toLowerCase()}, calibrado a tus ${profile.weight}kg y ${profile.height}cm.`
-
-  const m = plan.macros
-  const today = plan.workout.days[0]
+  // Saludo dinámico con la voz de Brenda según el estado de la racha.
+  // Estable por render (no reshuffle) vía useMemo sobre la categoría.
+  const streakCategory = streak > 0 ? 'homeStreak' : best > 0 ? 'homeStreakBroken' : 'homeNoWorkoutYet'
+  const brendaGreeting = useMemo(
+    () => getBrendaMessage(streakCategory, { streak }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [streakCategory],
+  )
 
   // Alarma principal (la primera de la lista real).
   const primary = alarms[0]
@@ -51,17 +59,16 @@ export default function Home() {
         <div className="hdr reveal d1">
           <div>
             <div className="hi" id="greeting">{greeting}</div>
-            <div className="name" id="userName">{firstName}</div>
+            <div className="name destello-title" id="userName">{firstName}</div>
           </div>
           <div className="avatar" id="avatarLetter">{avatarLetter}</div>
         </div>
 
+        {/* Racha */}
         <div className="streak reveal d2">
           <div className="lbl">Racha actual</div>
           <div className="big"><span id="streakNum">{streak}</span><span>días</span></div>
-          <div className="sub" id="streakSub">
-            {streak > 0 ? '¡Vas con todo! Sigue tu racha 🔥' : 'Empieza hoy tu primera racha 🔥'}
-          </div>
+          <div className="sub" id="streakSub">{brendaGreeting}</div>
           <div className="week">
             {weekChart.map((d, i) => (
               <div key={i} className={'day' + (d.done ? ' done' : '') + (d.today ? ' today' : '')}>{d.key}</div>
@@ -69,6 +76,14 @@ export default function Home() {
           </div>
         </div>
 
+        {/* KPIs reales */}
+        <div className="hm-kpis reveal d2">
+          <div className="hm-kpi"><span className="n">{totals.workouts || 0}</span><div className="k">Entrenos</div></div>
+          <div className="hm-kpi"><span className="n">{totals.reps || 0}</span><div className="k">Reps</div></div>
+          <div className="hm-kpi"><span className="n">{best}</span><div className="k">Mejor racha</div></div>
+        </div>
+
+        {/* Alarma (funcionalidad intacta) */}
         <div className="sec-h reveal d3">
           <h2>TU ALARMA</h2>
           <span className="more" onClick={() => primary && openAlarmEditor(primary)}>EDITAR</span>
@@ -93,6 +108,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Retos rápidos (funcionalidad intacta) */}
         <div className="sec-h reveal d4">
           <h2>RETOS RÁPIDOS</h2>
           <span className="more">{challengesDone} COMPLETADOS</span>
@@ -112,51 +128,32 @@ export default function Home() {
           ))}
         </div>
 
+        {/* Brenda Fitness */}
         <div className="sec-h reveal d5"><h2>BRENDA FITNESS</h2></div>
 
-        {!isPremium && (
-          <div id="brendaLocked" className="reveal d5">
-            <div className="brenda-promo">
-              <div className="glow" /><div className="shimmer" />
-              <div className="lock-pill">🔒 PREMIUM</div>
-              <div className="inner">
-                <div className="kick">Nutrición + Rutinas</div>
-                <h3 id="promoTitle">{promoTitle}</h3>
-                <p id="promoDesc">{promoDesc}</p>
-                {!isIOSNative() && (
-                  <button className="unlock" onClick={() => openSheet('paywall')}>DESBLOQUEAR →</button>
-                )}
+        {isPremium ? (
+          <div className="reveal d5">
+            <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right">
+              <div className="hm-hero-t">✦ Tu plan con Brenda</div>
+              <div><span className="hm-hero-h">RUTINA Y DIETA LISTAS</span></div>
+              <p className="hm-hero-p">Tu rutina y tu plan de comidas personalizados te esperan. ¿Le entras hoy?</p>
+              <div className="hm-quick">
+                <div className="hm-qbtn" onClick={() => navigate('/entrena')}><div className="e">🏋️</div><div className="l">Entrena</div></div>
+                <div className="hm-qbtn" onClick={() => navigate('/nutricion')}><div className="e">🥗</div><div className="l">Nutrición</div></div>
+                <div className="hm-qbtn" onClick={() => navigate('/progreso')}><div className="e">📊</div><div className="l">Progreso</div></div>
               </div>
-            </div>
+            </DestelloCard>
           </div>
-        )}
-
-        {isPremium && (
-          <div id="brendaUnlocked">
-            <div className="macros">
-              <div className="macro kcal"><div className="v" id="mKcal">{m.kcal}</div><div className="k">kcal</div></div>
-              <div className="macro prot"><div className="v" id="mProt">{m.protein}g</div><div className="k">proteína</div></div>
-              <div className="macro carb"><div className="v" id="mCarb">{m.carbs}g</div><div className="k">carbos</div></div>
-            </div>
-            <div className="brenda-live" style={{ marginTop: 14 }}>
-              <div className="bcard" onClick={() => navigate('/entrena')}>
-                <div className="ic" style={{ background: 'rgba(255,31,107,.15)' }}>🏋️</div>
-                <h4>RUTINA HOY</h4>
-                <p id="todayWk">{today.focus} · {today.ex.length} ejercicios</p>
-              </div>
-              <div className="bcard" onClick={() => openSheet('mealsSheet')}>
-                <div className="ic" style={{ background: 'rgba(216,255,62,.13)' }}>🥗</div>
-                <h4>COMIDAS</h4>
-                <p>5 comidas · tu plan</p>
-              </div>
-            </div>
-            <div className="brenda-signature">
-              <div className="ba">B</div>
-              <div className="bt">
-                <b>Brenda Jazmín</b><br />
-                <span id="sigText">{plan.workout.note}</span>
-              </div>
-            </div>
+        ) : (
+          <div id="brendaLocked" className="reveal d5">
+            <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right">
+              <div className="lock-pill" style={{ position: 'static', display: 'inline-block', marginBottom: 10 }}>🔒 PREMIUM</div>
+              <div><span className="hm-hero-h">BRENDA FITNESS</span></div>
+              <p className="hm-hero-p">Rutinas y dieta 100% personalizadas por IA para tu meta, tu nivel y tus días. Además, tu progreso con gráficas.</p>
+              {!isIOSNative() && (
+                <div className="hm-hero-cta"><button className="unlock" onClick={() => openSheet('paywall')}>DESBLOQUEAR →</button></div>
+              )}
+            </DestelloCard>
           </div>
         )}
       </div>
