@@ -24,6 +24,7 @@ create table if not exists public.profiles (
   allergies       text[],
   diet_pref       text,
   dislikes        text[],
+  ai_consent_at   timestamptz,
   created_at      timestamptz not null default now()
 );
 

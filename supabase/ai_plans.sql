@@ -43,3 +43,7 @@ create policy "ai_plans_select"
 alter table public.profiles add column if not exists allergies text[];
 alter table public.profiles add column if not exists diet_pref text;
 alter table public.profiles add column if not exists dislikes  text[];
+
+-- Consentimiento de IA (Apple 5.1.2(i)): fecha en que la usuaria aceptó que sus
+-- datos se usen con la herramienta de IA (Anthropic) para generar sus planes.
+alter table public.profiles add column if not exists ai_consent_at timestamptz;
