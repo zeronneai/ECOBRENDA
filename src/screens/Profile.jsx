@@ -6,6 +6,7 @@ import { GOALS, LEVELS, DAYS_OPTIONS, goalLabel } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
 import { isIOSNative } from '../lib/platform'
 import DestelloCard from '../components/ui/DestelloCard'
+import AiConsentModal from '../components/AiConsentModal'
 
 const kgToLb = (kg) => Math.round(kg * 2.20462)
 const lbToKg = (lb) => Math.round(lb / 2.20462)
@@ -28,6 +29,7 @@ export default function Profile() {
   const [inVal, setInVal] = useState(String(cmToIn(profile.height) % 12))
 
   const [confirm, setConfirm] = useState(null) // 'reset' | 'startover'
+  const [showAiInfo, setShowAiInfo] = useState(false) // aviso "Privacidad de IA"
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
   const avatarLetter = firstName[0] || 'B'
@@ -233,6 +235,9 @@ export default function Profile() {
             <div className="pf-link-row" onClick={() => openLegal('/terms')}>
               <span>Términos y Condiciones</span><span className="v">›</span>
             </div>
+            <div className="pf-link-row" onClick={() => setShowAiInfo(true)}>
+              <span>Privacidad de IA</span><span className="v">›</span>
+            </div>
             <div className="pf-link-row">
               <span>Versión</span><span className="v">0.1.0</span>
             </div>
@@ -268,6 +273,14 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {showAiInfo && (
+        <AiConsentModal
+          variant="info"
+          consentDate={profile.aiConsent?.date}
+          onClose={() => setShowAiInfo(false)}
+        />
+      )}
     </section>
   )
 }
