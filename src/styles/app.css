@@ -1097,3 +1097,27 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 /* Títulos de plan y de sección (Anton): textos largos envuelven, no desbordan */
 .destello-title{max-width:100%;overflow-wrap:break-word}
 .ai-plan-title,.wk-ex-top h4,.ai-meal-name,.al-meta .d,.pg2-hrow-main b{overflow-wrap:break-word;word-break:break-word}
+
+/* ============================================================
+   Consentimiento de IA (Apple 5.1.2i) — gate + info
+   ============================================================ */
+.ai-consent-overlay{position:fixed;inset:0;z-index:420;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:rgba(0,0,0,.72);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.ai-consent{width:100%;max-width:420px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:linear-gradient(165deg,#1a1020,#141418 62%);border:1px solid var(--line-strong);border-radius:var(--radius);
+  padding:24px 22px;box-shadow:var(--shadow-card-deep);animation:rise .4s cubic-bezier(.2,.8,.2,1) both}
+.ai-consent-badge{display:inline-block;font-family:'Archivo';font-weight:800;font-size:11px;letter-spacing:.14em;color:var(--lime);
+  background:rgba(216,255,62,.08);border:1px solid rgba(216,255,62,.22);padding:5px 12px;border-radius:50px;margin-bottom:14px}
+.ai-consent-title{font-size:26px;color:var(--txt);margin-bottom:14px}
+.ai-consent-body p{font-size:14px;line-height:1.55;color:var(--txt-dim);margin-bottom:12px;overflow-wrap:break-word}
+.ai-consent-body b{color:var(--txt)}
+.ai-consent-sub{color:var(--txt)!important;font-weight:700}
+.ai-consent-list{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:7px}
+.ai-consent-list li{position:relative;padding-left:18px;font-size:14px;color:var(--txt);line-height:1.4;overflow-wrap:break-word}
+.ai-consent-list li::before{content:'•';position:absolute;left:4px;color:var(--magenta-soft);font-weight:900}
+.ai-consent-ask{color:var(--magenta-soft)!important;font-weight:800;font-size:16px!important}
+.ai-consent-date{color:var(--lime)!important;font-weight:700}
+.ai-consent-link{display:inline-block;color:var(--txt-faint);font-size:13px;text-decoration:underline;cursor:pointer;margin-bottom:18px}
+.ai-consent-actions{display:flex;flex-direction:column;gap:10px}
+.ai-consent-no{background:none;border:none;color:var(--txt-dim);font-family:'Archivo';font-weight:700;font-size:14px;padding:10px;cursor:pointer}
+.ai-consent-no:active{transform:scale(.98)}

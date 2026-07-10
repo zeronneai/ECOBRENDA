@@ -1,26 +1,34 @@
 /* Orquesta la máquina de estados del plan de IA (compartido por Entrena y
    Nutrición): loading → invite → generating → ready → (checkin → generating) …
-   Incluye el ciclo de 30 días: si el plan está bloqueado (lockedUntil futuro)
-   se muestra el contador; si ya venció, se ofrece el check-in y la renovación.
+   Incluye el ciclo de 30 días y el GATE DE CONSENTIMIENTO DE IA (Apple 5.1.2i):
+   antes de la primera generación (rutina o dieta), si la usuaria no ha aceptado,
+   se muestra el modal; solo tras aceptar se envían datos a la IA (Anthropic).
+   Cubre también cuentas viejas: como el gate está en runGenerate, cualquier
+   regeneración/check-in sin consentimiento previo pide el modal primero.
    Props:
      - kind: 'workout' | 'diet'
      - intro: { kick, title, sub, cta }
      - generate: async (checkin?) => { content, lockedUntil }
-     - renderPlan: (content, meta) => JSX
-       meta = { locked, daysLeft, onRenew, onDevForce } */
+     - renderPlan: (content, meta) => JSX */
 import { useState, useEffect } from 'react'
+import { useApp } from '../store'
 import { getLatestPlan, USE_MOCK_PLANS } from '../lib/aiPlans'
 import AiPlanIntro from './AiPlanIntro'
 import AiGenerating from './AiGenerating'
 import AiCheckIn from './AiCheckIn'
+import AiConsentModal from './AiConsentModal'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
+  const { profile, updateProfile } = useApp()
+  const hasConsent = !!profile?.aiConsent?.accepted
+
   const [status, setStatus] = useState('loading') // loading|invite|generating|ready|checkin|error
   const [plan, setPlan] = useState(null)          // { content, lockedUntil }
   const [forced, setForced] = useState(false)     // override dev "simular +30 días"
   const [errMsg, setErrMsg] = useState('')
+  const [consent, setConsent] = useState(null)    // null | { checkin } mientras se pide consentimiento
 
   useEffect(() => {
     let alive = true
@@ -33,7 +41,8 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
     return () => { alive = false }
   }, [kind])
 
-  const runGenerate = async (checkin) => {
+  // Generación real (tras consentimiento).
+  const doGenerate = async (checkin) => {
     setStatus('generating'); setErrMsg('')
     try {
       const r = await generate(checkin)
@@ -43,23 +52,48 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
     }
   }
 
-  if (status === 'loading') return <div className="ai-loading-min" />
-  if (status === 'generating') return <AiGenerating kind={kind} />
-  if (status === 'checkin') return <AiCheckIn kind={kind} onSubmit={runGenerate} onCancel={() => setStatus('ready')} />
+  // Punto de entrada: intercepta con el consentimiento si aún no se ha dado.
+  const runGenerate = (checkin) => {
+    if (!hasConsent) { setConsent({ checkin }); return }
+    doGenerate(checkin)
+  }
 
-  if (status === 'ready' && plan?.content) {
+  const acceptConsent = () => {
+    updateProfile({ aiConsent: { accepted: true, date: new Date().toISOString() } })
+    const checkin = consent?.checkin
+    setConsent(null)
+    doGenerate(checkin)
+  }
+  const declineConsent = () => setConsent(null) // no genera, no pierde acceso al resto
+
+  let content
+  if (status === 'loading') {
+    content = <div className="ai-loading-min" />
+  } else if (status === 'generating') {
+    content = <AiGenerating kind={kind} />
+  } else if (status === 'checkin') {
+    content = <AiCheckIn kind={kind} onSubmit={runGenerate} onCancel={() => setStatus('ready')} />
+  } else if (status === 'ready' && plan?.content) {
     const lu = plan.lockedUntil ? new Date(plan.lockedUntil).getTime() : 0
     const now = Date.now()
     const locked = lu > now && !forced
     const daysLeft = locked ? Math.max(1, Math.ceil((lu - now) / DAY_MS)) : 0
-    return renderPlan(plan.content, {
+    content = renderPlan(plan.content, {
       locked,
       daysLeft,
       onRenew: () => setStatus('checkin'),
       onDevForce: USE_MOCK_PLANS && locked ? () => setForced(true) : null,
     })
+  } else {
+    content = <AiPlanIntro intro={intro} onGenerate={() => runGenerate()} error={status === 'error' ? errMsg : ''} />
   }
 
-  // invite y error comparten pantalla (error muestra el mensaje).
-  return <AiPlanIntro intro={intro} onGenerate={() => runGenerate()} error={status === 'error' ? errMsg : ''} />
+  return (
+    <>
+      {content}
+      {consent && (
+        <AiConsentModal variant="gate" onAccept={acceptConsent} onDecline={declineConsent} />
+      )}
+    </>
+  )
 }
