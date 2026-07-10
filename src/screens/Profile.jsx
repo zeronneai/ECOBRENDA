@@ -17,7 +17,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 export default function Profile() {
   const navigate = useNavigate()
   const { profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast,
-          cloudEnabled, session, openAuth, signOutAccount, openPortal } = useApp()
+          cloudEnabled, session, openAuth, signOutAccount, openPortal, deleteAccount } = useApp()
   const { isPremium } = useSubscription()
 
   // Medidas con estado local (para escribir decimales / pies+pulgadas).
@@ -28,8 +28,10 @@ export default function Profile() {
   const [ftVal, setFtVal] = useState(String(Math.floor(cmToIn(profile.height) / 12)))
   const [inVal, setInVal] = useState(String(cmToIn(profile.height) % 12))
 
-  const [confirm, setConfirm] = useState(null) // 'reset' | 'startover'
+  const [confirm, setConfirm] = useState(null) // 'reset' | 'startover' | 'delete'
   const [showAiInfo, setShowAiInfo] = useState(false) // aviso "Privacidad de IA"
+  const [deleteText, setDeleteText] = useState('') // confirmación escribiendo "ELIMINAR"
+  const [deleting, setDeleting] = useState(false)
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
   const avatarLetter = firstName[0] || 'B'
@@ -72,6 +74,16 @@ export default function Profile() {
   const doStartOver = () => {
     Object.keys(localStorage).filter((k) => k.startsWith('bf:') || k.startsWith('bac:')).forEach((k) => localStorage.removeItem(k))
     window.location.reload()
+  }
+  const doDelete = async () => {
+    if (deleting) return
+    setDeleting(true)
+    try {
+      await deleteAccount() // recarga a onboarding si tiene éxito
+    } catch (e) {
+      setDeleting(false)
+      showToast(e?.message || 'No se pudo eliminar la cuenta')
+    }
   }
 
   const Toggle = ({ on, onClick }) => (
@@ -269,6 +281,34 @@ export default function Profile() {
               </div>
             ) : (
               <button className="pf-danger-btn hard" onClick={() => setConfirm('startover')}>Empezar de nuevo</button>
+            )}
+
+            {confirm === 'delete' ? (
+              <div className="pf-danger-confirm">
+                <p><b>Eliminar tu cuenta es permanente.</b> Se borran para siempre tu cuenta, tu perfil, tus planes de IA, tu progreso y tu suscripción. Esta acción <b>no se puede deshacer</b>.</p>
+                <p style={{ marginTop: 8 }}>Para confirmar, escribe <b>ELIMINAR</b>:</p>
+                <input
+                  className="pf-input"
+                  style={{ marginTop: 8 }}
+                  value={deleteText}
+                  onChange={(e) => setDeleteText(e.target.value)}
+                  placeholder="ELIMINAR"
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                />
+                <div className="row" style={{ marginTop: 10 }}>
+                  <button
+                    className="yes"
+                    disabled={deleteText.trim().toUpperCase() !== 'ELIMINAR' || deleting}
+                    onClick={doDelete}
+                  >
+                    {deleting ? 'Eliminando…' : 'Eliminar mi cuenta'}
+                  </button>
+                  <button className="no" onClick={() => { setConfirm(null); setDeleteText('') }}>Cancelar</button>
+                </div>
+              </div>
+            ) : (
+              <button className="pf-danger-btn hard" onClick={() => { setConfirm('delete'); setDeleteText('') }}>Eliminar mi cuenta</button>
             )}
           </div>
         </div>
