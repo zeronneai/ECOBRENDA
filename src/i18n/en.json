@@ -1,0 +1,21 @@
+{
+  "common": {
+    "continue": "Continue",
+    "skip": "Skip",
+    "cancel": "Cancel",
+    "save": "Save",
+    "understood": "Got it",
+    "back": "Back"
+  },
+  "lang": {
+    "select_kick": "Welcome 🍑",
+    "select_title": "CHOOSE YOUR LANGUAGE",
+    "es_name": "Español",
+    "en_name": "English"
+  },
+  "profile": {
+    "language_row": "Idioma / Language",
+    "language_title": "LANGUAGE",
+    "language_sub": "Choose the app language"
+  }
+}
