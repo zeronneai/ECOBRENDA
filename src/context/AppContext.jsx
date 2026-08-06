@@ -13,6 +13,7 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import * as cloudSync from '../lib/cloudSync'
 import { startCheckout, openBillingPortal, closeNativeBrowser } from '../lib/stripeClient'
 import { deleteAccountRequest } from '../lib/account'
+import { uploadAvatarDataUrl } from '../lib/avatar'
 import { Capacitor } from '@capacitor/core'
 import { App as CapApp } from '@capacitor/app'
 
@@ -534,13 +535,28 @@ export function AppProvider({ children }) {
     return () => { offHy(); unsub() }
   }, [rehydrate])
 
+  // Sube el avatar capturado en el onboarding (dataUrl local) una vez que hay
+  // sesión (Storage requiere uid). Si falla, deja el pendiente para reintentar.
+  const flushPendingAvatar = useCallback(async () => {
+    const prof = dataStore.getProfile()
+    const pending = prof?.avatarPendingDataUrl
+    if (!pending) return
+    try {
+      const url = await uploadAvatarDataUrl(pending)
+      updateProfile({ avatarUrl: url, avatarPendingDataUrl: null })
+    } catch (e) {
+      console.warn('[avatar] subida pendiente falló:', e?.message || e)
+    }
+  }, [updateProfile])
+
   // Llamado por las pantallas de Auth al registrarse/iniciar sesión.
   const handleAuthed = useCallback(async (s, mode) => {
     setSession(s)
     setAuthOpen(false)
     await cloudSync.setUser(s, mode) // signup -> sube local; login -> baja nube
     rehydrate()
-  }, [rehydrate])
+    flushPendingAvatar()
+  }, [rehydrate, flushPendingAvatar])
 
   const openAuth = useCallback((view = 'login') => { setAuthView(view); setAuthOpen(true) }, [])
   const closeAuth = useCallback(() => setAuthOpen(false), [])

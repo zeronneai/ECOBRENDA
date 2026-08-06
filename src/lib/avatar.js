@@ -1,6 +1,8 @@
-/* Foto de perfil: elige galería/cámara (@capacitor/camera), optimiza y sube a
-   Supabase Storage (bucket público 'avatars', ruta <uid>/avatar.jpg). Devuelve
-   la URL pública con cache-bust, o null si la usuaria cancela. */
+/* Foto de perfil. La CAPTURA (galería/cámara + optimización) no requiere sesión;
+   la SUBIDA a Supabase Storage sí (RLS por dueño). En el onboarding se captura y
+   se guarda el dataUrl localmente; se sube tras crear la cuenta. En Perfil (ya
+   logueada) se hace captura+subida de una vez. Bucket público 'avatars', ruta
+   <uid>/avatar.jpg; URL pública con cache-bust. */
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { supabase } from './supabase'
 
@@ -15,17 +17,11 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([arr], { type: mime })
 }
 
-// Abre el picker, optimiza (~512px, calidad 70) y sube. Devuelve la URL pública
-// (con ?t= para bustear caché) o null si canceló. Lanza error si falla la subida.
-export async function pickAndUploadAvatar() {
-  if (!supabase) throw new Error('Falta configurar la nube.')
-  const { data: sess } = await supabase.auth.getSession()
-  const uid = sess?.session?.user?.id
-  if (!uid) throw new Error('Inicia sesión primero.')
-
-  let photo
+// Abre el picker (galería/cámara) y devuelve un dataUrl optimizado (~512px, q70)
+// o null si canceló. NO sube nada.
+export async function pickAvatarPhoto() {
   try {
-    photo = await Camera.getPhoto({
+    const photo = await Camera.getPhoto({
       source: CameraSource.Prompt,        // iOS: hoja "Cámara / Fotos"
       resultType: CameraResultType.DataUrl,
       quality: 70,
@@ -36,12 +32,21 @@ export async function pickAndUploadAvatar() {
       promptLabelPhoto: 'Elegir de galería',
       promptLabelPicture: 'Tomar foto',
     })
+    return photo?.dataUrl || null
   } catch {
     return null // la usuaria canceló → no es error
   }
-  if (!photo?.dataUrl) return null
+}
 
-  const blob = dataUrlToBlob(photo.dataUrl)
+// Sube un dataUrl a Storage. Requiere sesión. Devuelve la URL pública (cache-bust).
+export async function uploadAvatarDataUrl(dataUrl) {
+  if (!supabase) throw new Error('Falta configurar la nube.')
+  if (!dataUrl) throw new Error('Sin imagen.')
+  const { data: sess } = await supabase.auth.getSession()
+  const uid = sess?.session?.user?.id
+  if (!uid) throw new Error('Inicia sesión primero.')
+
+  const blob = dataUrlToBlob(dataUrl)
   const path = `${uid}/avatar.jpg`
   const { error } = await supabase.storage.from('avatars').upload(path, blob, {
     upsert: true,
@@ -52,4 +57,11 @@ export async function pickAndUploadAvatar() {
 
   const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path)
   return `${pub.publicUrl}?t=${Date.now()}`
+}
+
+// Conveniencia para Perfil (ya logueada): captura + subida en un paso.
+export async function pickAndUploadAvatar() {
+  const dataUrl = await pickAvatarPhoto()
+  if (!dataUrl) return null
+  return uploadAvatarDataUrl(dataUrl)
 }
