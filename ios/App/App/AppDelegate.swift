@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,7 +8,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Sesión de audio: .playback para que el audio del WebView (preview de
+        // canciones) suene aunque el iPhone esté en silencio. .mixWithOthers para
+        // NO interrumpir la música del usuario al abrir la app / al hacer preview.
+        // La alarma nativa maneja su propia sesión cuando dispara.
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("[AudioSession] no se pudo configurar: \(error)")
+        }
         return true
     }
 
