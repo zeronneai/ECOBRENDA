@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../store'
 import { GOALS, LEVELS, GENDERS, DAYS_OPTIONS, DAY_LABELS, ALLERGIES, DIET_PREFS } from '../data/onboarding'
 import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
+import { unlockPreview, playPreview, stopPreview as stopPreviewAudio } from '../lib/previewAudio'
 import RulerPicker from '../components/RulerPicker'
 import WheelPicker from '../components/WheelPicker'
 
@@ -49,22 +50,14 @@ export default function Onboarding() {
   const [unlocked, setUnlocked] = useState(1)
   const unlock = (n) => setUnlocked((u) => Math.max(u, n))
 
-  // Previsualización de canción (objeto Audio aparte).
+  // Previsualización de canción (helper aislado, bendecido para iOS).
   const [previewId, setPreviewId] = useState(null)
-  const previewRef = useRef(null)
-  const stopPreview = () => {
-    if (previewRef.current) { previewRef.current.pause(); previewRef.current = null }
-    setPreviewId(null)
-  }
-  useEffect(() => stopPreview, [])
+  const stopPreview = () => { stopPreviewAudio(); setPreviewId(null) }
+  useEffect(() => () => stopPreviewAudio(), [])
   const togglePreview = (song) => {
     if (previewId === song.id) { stopPreview(); return }
-    stopPreview()
-    const a = new Audio(song.url)
-    a.volume = 1.0
-    a.play().catch(() => {})
-    a.onended = () => setPreviewId((cur) => (cur === song.id ? null : cur))
-    previewRef.current = a
+    unlockPreview() // bendice el elemento DENTRO del gesto (iOS)
+    playPreview(song.url, () => setPreviewId((cur) => (cur === song.id ? null : cur)))
     setPreviewId(song.id)
   }
 

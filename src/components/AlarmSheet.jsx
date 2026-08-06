@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../store'
 import { DAY_LABELS } from '../data/onboarding'
 import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
+import { unlockPreview, playPreview, stopPreview as stopPreviewAudio } from '../lib/previewAudio'
 import Sheet from './Sheet'
 import WheelPicker from './WheelPicker'
 
@@ -37,21 +38,14 @@ export default function AlarmSheet() {
   // Previsualización: objeto Audio aparte (NO toca el <audio> de la alarma ni el
   // desbloqueo). Se detiene al cambiar de canción o al cerrar el editor.
   const [previewId, setPreviewId] = useState(null)
-  const previewRef = useRef(null)
-  const stopPreview = () => {
-    if (previewRef.current) { previewRef.current.pause(); previewRef.current = null }
-    setPreviewId(null)
-  }
-  useEffect(() => stopPreview, [])
+  const stopPreview = () => { stopPreviewAudio(); setPreviewId(null) }
+  // Al desmontar el editor, corta el audio (sin setState en unmount).
+  useEffect(() => () => stopPreviewAudio(), [])
 
   const togglePreview = (song) => {
     if (previewId === song.id) { stopPreview(); return }
-    stopPreview()
-    const a = new Audio(song.url)
-    a.volume = 1.0
-    a.play().catch(() => {})
-    a.onended = () => setPreviewId((cur) => (cur === song.id ? null : cur))
-    previewRef.current = a
+    unlockPreview() // bendice el elemento DENTRO del gesto (iOS)
+    playPreview(song.url, () => setPreviewId((cur) => (cur === song.id ? null : cur)))
     setPreviewId(song.id)
   }
 
