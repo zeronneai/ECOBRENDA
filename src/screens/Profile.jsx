@@ -6,6 +6,7 @@ import { GOALS, LEVELS, DAYS_OPTIONS, goalLabel } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
 import { isIOSNative } from '../lib/platform'
 import { pickAndUploadAvatar } from '../lib/avatar'
+import LanguageSelect from '../components/LanguageSelect'
 import DestelloCard from '../components/ui/DestelloCard'
 import AiConsentModal from '../components/AiConsentModal'
 
@@ -18,7 +19,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 export default function Profile() {
   const navigate = useNavigate()
   const { profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast,
-          cloudEnabled, session, openAuth, signOutAccount, openPortal, deleteAccount } = useApp()
+          cloudEnabled, session, openAuth, signOutAccount, openPortal, deleteAccount, language, setLanguage } = useApp()
   const { isPremium } = useSubscription()
 
   // Medidas con estado local (para escribir decimales / pies+pulgadas).
@@ -173,6 +174,12 @@ export default function Profile() {
               )}
             </div>
           )}
+
+          {/* Idioma / Language */}
+          <div className="pf-sec reveal d2">
+            <h3>Idioma / Language</h3>
+            <LanguageSelect current={language} onPick={setLanguage} compact />
+          </div>
 
           {/* Mi cuenta */}
           <div className="pf-sec reveal d3">
