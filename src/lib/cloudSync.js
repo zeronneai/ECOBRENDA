@@ -51,6 +51,7 @@ function profileRowFromLocal(p) {
     dislikes: dislikesToArray(p.dislikes),
     ai_consent_at: p.aiConsent?.date ?? null,
     avatar_url: p.avatarUrl ?? null,
+    language: p.language ?? null,
   }
 }
 
@@ -85,6 +86,7 @@ function applyProfileRow(r) {
     // reinstalación si inició sesión).
     ...(r.ai_consent_at ? { aiConsent: { accepted: true, date: r.ai_consent_at } } : {}),
     avatarUrl: r.avatar_url ?? null,
+    ...(r.language ? { language: r.language } : {}),
     onboarded: true, // si ya tiene perfil en la nube, ya hizo onboarding
     ...(r.created_at ? { createdAt: r.created_at } : {}),
   })

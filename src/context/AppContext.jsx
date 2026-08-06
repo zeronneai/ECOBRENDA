@@ -14,6 +14,7 @@ import * as cloudSync from '../lib/cloudSync'
 import { startCheckout, openBillingPortal, closeNativeBrowser } from '../lib/stripeClient'
 import { deleteAccountRequest } from '../lib/account'
 import { uploadAvatarDataUrl } from '../lib/avatar'
+import { translate, getInitialLang, LANG_KEY } from '../i18n'
 import { Capacitor } from '@capacitor/core'
 import { App as CapApp } from '@capacitor/app'
 
@@ -59,6 +60,10 @@ const DEFAULT_PROFILE = {
 }
 
 export function AppProvider({ children }) {
+  // ── i18n: idioma actual + traductor ──
+  const [language, setLanguageState] = useState(() => getInitialLang())
+  const t = useCallback((key, vars) => translate(language, key, vars), [language])
+
   // ── Estado persistente (respaldado por dataStore; mañana Supabase) ──
   const [profile, setProfileState] = useState(() => ({ ...DEFAULT_PROFILE, ...(dataStore.getProfile() || {}) }))
   const [subscription, setSubscriptionState] = useState(() => dataStore.getSubscription())
@@ -108,6 +113,24 @@ export function AppProvider({ children }) {
     const saved = dataStore.saveProfile(patch) // persiste y devuelve el perfil completo (con createdAt)
     setProfileState({ ...DEFAULT_PROFILE, ...saved })
   }, [])
+
+  // Cambia el idioma: estado + localStorage (render instantáneo) + perfil (espejo
+  // a Supabase para que siga a la cuenta).
+  const setLanguage = useCallback((lang) => {
+    setLanguageState(lang)
+    try { localStorage.setItem(LANG_KEY, lang) } catch { /* noop */ }
+    updateProfile({ language: lang })
+  }, [updateProfile])
+
+  // Reconcilia el idioma cuando el perfil llega de la nube (login en otro equipo).
+  useEffect(() => {
+    const pl = profile?.language
+    if (pl && pl !== language) {
+      setLanguageState(pl)
+      try { localStorage.setItem(LANG_KEY, pl) } catch { /* noop */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.language])
 
   // Activa premium (hoy local; mañana lo hará el webhook de Stripe en Supabase).
   // Demo local: solo activa premium en localStorage (sin tocar la nube).
@@ -642,6 +665,7 @@ export function AppProvider({ children }) {
   }, [profile.name, profile.goal, profile.wakeTime])
 
   const value = {
+    language, setLanguage, t,
     profile, updateProfile,
     subscription, unlocked, unlock,
     onboarding, finishOnboarding,
