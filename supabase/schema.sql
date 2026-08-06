@@ -25,6 +25,7 @@ create table if not exists public.profiles (
   diet_pref       text,
   dislikes        text[],
   ai_consent_at   timestamptz,
+  avatar_url      text,
   created_at      timestamptz not null default now()
 );
 
