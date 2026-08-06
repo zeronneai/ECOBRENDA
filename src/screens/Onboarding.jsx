@@ -3,10 +3,11 @@ import { useApp } from '../store'
 import { GOALS, LEVELS, GENDERS, DAYS_OPTIONS, DAY_LABELS, ALLERGIES, DIET_PREFS } from '../data/onboarding'
 import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
 import { unlockPreview, playPreview, stopPreview as stopPreviewAudio } from '../lib/previewAudio'
+import { pickAvatarPhoto } from '../lib/avatar'
 import RulerPicker from '../components/RulerPicker'
 import WheelPicker from '../components/WheelPicker'
 
-const OB_TOTAL = 11
+const OB_TOTAL = 12
 
 const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1))
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
@@ -26,6 +27,7 @@ export default function Onboarding() {
   const [leaving, setLeaving] = useState(false)
 
   const [name, setName] = useState('')
+  const [avatarPreview, setAvatarPreview] = useState(null) // dataUrl (se sube tras crear cuenta)
   const [age, setAge] = useState(25)
   const [gender, setGender] = useState('female')
   const [weightKg, setWeightKg] = useState(62)
@@ -65,6 +67,12 @@ export default function Onboarding() {
     setAlarmDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort((a, b) => a - b)))
   }
 
+  // Foto de perfil (opcional): captura + preview. La subida ocurre tras el signup.
+  const addPhoto = async () => {
+    const dataUrl = await pickAvatarPhoto()
+    if (dataUrl) setAvatarPreview(dataUrl)
+  }
+
   // Alergias: "ninguna" es exclusiva. Marcarla limpia el resto; marcar otra la quita.
   const toggleAllergy = (id) => {
     setAllergies((prev) => {
@@ -98,6 +106,7 @@ export default function Onboarding() {
       allergies,
       dietPref,
       dislikes: dislikes.trim(),
+      ...(avatarPreview ? { avatarPendingDataUrl: avatarPreview } : {}),
       wakeTime,
       exercise,
       reps,
@@ -156,8 +165,26 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* 1 — EDAD + GÉNERO */}
+        {/* 1 — FOTO DE PERFIL (opcional) */}
         {step === 1 && (
+          <div className="ob-step active">
+            <div className="ob-kick">Tu perfil</div>
+            <div className="ob-q">PONLE CARA<br />A TU PROGRESO</div>
+            <div className="ob-sub">Opcional. Sube una foto o tómate una. Puedes saltarlo.</div>
+            <div className="ob-avatar-wrap">
+              <button type="button" className="ob-avatar" onClick={addPhoto} aria-label="Agregar foto">
+                {avatarPreview
+                  ? <img src={avatarPreview} alt="Tu foto" />
+                  : <span>{(name.trim()[0] || '🍑').toUpperCase()}</span>}
+                <span className="ob-avatar-cam">📷</span>
+              </button>
+            </div>
+            <button className="cta full" onClick={addPhoto}>{avatarPreview ? 'CAMBIAR FOTO' : 'AGREGAR FOTO'}</button>
+          </div>
+        )}
+
+        {/* 2 — EDAD + GÉNERO */}
+        {step === 2 && (
           <div className="ob-step active">
             <div className="ob-kick">Sobre ti</div>
             <div className="ob-q">¿CUÁNTOS AÑOS<br />TIENES?</div>
@@ -174,7 +201,7 @@ export default function Onboarding() {
         )}
 
         {/* 2 — PESO (kg/lb) */}
-        {step === 2 && (
+        {step === 3 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu cuerpo</div>
             <div className="ob-q">¿CUÁNTO PESAS?</div>
@@ -192,7 +219,7 @@ export default function Onboarding() {
         )}
 
         {/* 3 — ALTURA (cm/ft) */}
-        {step === 3 && (
+        {step === 4 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu cuerpo</div>
             <div className="ob-q">¿CUÁNTO MIDES?</div>
@@ -210,7 +237,7 @@ export default function Onboarding() {
         )}
 
         {/* 4 — OBJETIVO (6) */}
-        {step === 4 && (
+        {step === 5 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu meta</div>
             <div className="ob-q">¿QUÉ QUIERES LOGRAR?</div>
@@ -227,7 +254,7 @@ export default function Onboarding() {
         )}
 
         {/* 5 — NIVEL */}
-        {step === 5 && (
+        {step === 6 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu experiencia</div>
             <div className="ob-q">¿CUÁL ES TU NIVEL?</div>
@@ -244,7 +271,7 @@ export default function Onboarding() {
         )}
 
         {/* 6 — DÍAS POR SEMANA */}
-        {step === 6 && (
+        {step === 7 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu compromiso</div>
             <div className="ob-q">¿CUÁNTOS DÍAS<br />A LA SEMANA?</div>
@@ -260,7 +287,7 @@ export default function Onboarding() {
         )}
 
         {/* 7 — ALERGIAS (multi-select) */}
-        {step === 7 && (
+        {step === 8 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu alimentación</div>
             <div className="ob-q">¿ALGUNA ALERGIA<br />O INTOLERANCIA?</div>
@@ -282,7 +309,7 @@ export default function Onboarding() {
         )}
 
         {/* 8 — PREFERENCIA DIETÉTICA (single-select) */}
-        {step === 8 && (
+        {step === 9 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu alimentación</div>
             <div className="ob-q">¿CÓMO PREFIERES<br />COMER?</div>
@@ -299,7 +326,7 @@ export default function Onboarding() {
         )}
 
         {/* 9 — ALIMENTOS QUE NO TE GUSTAN (texto libre, opcional) */}
-        {step === 9 && (
+        {step === 10 && (
           <div className="ob-step active">
             <div className="ob-kick">Tu alimentación</div>
             <div className="ob-q">¿ALGO QUE NO<br />TE GUSTE?</div>
@@ -316,7 +343,7 @@ export default function Onboarding() {
         )}
 
         {/* 10 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
-        {step === 10 && (
+        {step === 11 && (
           <div className="ob-step active">
             <div className="ob-kick">Despertar Activo</div>
             <div className="ob-q">CONFIGURA<br />TU ALARMA</div>
@@ -388,7 +415,10 @@ export default function Onboarding() {
 
       <div className="ob-foot">
         <button className="cta full" onClick={next}>
-          {step === OB_TOTAL - 1 ? (unlocked < 4 ? 'CONTINUAR' : 'EMPEZAR 🔥') : 'CONTINUAR'}
+          {step === OB_TOTAL - 1
+            ? (unlocked < 4 ? 'CONTINUAR' : 'EMPEZAR 🔥')
+            : step === 1 && !avatarPreview ? 'SALTAR'
+            : 'CONTINUAR'}
         </button>
       </div>
     </div>

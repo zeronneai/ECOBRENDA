@@ -1121,3 +1121,19 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .ai-consent-actions{display:flex;flex-direction:column;gap:10px}
 .ai-consent-no{background:none;border:none;color:var(--txt-dim);font-family:'Archivo';font-weight:700;font-size:14px;padding:10px;cursor:pointer}
 .ai-consent-no:active{transform:scale(.98)}
+
+/* Foto de perfil en el onboarding */
+.ob-avatar-wrap{display:flex;justify-content:center;margin:22px 0}
+.ob-avatar{position:relative;width:132px;height:132px;border-radius:50%;border:none;cursor:pointer;overflow:hidden;
+  background:linear-gradient(135deg,var(--magenta),#7a28ff);display:grid;place-items:center;
+  box-shadow:0 10px 30px var(--magenta-glow)}
+.ob-avatar img{width:100%;height:100%;object-fit:cover}
+.ob-avatar span{font-family:'Archivo Black','Archivo';font-weight:900;font-size:52px;color:#fff}
+.ob-avatar-cam{position:absolute;right:6px;bottom:6px;width:38px;height:38px;border-radius:50%;background:var(--surface);
+  border:2px solid var(--bg);display:grid;place-items:center;font-size:18px}
+
+/* Avatar en Perfil (foto o inicial) */
+.pf-avatar{position:relative;border:none;padding:0;cursor:pointer;overflow:hidden}
+.pf-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.pf-avatar-cam{position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:var(--surface);
+  border:2px solid var(--bg);display:grid;place-items:center;font-size:12px;z-index:1}

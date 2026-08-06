@@ -5,6 +5,7 @@ import { useSubscription } from '../hooks/useSubscription'
 import { GOALS, LEVELS, DAYS_OPTIONS, goalLabel } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
 import { isIOSNative } from '../lib/platform'
+import { pickAndUploadAvatar } from '../lib/avatar'
 import DestelloCard from '../components/ui/DestelloCard'
 import AiConsentModal from '../components/AiConsentModal'
 
@@ -32,6 +33,20 @@ export default function Profile() {
   const [showAiInfo, setShowAiInfo] = useState(false) // aviso "Privacidad de IA"
   const [deleteText, setDeleteText] = useState('') // confirmación escribiendo "ELIMINAR"
   const [deleting, setDeleting] = useState(false)
+  const [changingAvatar, setChangingAvatar] = useState(false)
+
+  const changeAvatar = async () => {
+    if (changingAvatar) return
+    setChangingAvatar(true)
+    try {
+      const url = await pickAndUploadAvatar()
+      if (url) { updateProfile({ avatarUrl: url }); showToast('Foto actualizada') }
+    } catch (e) {
+      showToast(e?.message || 'No se pudo actualizar la foto')
+    } finally {
+      setChangingAvatar(false)
+    }
+  }
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
   const avatarLetter = firstName[0] || 'B'
@@ -99,7 +114,10 @@ export default function Profile() {
         <div className="pad">
           {/* Tarjeta de usuario */}
           <div className="pf-user reveal d1">
-            <div className="pf-avatar">{avatarLetter}</div>
+            <button type="button" className="pf-avatar" onClick={changeAvatar} aria-label="Cambiar foto">
+              {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : avatarLetter}
+              <span className="pf-avatar-cam">📷</span>
+            </button>
             <div>
               <div className="pf-name">{firstName}</div>
               <div className="pf-meta">{goalLabel(profile.goal)}{profile.level ? ` · ${cap(profile.level)}` : ''}</div>

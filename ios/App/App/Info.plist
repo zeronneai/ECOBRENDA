@@ -41,11 +41,11 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Booty Alarm usa la cámara para contar tus repeticiones en tiempo real. El video no se sube a ningún lado.</string>
+	<string>Booty Alarm usa la cámara para contar tus repeticiones en tiempo real y, si eliges, para tomar tu foto de perfil. El video del conteo no se sube.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Booty Alarm no graba audio; este permiso lo requiere la API de cámara de iOS para contar tus repeticiones.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Booty Alarm no accede a tu galería sin tu acción. iOS solicita este permiso porque la función de cámara usa el framework de Fotos de Apple.</string>
+	<string>Booty Alarm accede a tus fotos solo cuando eliges una para tu foto de perfil.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Booty Alarm no guarda imágenes en tu galería automáticamente. iOS solicita este permiso por el framework de Fotos que usa la función de cámara.</string>
 	<key>CFBundleURLTypes</key>
