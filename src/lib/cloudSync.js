@@ -50,6 +50,7 @@ function profileRowFromLocal(p) {
     diet_pref: p.dietPref ?? null,
     dislikes: dislikesToArray(p.dislikes),
     ai_consent_at: p.aiConsent?.date ?? null,
+    avatar_url: p.avatarUrl ?? null,
   }
 }
 
@@ -83,6 +84,7 @@ function applyProfileRow(r) {
     // Consentimiento de IA: reconstruye el flag desde la columna (sobrevive
     // reinstalación si inició sesión).
     ...(r.ai_consent_at ? { aiConsent: { accepted: true, date: r.ai_consent_at } } : {}),
+    avatarUrl: r.avatar_url ?? null,
     onboarded: true, // si ya tiene perfil en la nube, ya hizo onboarding
     ...(r.created_at ? { createdAt: r.created_at } : {}),
   })
