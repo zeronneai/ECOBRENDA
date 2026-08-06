@@ -17,5 +17,102 @@
     "language_row": "Idioma / Language",
     "language_title": "LANGUAGE",
     "language_sub": "Choose the app language"
+  },
+  "onboarding": {
+    "continue": "CONTINUE",
+    "skip": "SKIP",
+    "start": "LET'S GO 🔥",
+    "body_kick": "Your body",
+    "food_kick": "Your nutrition",
+    "name": {
+      "kick": "Welcome 🍑",
+      "q": "WHAT'S YOUR NAME?",
+      "sub": "So Brenda can build your plan with your name.",
+      "placeholder": "Your name",
+      "have_account": "Already have an account?",
+      "sign_in": "Sign in",
+      "toast": "Enter your name 😊"
+    },
+    "photo": {
+      "kick": "Your profile",
+      "q": "PUT A FACE TO YOUR PROGRESS",
+      "sub": "Optional. Upload a photo or take one. You can skip this.",
+      "add": "ADD PHOTO",
+      "change": "CHANGE PHOTO"
+    },
+    "age": {
+      "kick": "About you",
+      "q": "HOW OLD ARE YOU?",
+      "sub": "Brenda fine-tunes your calories with your age and gender.",
+      "unit": "years"
+    },
+    "genders": { "female": "Female", "male": "Male", "other": "Prefer not to say" },
+    "weight": { "q": "HOW MUCH DO YOU WEIGH?", "sub": "Slide or type. Brenda dials in your exact calories." },
+    "height": { "q": "HOW TALL ARE YOU?", "sub": "Slide or type your exact height." },
+    "goal": {
+      "kick": "Your goal",
+      "q": "WHAT DO YOU WANT TO ACHIEVE?",
+      "sub": "Brenda builds everything around this."
+    },
+    "goals": {
+      "perder_grasa": { "label": "Lose fat", "desc": "Get lean and drop a size" },
+      "ganar_musculo": { "label": "Build muscle", "desc": "Build size and strength" },
+      "tonificar": { "label": "Tone up", "desc": "Firm up head to toe" },
+      "gluteos": { "label": "Glutes", "desc": "Glute size and shape" },
+      "resistencia": { "label": "Endurance", "desc": "Cardio and stamina" },
+      "bienestar": { "label": "Wellness", "desc": "Energy and balance" }
+    },
+    "level": {
+      "kick": "Your experience",
+      "q": "WHAT'S YOUR LEVEL?",
+      "sub": "To set the intensity of your plan."
+    },
+    "levels": {
+      "principiante": { "label": "Beginner", "desc": "Starting from scratch" },
+      "intermedio": { "label": "Intermediate", "desc": "I train sometimes" },
+      "avanzado": { "label": "Advanced", "desc": "I train consistently" }
+    },
+    "days": {
+      "kick": "Your commitment",
+      "q": "HOW MANY DAYS A WEEK?",
+      "sub": "Be realistic. Brenda builds your week for you.",
+      "unit": "days"
+    },
+    "allergy": {
+      "q": "ANY ALLERGIES OR INTOLERANCES?",
+      "sub": "Brenda will keep these foods out of your plan. Select all that apply."
+    },
+    "allergies": {
+      "lacteos": "Dairy", "gluten": "Gluten", "frutos_secos": "Nuts",
+      "mariscos": "Shellfish", "huevo": "Egg", "soya": "Soy", "pescado": "Fish", "ninguna": "None"
+    },
+    "diet": { "q": "HOW DO YOU PREFER TO EAT?", "sub": "Brenda builds your diet around this." },
+    "diet_prefs": {
+      "todo": { "label": "I eat everything", "desc": "No restrictions" },
+      "vegetariana": { "label": "Vegetarian", "desc": "No meat or fish" },
+      "vegana": { "label": "Vegan", "desc": "Nothing from animals" },
+      "keto": { "label": "Keto / Low-carb", "desc": "Few carbs" },
+      "ninguna": { "label": "No specific restriction", "desc": "You decide" }
+    },
+    "dislikes": {
+      "q": "ANYTHING YOU DON'T LIKE?",
+      "sub": "Optional. List foods you'd rather avoid (e.g., broccoli, tuna). You can skip this.",
+      "placeholder": "e.g., broccoli, liver, cilantro…"
+    },
+    "alarm": {
+      "kick": "Active Wake-Up",
+      "q": "SET UP YOUR ALARM",
+      "sub": "It rings at this time and won't stop until you finish your reps.",
+      "exercise_h": "EXERCISE",
+      "days_h": "DAYS",
+      "song_h": "SONG",
+      "reps_unit": "reps",
+      "day_initials": "M,T,W,T,F,S,S",
+      "hint_hour": "Set the time ▾",
+      "hint_ex": "Pick exercise and reps ▾",
+      "hint_days": "Pick your days ▾",
+      "play": "Play",
+      "stop": "Stop"
+    }
   }
 }

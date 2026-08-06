@@ -1148,7 +1148,9 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .lang-select.compact .lang-btn{flex-direction:column;gap:6px;padding:16px 8px;text-align:center}
 .lang-btn:active{transform:scale(.98)}
 .lang-btn.sel{border-color:var(--magenta);background:linear-gradient(120deg,rgba(255,31,107,.14),var(--surface));box-shadow:0 0 16px var(--magenta-glow)}
-.lang-flag{font-size:34px;line-height:1}
-.lang-select.compact .lang-flag{font-size:26px}
+.lang-code{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+  font-family:'Archivo';font-weight:900;font-size:17px;letter-spacing:.02em;color:#fff;
+  background:linear-gradient(135deg,var(--magenta),#7a28ff)}
+.lang-select.compact .lang-code{width:38px;height:38px;font-size:15px}
 .lang-name{font-family:'Archivo';font-weight:800;font-size:18px}
 .lang-select.compact .lang-name{font-size:14px}

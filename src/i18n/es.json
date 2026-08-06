@@ -17,5 +17,102 @@
     "language_row": "Idioma / Language",
     "language_title": "IDIOMA",
     "language_sub": "Elige el idioma de la app"
+  },
+  "onboarding": {
+    "continue": "CONTINUAR",
+    "skip": "SALTAR",
+    "start": "EMPEZAR 🔥",
+    "body_kick": "Tu cuerpo",
+    "food_kick": "Tu alimentación",
+    "name": {
+      "kick": "Bienvenida 🍑",
+      "q": "¿CÓMO TE LLAMAS?",
+      "sub": "Para que Brenda arme tu plan con tu nombre.",
+      "placeholder": "Tu nombre",
+      "have_account": "¿Ya tienes cuenta?",
+      "sign_in": "Inicia sesión",
+      "toast": "Escribe tu nombre 😊"
+    },
+    "photo": {
+      "kick": "Tu perfil",
+      "q": "PONLE CARA A TU PROGRESO",
+      "sub": "Opcional. Sube una foto o tómate una. Puedes saltarlo.",
+      "add": "AGREGAR FOTO",
+      "change": "CAMBIAR FOTO"
+    },
+    "age": {
+      "kick": "Sobre ti",
+      "q": "¿CUÁNTOS AÑOS TIENES?",
+      "sub": "Brenda calibra tus calorías con tu edad y género.",
+      "unit": "años"
+    },
+    "genders": { "female": "Mujer", "male": "Hombre", "other": "Prefiero no decir" },
+    "weight": { "q": "¿CUÁNTO PESAS?", "sub": "Desliza o escribe. Brenda ajusta tus calorías exactas." },
+    "height": { "q": "¿CUÁNTO MIDES?", "sub": "Desliza o escribe para tu estatura exacta." },
+    "goal": {
+      "kick": "Tu meta",
+      "q": "¿QUÉ QUIERES LOGRAR?",
+      "sub": "Brenda diseña todo alrededor de esto."
+    },
+    "goals": {
+      "perder_grasa": { "label": "Perder grasa", "desc": "Define y baja de talla" },
+      "ganar_musculo": { "label": "Ganar músculo", "desc": "Construye volumen y fuerza" },
+      "tonificar": { "label": "Tonificar", "desc": "Firmeza en todo el cuerpo" },
+      "gluteos": { "label": "Glúteos", "desc": "Volumen y forma de glúteo" },
+      "resistencia": { "label": "Resistencia", "desc": "Cardio y aguante" },
+      "bienestar": { "label": "Bienestar", "desc": "Energía y equilibrio" }
+    },
+    "level": {
+      "kick": "Tu experiencia",
+      "q": "¿CUÁL ES TU NIVEL?",
+      "sub": "Para ajustar la intensidad de tu plan."
+    },
+    "levels": {
+      "principiante": { "label": "Principiante", "desc": "Empiezo desde cero" },
+      "intermedio": { "label": "Intermedio", "desc": "Ya entreno a veces" },
+      "avanzado": { "label": "Avanzado", "desc": "Entreno constante" }
+    },
+    "days": {
+      "kick": "Tu compromiso",
+      "q": "¿CUÁNTOS DÍAS A LA SEMANA?",
+      "sub": "Sé realista. Brenda arma la semana para ti.",
+      "unit": "días"
+    },
+    "allergy": {
+      "q": "¿ALGUNA ALERGIA O INTOLERANCIA?",
+      "sub": "Brenda evitará estos alimentos en tu plan. Marca todas las que apliquen."
+    },
+    "allergies": {
+      "lacteos": "Lácteos", "gluten": "Gluten", "frutos_secos": "Frutos secos",
+      "mariscos": "Mariscos", "huevo": "Huevo", "soya": "Soya", "pescado": "Pescado", "ninguna": "Ninguna"
+    },
+    "diet": { "q": "¿CÓMO PREFIERES COMER?", "sub": "Brenda arma tu dieta con base en esto." },
+    "diet_prefs": {
+      "todo": { "label": "Como de todo", "desc": "Sin restricciones" },
+      "vegetariana": { "label": "Vegetariana", "desc": "Sin carne ni pescado" },
+      "vegana": { "label": "Vegana", "desc": "Nada de origen animal" },
+      "keto": { "label": "Keto / Baja en carbos", "desc": "Pocos carbohidratos" },
+      "ninguna": { "label": "Sin restricción específica", "desc": "Tú decides" }
+    },
+    "dislikes": {
+      "q": "¿ALGO QUE NO TE GUSTE?",
+      "sub": "Opcional. Escribe alimentos que prefieres evitar (ej. brócoli, atún). Puedes saltarlo.",
+      "placeholder": "Ej. brócoli, hígado, cilantro…"
+    },
+    "alarm": {
+      "kick": "Despertar Activo",
+      "q": "CONFIGURA TU ALARMA",
+      "sub": "Sonará a esta hora y no para hasta que completes tus reps.",
+      "exercise_h": "EJERCICIO",
+      "days_h": "DÍAS",
+      "song_h": "CANCIÓN",
+      "reps_unit": "reps",
+      "day_initials": "L,M,M,J,V,S,D",
+      "hint_hour": "Ajusta la hora ▾",
+      "hint_ex": "Elige ejercicio y reps ▾",
+      "hint_days": "Elige los días ▾",
+      "play": "Escuchar",
+      "stop": "Detener"
+    }
   }
 }

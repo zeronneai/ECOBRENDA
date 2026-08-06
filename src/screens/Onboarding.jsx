@@ -22,7 +22,7 @@ const inToCm = (inch) => Math.round(inch * 2.54)
 const fmtFt = (inch) => `${Math.floor(inch / 12)}'${inch % 12}"`
 
 export default function Onboarding() {
-  const { updateProfile, addAlarm, finishOnboarding, showToast, cloudEnabled, openAuth, language, setLanguage } = useApp()
+  const { updateProfile, addAlarm, finishOnboarding, showToast, cloudEnabled, openAuth, language, setLanguage, t } = useApp()
 
   const [langPicked, setLangPicked] = useState(false)
   const [step, setStep] = useState(0)
@@ -123,7 +123,7 @@ export default function Onboarding() {
   const next = () => {
     if (leaving) return // ya terminando: evita crear la alarma dos veces
     if (step === 0 && !name.trim()) {
-      showToast('Escribe tu nombre 😊')
+      showToast(t('onboarding.name.toast'))
       return
     }
     if (step < OB_TOTAL - 1) { setStep((s) => s + 1); return }
@@ -160,12 +160,12 @@ export default function Onboarding() {
         {/* 0 — NOMBRE */}
         {step === 0 && (
           <div className="ob-step active">
-            <div className="ob-kick">Bienvenida 🍑</div>
-            <div className="ob-q">¿CÓMO TE LLAMAS?</div>
-            <div className="ob-sub">Para que Brenda arme tu plan con tu nombre.</div>
+            <div className="ob-kick">{t('onboarding.name.kick')}</div>
+            <div className="ob-q">{t('onboarding.name.q')}</div>
+            <div className="ob-sub">{t('onboarding.name.sub')}</div>
             <input
               className="ob-name-input"
-              placeholder="Tu nombre"
+              placeholder={t('onboarding.name.placeholder')}
               autoComplete="off"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -173,7 +173,7 @@ export default function Onboarding() {
             />
             {cloudEnabled && (
               <div className="ob-haveaccount">
-                ¿Ya tienes cuenta? <span className="auth-link" onClick={() => openAuth('login')}>Inicia sesión</span>
+                {t('onboarding.name.have_account')} <span className="auth-link" onClick={() => openAuth('login')}>{t('onboarding.name.sign_in')}</span>
               </div>
             )}
           </div>
@@ -182,32 +182,32 @@ export default function Onboarding() {
         {/* 1 — FOTO DE PERFIL (opcional) */}
         {step === 1 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu perfil</div>
-            <div className="ob-q">PONLE CARA<br />A TU PROGRESO</div>
-            <div className="ob-sub">Opcional. Sube una foto o tómate una. Puedes saltarlo.</div>
+            <div className="ob-kick">{t('onboarding.photo.kick')}</div>
+            <div className="ob-q">{t('onboarding.photo.q')}</div>
+            <div className="ob-sub">{t('onboarding.photo.sub')}</div>
             <div className="ob-avatar-wrap">
-              <button type="button" className="ob-avatar" onClick={addPhoto} aria-label="Agregar foto">
+              <button type="button" className="ob-avatar" onClick={addPhoto} aria-label={t('onboarding.photo.add')}>
                 {avatarPreview
-                  ? <img src={avatarPreview} alt="Tu foto" />
+                  ? <img src={avatarPreview} alt="" />
                   : <span>{(name.trim()[0] || '🍑').toUpperCase()}</span>}
                 <span className="ob-avatar-cam">📷</span>
               </button>
             </div>
-            <button className="cta full" onClick={addPhoto}>{avatarPreview ? 'CAMBIAR FOTO' : 'AGREGAR FOTO'}</button>
+            <button className="cta full" onClick={addPhoto}>{avatarPreview ? t('onboarding.photo.change') : t('onboarding.photo.add')}</button>
           </div>
         )}
 
         {/* 2 — EDAD + GÉNERO */}
         {step === 2 && (
           <div className="ob-step active">
-            <div className="ob-kick">Sobre ti</div>
-            <div className="ob-q">¿CUÁNTOS AÑOS<br />TIENES?</div>
-            <div className="ob-sub">Brenda calibra tus calorías con tu edad y género.</div>
-            <RulerPicker min={16} max={80} unit="años" value={age} onChange={setAge} />
+            <div className="ob-kick">{t('onboarding.age.kick')}</div>
+            <div className="ob-q">{t('onboarding.age.q')}</div>
+            <div className="ob-sub">{t('onboarding.age.sub')}</div>
+            <RulerPicker min={16} max={80} unit={t('onboarding.age.unit')} value={age} onChange={setAge} />
             <div className="pill-row">
               {GENDERS.map((g) => (
                 <div key={g.id} className={'pill' + (gender === g.id ? ' sel' : '')} onClick={() => setGender(g.id)}>
-                  {g.label}
+                  {t('onboarding.genders.' + g.id)}
                 </div>
               ))}
             </div>
@@ -217,9 +217,9 @@ export default function Onboarding() {
         {/* 2 — PESO (kg/lb) */}
         {step === 3 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu cuerpo</div>
-            <div className="ob-q">¿CUÁNTO PESAS?</div>
-            <div className="ob-sub">Desliza o escribe. Brenda ajusta tus calorías exactas.</div>
+            <div className="ob-kick">{t('onboarding.body_kick')}</div>
+            <div className="ob-q">{t('onboarding.weight.q')}</div>
+            <div className="ob-sub">{t('onboarding.weight.sub')}</div>
             <div className="unit-toggle">
               <button className={weightUnit === 'kg' ? 'sel' : ''} onClick={() => setWeightUnit('kg')}>KG</button>
               <button className={weightUnit === 'lb' ? 'sel' : ''} onClick={() => setWeightUnit('lb')}>LB</button>
@@ -235,9 +235,9 @@ export default function Onboarding() {
         {/* 3 — ALTURA (cm/ft) */}
         {step === 4 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu cuerpo</div>
-            <div className="ob-q">¿CUÁNTO MIDES?</div>
-            <div className="ob-sub">Desliza o escribe para tu estatura exacta.</div>
+            <div className="ob-kick">{t('onboarding.body_kick')}</div>
+            <div className="ob-q">{t('onboarding.height.q')}</div>
+            <div className="ob-sub">{t('onboarding.height.sub')}</div>
             <div className="unit-toggle">
               <button className={heightUnit === 'cm' ? 'sel' : ''} onClick={() => setHeightUnit('cm')}>CM</button>
               <button className={heightUnit === 'ft' ? 'sel' : ''} onClick={() => setHeightUnit('ft')}>FT</button>
@@ -253,14 +253,14 @@ export default function Onboarding() {
         {/* 4 — OBJETIVO (6) */}
         {step === 5 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu meta</div>
-            <div className="ob-q">¿QUÉ QUIERES LOGRAR?</div>
-            <div className="ob-sub">Brenda diseña todo alrededor de esto.</div>
+            <div className="ob-kick">{t('onboarding.goal.kick')}</div>
+            <div className="ob-q">{t('onboarding.goal.q')}</div>
+            <div className="ob-sub">{t('onboarding.goal.sub')}</div>
             <div>
               {GOALS.map((g) => (
                 <div key={g.id} className={'opt' + (g.id === goal ? ' sel' : '')} onClick={() => setGoal(g.id)}>
                   <div className="oe">{g.emoji}</div>
-                  <div className="ol"><b>{g.label}</b><span>{g.desc}</span></div>
+                  <div className="ol"><b>{t('onboarding.goals.' + g.id + '.label')}</b><span>{t('onboarding.goals.' + g.id + '.desc')}</span></div>
                 </div>
               ))}
             </div>
@@ -270,14 +270,14 @@ export default function Onboarding() {
         {/* 5 — NIVEL */}
         {step === 6 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu experiencia</div>
-            <div className="ob-q">¿CUÁL ES TU NIVEL?</div>
-            <div className="ob-sub">Para ajustar la intensidad de tu plan.</div>
+            <div className="ob-kick">{t('onboarding.level.kick')}</div>
+            <div className="ob-q">{t('onboarding.level.q')}</div>
+            <div className="ob-sub">{t('onboarding.level.sub')}</div>
             <div>
               {LEVELS.map((l) => (
                 <div key={l.id} className={'opt' + (l.id === level ? ' sel' : '')} onClick={() => setLevel(l.id)}>
                   <div className="oe">{l.emoji}</div>
-                  <div className="ol"><b>{l.label}</b><span>{l.desc}</span></div>
+                  <div className="ol"><b>{t('onboarding.levels.' + l.id + '.label')}</b><span>{t('onboarding.levels.' + l.id + '.desc')}</span></div>
                 </div>
               ))}
             </div>
@@ -287,13 +287,13 @@ export default function Onboarding() {
         {/* 6 — DÍAS POR SEMANA */}
         {step === 7 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu compromiso</div>
-            <div className="ob-q">¿CUÁNTOS DÍAS<br />A LA SEMANA?</div>
-            <div className="ob-sub">Sé realista. Brenda arma la semana para ti.</div>
+            <div className="ob-kick">{t('onboarding.days.kick')}</div>
+            <div className="ob-q">{t('onboarding.days.q')}</div>
+            <div className="ob-sub">{t('onboarding.days.sub')}</div>
             <div className="chip-row">
               {DAYS_OPTIONS.map((d) => (
                 <div key={d} className={'chip' + (daysPerWeek === d ? ' sel' : '')} onClick={() => setDaysPerWeek(d)}>
-                  {d}<span>días</span>
+                  {d}<span>{t('onboarding.days.unit')}</span>
                 </div>
               ))}
             </div>
@@ -303,9 +303,9 @@ export default function Onboarding() {
         {/* 7 — ALERGIAS (multi-select) */}
         {step === 8 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu alimentación</div>
-            <div className="ob-q">¿ALGUNA ALERGIA<br />O INTOLERANCIA?</div>
-            <div className="ob-sub">Brenda evitará estos alimentos en tu plan. Marca todas las que apliquen.</div>
+            <div className="ob-kick">{t('onboarding.food_kick')}</div>
+            <div className="ob-q">{t('onboarding.allergy.q')}</div>
+            <div className="ob-sub">{t('onboarding.allergy.sub')}</div>
             <div className="allergy-grid">
               {ALLERGIES.map((a) => (
                 <button
@@ -315,7 +315,7 @@ export default function Onboarding() {
                   onClick={() => toggleAllergy(a.id)}
                 >
                   <span className="ae">{a.emoji}</span>
-                  <span className="al">{a.label}</span>
+                  <span className="al">{t('onboarding.allergies.' + a.id)}</span>
                 </button>
               ))}
             </div>
@@ -325,14 +325,14 @@ export default function Onboarding() {
         {/* 8 — PREFERENCIA DIETÉTICA (single-select) */}
         {step === 9 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu alimentación</div>
-            <div className="ob-q">¿CÓMO PREFIERES<br />COMER?</div>
-            <div className="ob-sub">Brenda arma tu dieta con base en esto.</div>
+            <div className="ob-kick">{t('onboarding.food_kick')}</div>
+            <div className="ob-q">{t('onboarding.diet.q')}</div>
+            <div className="ob-sub">{t('onboarding.diet.sub')}</div>
             <div>
               {DIET_PREFS.map((d) => (
                 <div key={d.id} className={'opt' + (d.id === dietPref ? ' sel' : '')} onClick={() => setDietPref(d.id)}>
                   <div className="oe">{d.emoji}</div>
-                  <div className="ol"><b>{d.label}</b><span>{d.desc}</span></div>
+                  <div className="ol"><b>{t('onboarding.diet_prefs.' + d.id + '.label')}</b><span>{t('onboarding.diet_prefs.' + d.id + '.desc')}</span></div>
                 </div>
               ))}
             </div>
@@ -342,12 +342,12 @@ export default function Onboarding() {
         {/* 9 — ALIMENTOS QUE NO TE GUSTAN (texto libre, opcional) */}
         {step === 10 && (
           <div className="ob-step active">
-            <div className="ob-kick">Tu alimentación</div>
-            <div className="ob-q">¿ALGO QUE NO<br />TE GUSTE?</div>
-            <div className="ob-sub">Opcional. Escribe alimentos que prefieres evitar (ej. brócoli, atún). Puedes saltarlo.</div>
+            <div className="ob-kick">{t('onboarding.food_kick')}</div>
+            <div className="ob-q">{t('onboarding.dislikes.q')}</div>
+            <div className="ob-sub">{t('onboarding.dislikes.sub')}</div>
             <input
               className="ob-name-input"
-              placeholder="Ej. brócoli, hígado, cilantro…"
+              placeholder={t('onboarding.dislikes.placeholder')}
               autoComplete="off"
               value={dislikes}
               onChange={(e) => setDislikes(e.target.value)}
@@ -359,9 +359,9 @@ export default function Onboarding() {
         {/* 10 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
         {step === 11 && (
           <div className="ob-step active">
-            <div className="ob-kick">Despertar Activo</div>
-            <div className="ob-q">CONFIGURA<br />TU ALARMA</div>
-            <div className="ob-sub">Sonará a esta hora y no para hasta que completes tus reps.</div>
+            <div className="ob-kick">{t('onboarding.alarm.kick')}</div>
+            <div className="ob-q">{t('onboarding.alarm.q')}</div>
+            <div className="ob-sub">{t('onboarding.alarm.sub')}</div>
             <div className="wheel-wrap">
               <div className="wheel-line" />
               <WheelPicker items={HOURS} initIdx={5} onChange={(v) => { setHour(v); unlock(2) }} />
@@ -372,7 +372,7 @@ export default function Onboarding() {
 
             {unlocked >= 2 && (
               <div className="cfg-stage">
-                <div className="sec-h" style={{ margin: '6px 0 10px' }}><h2 style={{ fontSize: 18 }}>EJERCICIO</h2></div>
+                <div className="sec-h" style={{ margin: '6px 0 10px' }}><h2 style={{ fontSize: 18 }}>{t('onboarding.alarm.exercise_h')}</h2></div>
                 <div className="chip-row">
                   <div className={'chip' + (exercise === 'squats' ? ' sel' : '')} onClick={() => { setExercise('squats'); unlock(3) }}>🍑<span>Squats</span></div>
                   <div className={'chip' + (exercise === 'lunges' ? ' sel' : '')} onClick={() => { setExercise('lunges'); unlock(3) }}>🦵<span>Lunges</span></div>
@@ -380,7 +380,7 @@ export default function Onboarding() {
                 <div className="chip-row" style={{ marginTop: 10 }}>
                   {REPS_OPTIONS.map((r) => (
                     <div key={r} className={'chip' + (reps === r ? ' sel' : '')} onClick={() => { setReps(r); unlock(3) }}>
-                      {r}<span>reps</span>
+                      {r}<span>{t('onboarding.alarm.reps_unit')}</span>
                     </div>
                   ))}
                 </div>
@@ -389,9 +389,9 @@ export default function Onboarding() {
 
             {unlocked >= 3 && (
               <div className="cfg-stage">
-                <div className="sec-h" style={{ margin: '16px 0 10px' }}><h2 style={{ fontSize: 18 }}>DÍAS</h2></div>
+                <div className="sec-h" style={{ margin: '16px 0 10px' }}><h2 style={{ fontSize: 18 }}>{t('onboarding.alarm.days_h')}</h2></div>
                 <div className="daysel">
-                  {DAY_LABELS.map((lbl, d) => (
+                  {t('onboarding.alarm.day_initials').split(',').map((lbl, d) => (
                     <div key={d} className={'d' + (alarmDays.includes(d) ? ' on' : '')} onClick={() => { toggleAlarmDay(d); unlock(4) }}>{lbl}</div>
                   ))}
                 </div>
@@ -400,7 +400,7 @@ export default function Onboarding() {
 
             {unlocked >= 4 && (
               <div className="cfg-stage">
-                <div className="sec-h" style={{ margin: '16px 0 10px' }}><h2 style={{ fontSize: 18 }}>CANCIÓN</h2></div>
+                <div className="sec-h" style={{ margin: '16px 0 10px' }}><h2 style={{ fontSize: 18 }}>{t('onboarding.alarm.song_h')}</h2></div>
                 <div className="songsel">
                   {ALARM_SONGS.map((song) => (
                     <div key={song.id} className={'songrow' + (songId === song.id ? ' sel' : '')} onClick={() => { setSongId(song.id); stopPreview() }}>
@@ -410,7 +410,7 @@ export default function Onboarding() {
                         type="button"
                         className={'songplay' + (previewId === song.id ? ' on' : '')}
                         onClick={(e) => { e.stopPropagation(); togglePreview(song) }}
-                        aria-label={previewId === song.id ? 'Detener' : 'Escuchar'}
+                        aria-label={previewId === song.id ? t('onboarding.alarm.stop') : t('onboarding.alarm.play')}
                       >
                         {previewId === song.id ? '◼' : '▶'}
                       </button>
@@ -421,7 +421,7 @@ export default function Onboarding() {
             )}
 
             {unlocked < 4 && (
-              <div className="cfg-hint">{unlocked === 1 ? 'Ajusta la hora ▾' : unlocked === 2 ? 'Elige ejercicio y reps ▾' : 'Elige los días ▾'}</div>
+              <div className="cfg-hint">{unlocked === 1 ? t('onboarding.alarm.hint_hour') : unlocked === 2 ? t('onboarding.alarm.hint_ex') : t('onboarding.alarm.hint_days')}</div>
             )}
           </div>
         )}
@@ -430,9 +430,9 @@ export default function Onboarding() {
       <div className="ob-foot">
         <button className="cta full" onClick={next}>
           {step === OB_TOTAL - 1
-            ? (unlocked < 4 ? 'CONTINUAR' : 'EMPEZAR 🔥')
-            : step === 1 && !avatarPreview ? 'SALTAR'
-            : 'CONTINUAR'}
+            ? (unlocked < 4 ? t('onboarding.continue') : t('onboarding.start'))
+            : step === 1 && !avatarPreview ? t('onboarding.skip')
+            : t('onboarding.continue')}
         </button>
       </div>
     </div>
