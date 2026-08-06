@@ -6,6 +6,7 @@ import { unlockPreview, playPreview, stopPreview as stopPreviewAudio } from '../
 import { pickAvatarPhoto } from '../lib/avatar'
 import RulerPicker from '../components/RulerPicker'
 import WheelPicker from '../components/WheelPicker'
+import LanguageSelect from '../components/LanguageSelect'
 
 const OB_TOTAL = 12
 
@@ -21,8 +22,9 @@ const inToCm = (inch) => Math.round(inch * 2.54)
 const fmtFt = (inch) => `${Math.floor(inch / 12)}'${inch % 12}"`
 
 export default function Onboarding() {
-  const { updateProfile, addAlarm, finishOnboarding, showToast, cloudEnabled, openAuth } = useApp()
+  const { updateProfile, addAlarm, finishOnboarding, showToast, cloudEnabled, openAuth, language, setLanguage } = useApp()
 
+  const [langPicked, setLangPicked] = useState(false)
   const [step, setStep] = useState(0)
   const [leaving, setLeaving] = useState(false)
 
@@ -134,6 +136,18 @@ export default function Onboarding() {
   const onbStyle = leaving
     ? { transition: 'opacity .5s, transform .5s', opacity: 0, transform: 'scale(1.04)' }
     : undefined
+
+  // Paso 0 real: elegir idioma (antes de cualquier texto del onboarding).
+  if (!langPicked) {
+    return (
+      <div id="onb">
+        <div className="ob-body ob-lang-screen">
+          <div className="ob-lang-brand">🍑 BOOTY ALARM</div>
+          <LanguageSelect current={language} onPick={(l) => { setLanguage(l); setLangPicked(true) }} />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div id="onb" style={onbStyle}>
