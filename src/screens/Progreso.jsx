@@ -25,6 +25,7 @@ function SectionTitle({ children }) {
 }
 
 function StreakRing({ current, best }) {
+  const { t } = useApp()
   const goal = Math.max(best, 7, current, 1)
   const pct = Math.min(1, current / goal)
   const r = 52
@@ -48,26 +49,27 @@ function StreakRing({ current, best }) {
         </svg>
         <div className="pg2-ring-center">
           <div className="num">{current}</div>
-          <div className="u">días</div>
+          <div className="u">{t('progreso.ring_unit')}</div>
         </div>
       </div>
       <div className="pg2-ring-info">
-        <h4>Racha activa 🔥</h4>
-        <p>{current > 0 ? 'No la rompas. Cada día cuenta.' : 'Despierta activa hoy y arranca tu racha.'}</p>
-        <span className="pg2-best">🏆 Mejor: {best} {best === 1 ? 'día' : 'días'}</span>
+        <h4>{t('progreso.ring_active')}</h4>
+        <p>{current > 0 ? t('progreso.ring_p_on') : t('progreso.ring_p_off')}</p>
+        <span className="pg2-best">{t(best === 1 ? 'progreso.ring_best_one' : 'progreso.ring_best_many', { n: best })}</span>
       </div>
     </div>
   )
 }
 
 function PremiumGate({ navigate, openSheet }) {
+  const { t } = useApp()
   return (
     <section className="screen active" id="s-progreso">
       <div className="scroll">
         <div className="topgap" />
         <div className="hdr reveal d1" style={{ alignItems: 'center', justifyContent: 'flex-start' }}>
           <button className="pg-back" onClick={() => navigate('/profile')}>‹</button>
-          <div><div className="hi">Premium</div><div className="name">PROGRESO</div></div>
+          <div><div className="hi">{t('progreso.premium_hi')}</div><div className="name">{t('progreso.header')}</div></div>
         </div>
         <div className="pad reveal d2">
           {isIOSNative() ? (
@@ -77,10 +79,10 @@ function PremiumGate({ navigate, openSheet }) {
               <div className="glow" /><div className="shimmer" />
               <div className="lock-pill">🔒 PREMIUM</div>
               <div className="inner">
-                <div className="kick">Tu evolución</div>
-                <h3>REGISTRA TU PROGRESO</h3>
-                <p>Peso, gráficas y logros desbloqueables. Disponible con Brenda.</p>
-                <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+                <div className="kick">{t('progreso.gate_kick')}</div>
+                <h3>{t('progreso.gate_h')}</h3>
+                <p>{t('progreso.gate_p')}</p>
+                <button className="unlock" onClick={() => openSheet('paywall')}>{t('paywall.see_plans')}</button>
               </div>
             </div>
           )}
@@ -92,7 +94,7 @@ function PremiumGate({ navigate, openSheet }) {
 
 export default function Progreso() {
   const navigate = useNavigate()
-  const { progressLog, addProgressEntry, deleteProgressEntry, streak, totals, workoutLog, openSheet } = useApp()
+  const { t, progressLog, addProgressEntry, deleteProgressEntry, streak, totals, workoutLog, openSheet } = useApp()
   const { isPremium } = useSubscription()
 
   const [weight, setWeight] = useState('')
@@ -127,24 +129,24 @@ export default function Progreso() {
         <div className="topgap" />
         <div className="hdr reveal d1" style={{ alignItems: 'center', justifyContent: 'flex-start' }}>
           <button className="pg-back" onClick={() => navigate('/profile')}>‹</button>
-          <div><div className="hi">Tu evolución</div><div className="name">PROGRESO</div></div>
+          <div><div className="hi">{t('progreso.hi')}</div><div className="name">{t('progreso.header')}</div></div>
         </div>
 
         <div className="pad pg2-wrap">
           {/* 1 — Registrar peso */}
-          <SectionTitle>Registra tu peso</SectionTitle>
+          <SectionTitle>{t('progreso.t_log')}</SectionTitle>
           <form className="pg2-form reveal d2" onSubmit={submit}>
-            <input className="pg2-input" type="number" step="0.1" inputMode="decimal" placeholder="Tu peso (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} />
-            <input className="pg2-input" placeholder="Nota (opcional)" value={note} onChange={(e) => setNote(e.target.value)} />
-            <Button3D type="submit" fullWidth>Registrar peso</Button3D>
+            <input className="pg2-input" type="number" step="0.1" inputMode="decimal" placeholder={t('progreso.ph_weight')} value={weight} onChange={(e) => setWeight(e.target.value)} />
+            <input className="pg2-input" placeholder={t('progreso.ph_note')} value={note} onChange={(e) => setNote(e.target.value)} />
+            <Button3D type="submit" fullWidth>{t('progreso.btn_log')}</Button3D>
           </form>
 
           {/* 2 — Peso: hero + área */}
-          <SectionTitle>Evolución del peso</SectionTitle>
+          <SectionTitle>{t('progreso.t_weight')}</SectionTitle>
           {latest && (
             <div className="pg2-hero reveal d3">
               <div>
-                <div className="pg2-hero-lbl">Peso actual</div>
+                <div className="pg2-hero-lbl">{t('progreso.current_weight')}</div>
                 <div className="pg2-hero-val">{latest.weight}<small> kg</small></div>
               </div>
               {delta !== null && delta !== 0 && (
@@ -171,30 +173,30 @@ export default function Progreso() {
                   <Area type="monotone" dataKey="weight" stroke={MAGENTA} strokeWidth={3} fill="url(#wgrad)" dot={{ fill: MAGENTA, r: 3 }} activeDot={{ r: 5 }} />
                 </AreaChart>
               </ResponsiveContainer>
-              <div className="pg2-sub" style={{ textAlign: 'center', paddingBottom: 6 }}>Mín {series.min} kg · Máx {series.max} kg</div>
+              <div className="pg2-sub" style={{ textAlign: 'center', paddingBottom: 6 }}>{t('progreso.minmax', { min: series.min, max: series.max })}</div>
             </div>
           ) : (
             <div className="pg2-empty reveal d3">
               <div className="pg2-empty-emoji">📈</div>
-              <p>Registra tu peso al menos 2 veces para ver tu evolución.</p>
+              <p>{t('progreso.empty_weight')}</p>
             </div>
           )}
 
           {/* 3 — KPIs */}
-          <SectionTitle>Tus números</SectionTitle>
+          <SectionTitle>{t('progreso.t_numbers')}</SectionTitle>
           <div className="pg2-kpis reveal d3">
             <div className="pg2-kpi pg2-kpi--m"><span className="n">{totals.squat || 0}</span><div className="k">Squats</div></div>
             <div className="pg2-kpi pg2-kpi--l"><span className="n">{totals.lunge || 0}</span><div className="k">Lunges</div></div>
-            <div className="pg2-kpi pg2-kpi--m"><span className="n">{totals.reps || 0}</span><div className="k">Reps totales</div></div>
-            <div className="pg2-kpi pg2-kpi--l"><span className="n">{totals.workouts || 0}</span><div className="k">Entrenamientos</div></div>
+            <div className="pg2-kpi pg2-kpi--m"><span className="n">{totals.reps || 0}</span><div className="k">{t('progreso.kpi_reps_total')}</div></div>
+            <div className="pg2-kpi pg2-kpi--l"><span className="n">{totals.workouts || 0}</span><div className="k">{t('progreso.kpi_workouts')}</div></div>
           </div>
 
           {/* 4 — Racha */}
-          <SectionTitle>Tu racha</SectionTitle>
+          <SectionTitle>{t('progreso.t_streak')}</SectionTitle>
           <div className="reveal d4"><StreakRing current={streak} best={best} /></div>
 
           {/* 5 — Entrenamientos por semana */}
-          <SectionTitle>Constancia semanal</SectionTitle>
+          <SectionTitle>{t('progreso.t_weekly')}</SectionTitle>
           {hasWeeks ? (
             <div className="pg2-chartcard pad-r reveal d4">
               <ResponsiveContainer width="100%" height={180}>
@@ -212,12 +214,12 @@ export default function Progreso() {
           ) : (
             <div className="pg2-empty reveal d4">
               <div className="pg2-empty-emoji">📊</div>
-              <p>Empieza a entrenar para ver tu constancia semanal 🔥</p>
+              <p>{t('progreso.empty_weekly')}</p>
             </div>
           )}
 
           {/* 6 — Donut Squats vs Lunges */}
-          <SectionTitle>Squats vs Lunges</SectionTitle>
+          <SectionTitle>{t('progreso.t_split')}</SectionTitle>
           {donut.total > 0 ? (
             <div className="pg2-chartcard pad-r reveal d5" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <ResponsiveContainer width="55%" height={160}>
@@ -237,27 +239,27 @@ export default function Progreso() {
           ) : (
             <div className="pg2-empty reveal d5">
               <div className="pg2-empty-emoji">🍑</div>
-              <p>Completa retos y alarmas para ver tu balance de ejercicios.</p>
+              <p>{t('progreso.empty_split')}</p>
             </div>
           )}
 
           {/* 7 — Logros */}
-          <SectionTitle>Logros</SectionTitle>
+          <SectionTitle>{t('progreso.t_ach')}</SectionTitle>
           <div className="pg2-badges reveal d5">
             {ACHIEVEMENTS.map((a) => {
               const done = a.check(streak, totals.workouts)
               return (
                 <div className={'pg2-badge' + (done ? ' done' : ' locked')} key={a.id}>
                   <div className="e">{a.emoji}</div>
-                  <div className="nm">{a.name}</div>
-                  <div className="rq">{done ? 'Desbloqueado' : a.req}</div>
+                  <div className="nm">{t('progreso.ach.' + a.id + '.name')}</div>
+                  <div className="rq">{done ? t('progreso.unlocked') : t('progreso.ach.' + a.id + '.req')}</div>
                 </div>
               )
             })}
           </div>
 
           {/* 8 — Historial */}
-          <SectionTitle>Historial</SectionTitle>
+          <SectionTitle>{t('progreso.t_history')}</SectionTitle>
           {progressLog.length === 0 ? (
             <div className="pg2-empty reveal d6">
               <div className="pg2-empty-emoji">📝</div>
@@ -274,8 +276,8 @@ export default function Progreso() {
                   </div>
                   {confirmId === p.id ? (
                     <div className="pg2-confirm">
-                      <button onClick={() => { deleteProgressEntry(p.id); setConfirmId(null) }}>Sí</button>
-                      <button className="no" onClick={() => setConfirmId(null)}>No</button>
+                      <button onClick={() => { deleteProgressEntry(p.id); setConfirmId(null) }}>{t('progreso.yes')}</button>
+                      <button className="no" onClick={() => setConfirmId(null)}>{t('progreso.no')}</button>
                     </div>
                   ) : (
                     <button className="pg2-del" onClick={() => setConfirmId(p.id)}>🗑</button>

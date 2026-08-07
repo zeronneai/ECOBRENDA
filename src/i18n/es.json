@@ -46,21 +46,49 @@
       "sub": "Brenda calibra tus calorías con tu edad y género.",
       "unit": "años"
     },
-    "genders": { "female": "Mujer", "male": "Hombre", "other": "Prefiero no decir" },
-    "weight": { "q": "¿CUÁNTO PESAS?", "sub": "Desliza o escribe. Brenda ajusta tus calorías exactas." },
-    "height": { "q": "¿CUÁNTO MIDES?", "sub": "Desliza o escribe para tu estatura exacta." },
+    "genders": {
+      "female": "Mujer",
+      "male": "Hombre",
+      "other": "Prefiero no decir"
+    },
+    "weight": {
+      "q": "¿CUÁNTO PESAS?",
+      "sub": "Desliza o escribe. Brenda ajusta tus calorías exactas."
+    },
+    "height": {
+      "q": "¿CUÁNTO MIDES?",
+      "sub": "Desliza o escribe para tu estatura exacta."
+    },
     "goal": {
       "kick": "Tu meta",
       "q": "¿QUÉ QUIERES LOGRAR?",
       "sub": "Brenda diseña todo alrededor de esto."
     },
     "goals": {
-      "perder_grasa": { "label": "Perder grasa", "desc": "Define y baja de talla" },
-      "ganar_musculo": { "label": "Ganar músculo", "desc": "Construye volumen y fuerza" },
-      "tonificar": { "label": "Tonificar", "desc": "Firmeza en todo el cuerpo" },
-      "gluteos": { "label": "Glúteos", "desc": "Volumen y forma de glúteo" },
-      "resistencia": { "label": "Resistencia", "desc": "Cardio y aguante" },
-      "bienestar": { "label": "Bienestar", "desc": "Energía y equilibrio" }
+      "perder_grasa": {
+        "label": "Perder grasa",
+        "desc": "Define y baja de talla"
+      },
+      "ganar_musculo": {
+        "label": "Ganar músculo",
+        "desc": "Construye volumen y fuerza"
+      },
+      "tonificar": {
+        "label": "Tonificar",
+        "desc": "Firmeza en todo el cuerpo"
+      },
+      "gluteos": {
+        "label": "Glúteos",
+        "desc": "Volumen y forma de glúteo"
+      },
+      "resistencia": {
+        "label": "Resistencia",
+        "desc": "Cardio y aguante"
+      },
+      "bienestar": {
+        "label": "Bienestar",
+        "desc": "Energía y equilibrio"
+      }
     },
     "level": {
       "kick": "Tu experiencia",
@@ -68,9 +96,18 @@
       "sub": "Para ajustar la intensidad de tu plan."
     },
     "levels": {
-      "principiante": { "label": "Principiante", "desc": "Empiezo desde cero" },
-      "intermedio": { "label": "Intermedio", "desc": "Ya entreno a veces" },
-      "avanzado": { "label": "Avanzado", "desc": "Entreno constante" }
+      "principiante": {
+        "label": "Principiante",
+        "desc": "Empiezo desde cero"
+      },
+      "intermedio": {
+        "label": "Intermedio",
+        "desc": "Ya entreno a veces"
+      },
+      "avanzado": {
+        "label": "Avanzado",
+        "desc": "Entreno constante"
+      }
     },
     "days": {
       "kick": "Tu compromiso",
@@ -83,16 +120,40 @@
       "sub": "Brenda evitará estos alimentos en tu plan. Marca todas las que apliquen."
     },
     "allergies": {
-      "lacteos": "Lácteos", "gluten": "Gluten", "frutos_secos": "Frutos secos",
-      "mariscos": "Mariscos", "huevo": "Huevo", "soya": "Soya", "pescado": "Pescado", "ninguna": "Ninguna"
+      "lacteos": "Lácteos",
+      "gluten": "Gluten",
+      "frutos_secos": "Frutos secos",
+      "mariscos": "Mariscos",
+      "huevo": "Huevo",
+      "soya": "Soya",
+      "pescado": "Pescado",
+      "ninguna": "Ninguna"
     },
-    "diet": { "q": "¿CÓMO PREFIERES COMER?", "sub": "Brenda arma tu dieta con base en esto." },
+    "diet": {
+      "q": "¿CÓMO PREFIERES COMER?",
+      "sub": "Brenda arma tu dieta con base en esto."
+    },
     "diet_prefs": {
-      "todo": { "label": "Como de todo", "desc": "Sin restricciones" },
-      "vegetariana": { "label": "Vegetariana", "desc": "Sin carne ni pescado" },
-      "vegana": { "label": "Vegana", "desc": "Nada de origen animal" },
-      "keto": { "label": "Keto / Baja en carbos", "desc": "Pocos carbohidratos" },
-      "ninguna": { "label": "Sin restricción específica", "desc": "Tú decides" }
+      "todo": {
+        "label": "Como de todo",
+        "desc": "Sin restricciones"
+      },
+      "vegetariana": {
+        "label": "Vegetariana",
+        "desc": "Sin carne ni pescado"
+      },
+      "vegana": {
+        "label": "Vegana",
+        "desc": "Nada de origen animal"
+      },
+      "keto": {
+        "label": "Keto / Baja en carbos",
+        "desc": "Pocos carbohidratos"
+      },
+      "ninguna": {
+        "label": "Sin restricción específica",
+        "desc": "Tú decides"
+      }
     },
     "dislikes": {
       "q": "¿ALGO QUE NO TE GUSTE?",
@@ -113,6 +174,164 @@
       "hint_days": "Elige los días ▾",
       "play": "Escuchar",
       "stop": "Detener"
+    }
+  },
+  "nav": {
+    "train": "Entrena",
+    "nutrition": "Nutrición",
+    "progress": "Progreso"
+  },
+  "home": {
+    "g_morning": "Buen día",
+    "g_afternoon": "Buena tarde",
+    "g_evening": "Buena noche",
+    "hi": "HOLA",
+    "streak_label": "Racha actual",
+    "days": "días",
+    "kpi_workouts": "Entrenos",
+    "kpi_reps": "Reps",
+    "kpi_best": "Mejor racha",
+    "alarm_h": "TU ALARMA",
+    "edit": "EDITAR",
+    "active_wake": "Despertar activo",
+    "test_alarm": "PROBAR ALARMA",
+    "challenges_h": "RETOS RÁPIDOS",
+    "completed": "{{n}} COMPLETADOS",
+    "lvl_express": "Express",
+    "lvl_calentamiento": "Calentamiento",
+    "lvl_intenso": "Intenso",
+    "lvl_bestia": "Bestia",
+    "hero_kick": "✦ Tu plan con Brenda",
+    "hero_title": "RUTINA Y DIETA LISTAS",
+    "hero_p": "Tu rutina y tu plan de comidas personalizados te esperan. ¿Le entras hoy?",
+    "locked_p": "Rutinas y dieta 100% personalizadas por IA para tu meta, tu nivel y tus días. Además, tu progreso con gráficas.",
+    "unlock": "DESBLOQUEAR →"
+  },
+  "ai": {
+    "intro_foot": "100% personalizado con tu perfil",
+    "gen_title": "Brenda está analizando tu perfil…",
+    "gen_sub_workout": "Armando tu rutina a tu medida. Aguanta, esto vale la pena. 🔥",
+    "gen_sub_diet": "Armando tu plan de comidas a tu medida. Aguanta, esto vale la pena. 🔥",
+    "footer_locked_one": "🔒 Tu plan se renueva en 1 día",
+    "footer_locked_many": "🔒 Tu plan se renueva en {{n}} días",
+    "dev_force": "⏩ Simular +30 días (dev)",
+    "renew_p": "Ya pasó un mes. ¿Cómo te fue? Cuéntame tus avances y te armo el siguiente nivel. 🔥",
+    "renew_btn": "ACTUALIZAR MI PLAN",
+    "kpi_days": "Días",
+    "kpi_ex": "Ejercicios",
+    "kpi_sets": "Series",
+    "warmup": "🔥 Calentamiento:",
+    "rest": "Descanso {{rest}}",
+    "done": "✓ Hecho",
+    "mark": "Marcar",
+    "mac_protein": "proteína",
+    "mac_carbs": "carbos",
+    "mac_fat": "grasas",
+    "diet_day": "{{kc}} kcal · {{n}} comidas",
+    "ck_back": "Volver",
+    "ck_kick": "Check-in del mes",
+    "ck_title": "¿CÓMO TE FUE?",
+    "ck_sub": "Un mes completo. Ahora dime la verdad y te armo el siguiente nivel. 🔥",
+    "ck_weight": "Tu peso actual",
+    "ck_feel": "¿Cómo se sintió el plan?",
+    "feel_easy": "Muy fácil",
+    "feel_ok": "Bien",
+    "feel_hard": "Muy difícil",
+    "ck_adherence": "¿Cumpliste tus entrenamientos?",
+    "adh_all": "Sí, todos",
+    "adh_most": "La mayoría",
+    "adh_few": "Pocos",
+    "ck_comment": "Algo que contarme (opcional)",
+    "ck_comment_ph": "Ej. me costó el cardio, quiero más glúteo…",
+    "ck_submit": "ARMAR MI SIGUIENTE NIVEL",
+    "ck_submitting": "ARMANDO…"
+  },
+  "paywall": {
+    "see_plans": "VER PLANES →"
+  },
+  "premium": {
+    "locked_title": "CONTENIDO EXCLUSIVO",
+    "locked_text": "Esta sección requiere una cuenta con acceso completo. Si ya tienes acceso, inicia sesión para continuar."
+  },
+  "entrena": {
+    "header": "ENTRENA",
+    "promo_kick": "Biblioteca de entrenamientos",
+    "promo_h": "RUTINAS Y PROGRAMAS HECHOS PARA TI",
+    "promo_p": "Decenas de rutinas guiadas y programas de varias semanas. Desbloquéalo con Brenda.",
+    "intro_kick": "Tu rutina personalizada",
+    "intro_title": "BRENDA TIENE TU RUTINA LISTA",
+    "intro_sub": "Analicé tu nivel, tus días, tu objetivo. ¿Le entras o no? 🔥",
+    "intro_cta": "GENERAR MI RUTINA CON BRENDA"
+  },
+  "nutricion": {
+    "header": "NUTRICIÓN",
+    "promo_kick": "Nutrición de Brenda",
+    "promo_h": "PLANES, RECETAS Y SUPLEMENTOS",
+    "promo_p": "Planes de comida según tu objetivo, recetas fáciles y guía de suplementos.",
+    "intro_kick": "Tu plan de comidas personalizado",
+    "intro_title": "BRENDA TIENE TU PLAN DE COMIDAS",
+    "intro_sub": "Hecho para tu cuerpo y tus metas. ¿Vas a poder seguirlo? 💪",
+    "intro_cta": "GENERAR MI PLAN CON BRENDA"
+  },
+  "progreso": {
+    "premium_hi": "Premium",
+    "header": "PROGRESO",
+    "hi": "Tu evolución",
+    "gate_kick": "Tu evolución",
+    "gate_h": "REGISTRA TU PROGRESO",
+    "gate_p": "Peso, gráficas y logros desbloqueables. Disponible con Brenda.",
+    "t_log": "Registra tu peso",
+    "t_weight": "Evolución del peso",
+    "t_numbers": "Tus números",
+    "t_streak": "Tu racha",
+    "t_weekly": "Constancia semanal",
+    "t_split": "Squats vs Lunges",
+    "t_ach": "Logros",
+    "t_history": "Historial",
+    "ph_weight": "Tu peso (kg)",
+    "ph_note": "Nota (opcional)",
+    "btn_log": "Registrar peso",
+    "current_weight": "Peso actual",
+    "minmax": "Mín {{min}} kg · Máx {{max}} kg",
+    "empty_weight": "Registra tu peso al menos 2 veces para ver tu evolución.",
+    "kpi_reps_total": "Reps totales",
+    "kpi_workouts": "Entrenamientos",
+    "ring_unit": "días",
+    "ring_active": "Racha activa 🔥",
+    "ring_p_on": "No la rompas. Cada día cuenta.",
+    "ring_p_off": "Despierta activa hoy y arranca tu racha.",
+    "ring_best_one": "🏆 Mejor: {{n}} día",
+    "ring_best_many": "🏆 Mejor: {{n}} días",
+    "empty_weekly": "Empieza a entrenar para ver tu constancia semanal 🔥",
+    "empty_split": "Completa retos y alarmas para ver tu balance de ejercicios.",
+    "unlocked": "Desbloqueado",
+    "yes": "Sí",
+    "no": "No",
+    "ach": {
+      "semana": {
+        "name": "Primera semana",
+        "req": "3 entrenamientos"
+      },
+      "mes": {
+        "name": "Mes completo",
+        "req": "12 entrenamientos"
+      },
+      "racha7": {
+        "name": "Racha de 7 días",
+        "req": "Racha de 7"
+      },
+      "cincuenta": {
+        "name": "50 entrenamientos",
+        "req": "50 entrenamientos"
+      },
+      "racha30": {
+        "name": "Racha de 30 días",
+        "req": "Racha de 30"
+      },
+      "cien": {
+        "name": "100 entrenamientos",
+        "req": "100 entrenamientos"
+      }
     }
   }
 }

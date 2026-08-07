@@ -5,19 +5,21 @@
      - onCancel() */
 import { useState } from 'react'
 import { getProfile } from '../lib/dataStore'
+import { useApp } from '../store'
 
 const FEELS = [
-  { id: 'easy', emoji: '😎', label: 'Muy fácil' },
-  { id: 'ok',   emoji: '💪', label: 'Bien' },
-  { id: 'hard', emoji: '🥵', label: 'Muy difícil' },
+  { id: 'easy', emoji: '😎', key: 'ai.feel_easy' },
+  { id: 'ok',   emoji: '💪', key: 'ai.feel_ok' },
+  { id: 'hard', emoji: '🥵', key: 'ai.feel_hard' },
 ]
 const ADHERENCE = [
-  { id: 'all',  emoji: '🔥', label: 'Sí, todos' },
-  { id: 'most', emoji: '👍', label: 'La mayoría' },
-  { id: 'few',  emoji: '😬', label: 'Pocos' },
+  { id: 'all',  emoji: '🔥', key: 'ai.adh_all' },
+  { id: 'most', emoji: '👍', key: 'ai.adh_most' },
+  { id: 'few',  emoji: '😬', key: 'ai.adh_few' },
 ]
 
 export default function AiCheckIn({ onSubmit, onCancel }) {
+  const { t } = useApp()
   const prof = getProfile() || {}
   const [weight, setWeight] = useState(prof.weight ?? '')
   const [feel, setFeel] = useState('ok')
@@ -38,12 +40,12 @@ export default function AiCheckIn({ onSubmit, onCancel }) {
 
   return (
     <div className="ai-checkin reveal d2">
-      <button className="ai-checkin-back" onClick={onCancel} aria-label="Volver">‹</button>
-      <div className="ai-checkin-kick">Check-in del mes</div>
-      <h2 className="ai-checkin-title">¿CÓMO TE FUE?</h2>
-      <p className="ai-checkin-sub">Un mes completo. Ahora dime la verdad y te armo el siguiente nivel. 🔥</p>
+      <button className="ai-checkin-back" onClick={onCancel} aria-label={t('ai.ck_back')}>‹</button>
+      <div className="ai-checkin-kick">{t('ai.ck_kick')}</div>
+      <h2 className="ai-checkin-title">{t('ai.ck_title')}</h2>
+      <p className="ai-checkin-sub">{t('ai.ck_sub')}</p>
 
-      <label className="ai-checkin-label">Tu peso actual</label>
+      <label className="ai-checkin-label">{t('ai.ck_weight')}</label>
       <div className="ai-checkin-weight">
         <input
           type="number" inputMode="decimal" value={weight}
@@ -52,33 +54,33 @@ export default function AiCheckIn({ onSubmit, onCancel }) {
         <span>kg</span>
       </div>
 
-      <label className="ai-checkin-label">¿Cómo se sintió el plan?</label>
+      <label className="ai-checkin-label">{t('ai.ck_feel')}</label>
       <div className="ai-checkin-opts">
         {FEELS.map((f) => (
           <button key={f.id} className={'ai-chip' + (feel === f.id ? ' sel' : '')} onClick={() => setFeel(f.id)}>
-            <span className="ai-chip-e">{f.emoji}</span>{f.label}
+            <span className="ai-chip-e">{f.emoji}</span>{t(f.key)}
           </button>
         ))}
       </div>
 
-      <label className="ai-checkin-label">¿Cumpliste tus entrenamientos?</label>
+      <label className="ai-checkin-label">{t('ai.ck_adherence')}</label>
       <div className="ai-checkin-opts">
         {ADHERENCE.map((a) => (
           <button key={a.id} className={'ai-chip' + (adherence === a.id ? ' sel' : '')} onClick={() => setAdherence(a.id)}>
-            <span className="ai-chip-e">{a.emoji}</span>{a.label}
+            <span className="ai-chip-e">{a.emoji}</span>{t(a.key)}
           </button>
         ))}
       </div>
 
-      <label className="ai-checkin-label">Algo que contarme (opcional)</label>
+      <label className="ai-checkin-label">{t('ai.ck_comment')}</label>
       <textarea
         className="ai-checkin-comment" rows={3}
         value={comment} onChange={(e) => setComment(e.target.value)}
-        placeholder="Ej. me costó el cardio, quiero más glúteo…"
+        placeholder={t('ai.ck_comment_ph')}
       />
 
       <button className="ai-intro-cta" onClick={submit} disabled={busy}>
-        {busy ? 'ARMANDO…' : 'ARMAR MI SIGUIENTE NIVEL'}
+        {busy ? t('ai.ck_submitting') : t('ai.ck_submit')}
       </button>
     </div>
   )

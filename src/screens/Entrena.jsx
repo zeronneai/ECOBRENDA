@@ -33,16 +33,16 @@ function RoutineCard({ r, onClick }) {
 // Referencias para conservar los imports de fallback sin romper el build.
 void ROUTINES; void PROGRAMS; void CATEGORIES
 
-const INTRO = {
-  kick: 'Tu rutina personalizada',
-  title: 'BRENDA TIENE TU RUTINA LISTA',
-  sub: 'Analicé tu nivel, tus días, tu objetivo. ¿Le entras o no? 🔥',
-  cta: 'GENERAR MI RUTINA CON BRENDA',
-}
-
 export default function Entrena() {
-  const { openSheet } = useApp()
+  const { t, openSheet } = useApp()
   const { isPremium } = useSubscription()
+
+  const INTRO = {
+    kick: t('entrena.intro_kick'),
+    title: t('entrena.intro_title'),
+    sub: t('entrena.intro_sub'),
+    cta: t('entrena.intro_cta'),
+  }
 
   // Gate premium (PRODUCCIÓN). El bypass solo ocurre con USE_MOCK_PLANS (dev).
   if (!isPremium && !USE_MOCK_PLANS) {
@@ -50,7 +50,7 @@ export default function Entrena() {
       <section className="screen active" id="s-entrena">
         <div className="scroll">
           <div className="topgap" />
-          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">ENTRENA</div></div></div>
+          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">{t('entrena.header')}</div></div></div>
           <div className="pad reveal d2">
             {isIOSNative() ? (
               <PremiumLockedIOS />
@@ -59,10 +59,10 @@ export default function Entrena() {
                 <div className="glow" /><div className="shimmer" />
                 <div className="lock-pill">🔒 PREMIUM</div>
                 <div className="inner">
-                  <div className="kick">Biblioteca de entrenamientos</div>
-                  <h3>RUTINAS Y PROGRAMAS<br />HECHOS PARA TI</h3>
-                  <p>Decenas de rutinas guiadas y programas de varias semanas. Desbloquéalo con Brenda.</p>
-                  <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+                  <div className="kick">{t('entrena.promo_kick')}</div>
+                  <h3>{t('entrena.promo_h')}</h3>
+                  <p>{t('entrena.promo_p')}</p>
+                  <button className="unlock" onClick={() => openSheet('paywall')}>{t('paywall.see_plans')}</button>
                 </div>
               </div>
             )}
@@ -76,7 +76,7 @@ export default function Entrena() {
     <section className="screen active" id="s-entrena">
       <div className="scroll">
         <div className="topgap" />
-        <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">ENTRENA</div></div></div>
+        <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name">{t('entrena.header')}</div></div></div>
         <div className="pad">
           <AiPlanFlow
             kind="workout"

@@ -1,8 +1,10 @@
 /* Pantalla de invitación premium (estado inicial, antes de generar).
    Copy retador de Brenda; `intro` trae el texto por pantalla (Entrena/Nutrición). */
+import { useApp } from '../store'
 import Button3D from './ui/Button3D'
 
 export default function AiPlanIntro({ intro, onGenerate, error }) {
+  const { t } = useApp()
   return (
     <div className="ai-intro reveal d2">
       <div className="ai-intro-glow" />
@@ -12,7 +14,7 @@ export default function AiPlanIntro({ intro, onGenerate, error }) {
       <p className="ai-intro-sub">{intro.sub}</p>
       {error && <div className="ai-intro-error">{error}</div>}
       <div style={{ marginTop: 4 }}><Button3D fullWidth onClick={onGenerate}>{intro.cta}</Button3D></div>
-      <div className="ai-intro-foot">100% personalizado con tu perfil</div>
+      <div className="ai-intro-foot">{t('ai.intro_foot')}</div>
     </div>
   )
 }

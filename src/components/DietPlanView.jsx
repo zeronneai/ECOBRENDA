@@ -3,10 +3,12 @@
    Hero (DestelloCard) con título Anton + note + macros en bloques de color;
    acordeón por día con kcal del día; comidas con tipo, kcal e ingredientes. */
 import { useState } from 'react'
+import { useApp } from '../store'
 import DestelloCard from './ui/DestelloCard'
 import AiPlanFooter from './AiPlanFooter'
 
 export default function DietPlanView({ plan, locked, daysLeft, onRenew, onDevForce }) {
+  const { t } = useApp()
   const [open, setOpen] = useState(0)
   const days = plan?.days || []
   const m = plan?.macros || {}
@@ -25,9 +27,9 @@ export default function DietPlanView({ plan, locked, daysLeft, onRenew, onDevFor
         </div>
         <div className="nu-macros">
           <div className="nu-macro kcal"><span className="n">{m.kcal ?? '—'}</span><div className="k">kcal</div></div>
-          <div className="nu-macro prot"><span className="n">{m.protein ?? '—'}g</span><div className="k">proteína</div></div>
-          <div className="nu-macro carb"><span className="n">{m.carbs ?? '—'}g</span><div className="k">carbos</div></div>
-          <div className="nu-macro fat"><span className="n">{m.fat ?? '—'}g</span><div className="k">grasas</div></div>
+          <div className="nu-macro prot"><span className="n">{m.protein ?? '—'}g</span><div className="k">{t('ai.mac_protein')}</div></div>
+          <div className="nu-macro carb"><span className="n">{m.carbs ?? '—'}g</span><div className="k">{t('ai.mac_carbs')}</div></div>
+          <div className="nu-macro fat"><span className="n">{m.fat ?? '—'}g</span><div className="k">{t('ai.mac_fat')}</div></div>
         </div>
       </DestelloCard>
 
@@ -42,7 +44,7 @@ export default function DietPlanView({ plan, locked, daysLeft, onRenew, onDevFor
                 <div className="nu-day-badge">🍽️</div>
                 <div className="nu-day-t">
                   <b>{d.day}</b>
-                  <span className="kc">{kc} kcal · {(d.meals || []).length} comidas</span>
+                  <span className="kc">{t('ai.diet_day', { kc, n: (d.meals || []).length })}</span>
                   {target > 0 && (
                     <div className="wk-dayprog">
                       <div className="wk-bar"><i style={{ width: pct + '%' }} /></div>

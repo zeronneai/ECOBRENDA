@@ -9,25 +9,25 @@ import { getWakeStreak } from '../lib/dataStore'
 import { getBrendaMessage } from '../data/brendaMessages'
 import DestelloCard from '../components/ui/DestelloCard'
 
-function greetingFor(h) {
-  return h < 12 ? 'Buen día' : h < 19 ? 'Buena tarde' : 'Buena noche'
+function greetingKey(h) {
+  return h < 12 ? 'home.g_morning' : h < 19 ? 'home.g_afternoon' : 'home.g_evening'
 }
 
 const QUICK_CHALLENGES = [
-  { id: 'express', emoji: '🍑', reps: 15, exercise: 'squats', label: 'SQUATS', level: 'Express' },
-  { id: 'calentamiento', emoji: '🦵', reps: 20, exercise: 'lunges', label: 'LUNGES', level: 'Calentamiento' },
-  { id: 'intenso', emoji: '🍑', reps: 30, exercise: 'squats', label: 'SQUATS', level: 'Intenso' },
-  { id: 'bestia', emoji: '🦵', reps: 40, exercise: 'lunges', label: 'LUNGES', level: 'Bestia' },
+  { id: 'express', emoji: '🍑', reps: 15, exercise: 'squats', label: 'SQUATS', level: 'Express', levelKey: 'home.lvl_express' },
+  { id: 'calentamiento', emoji: '🦵', reps: 20, exercise: 'lunges', label: 'LUNGES', level: 'Calentamiento', levelKey: 'home.lvl_calentamiento' },
+  { id: 'intenso', emoji: '🍑', reps: 30, exercise: 'squats', label: 'SQUATS', level: 'Intenso', levelKey: 'home.lvl_intenso' },
+  { id: 'bestia', emoji: '🦵', reps: 40, exercise: 'lunges', label: 'LUNGES', level: 'Bestia', levelKey: 'home.lvl_bestia' },
 ]
 
 export default function Home() {
   const navigate = useNavigate()
-  const { profile, streak, weekChart, challengesDone, totals, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
+  const { t, profile, streak, weekChart, challengesDone, totals, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
   const { isPremium } = useSubscription()
 
-  const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
+  const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : t('home.hi')
   const avatarLetter = firstName[0] || 'B'
-  const greeting = greetingFor(new Date().getHours())
+  const greeting = t(greetingKey(new Date().getHours()))
   const best = getWakeStreak().best || 0
 
   // Saludo dinámico con la voz de Brenda según el estado de la racha.
@@ -66,8 +66,8 @@ export default function Home() {
 
         {/* Racha */}
         <div className="streak reveal d2">
-          <div className="lbl">Racha actual</div>
-          <div className="big"><span id="streakNum">{streak}</span><span>días</span></div>
+          <div className="lbl">{t('home.streak_label')}</div>
+          <div className="big"><span id="streakNum">{streak}</span><span>{t('home.days')}</span></div>
           <div className="sub" id="streakSub">{brendaGreeting}</div>
           <div className="week">
             {weekChart.map((d, i) => (
@@ -78,21 +78,21 @@ export default function Home() {
 
         {/* KPIs reales */}
         <div className="hm-kpis reveal d2">
-          <div className="hm-kpi"><span className="n">{totals.workouts || 0}</span><div className="k">Entrenos</div></div>
-          <div className="hm-kpi"><span className="n">{totals.reps || 0}</span><div className="k">Reps</div></div>
-          <div className="hm-kpi"><span className="n">{best}</span><div className="k">Mejor racha</div></div>
+          <div className="hm-kpi"><span className="n">{totals.workouts || 0}</span><div className="k">{t('home.kpi_workouts')}</div></div>
+          <div className="hm-kpi"><span className="n">{totals.reps || 0}</span><div className="k">{t('home.kpi_reps')}</div></div>
+          <div className="hm-kpi"><span className="n">{best}</span><div className="k">{t('home.kpi_best')}</div></div>
         </div>
 
         {/* Alarma (funcionalidad intacta) */}
         <div className="sec-h reveal d3">
-          <h2>TU ALARMA</h2>
-          <span className="more" onClick={() => primary && openAlarmEditor(primary)}>EDITAR</span>
+          <h2>{t('home.alarm_h')}</h2>
+          <span className="more" onClick={() => primary && openAlarmEditor(primary)}>{t('home.edit')}</span>
         </div>
         <div className="alarm-card reveal d3">
           <div className="row">
             <div className="alarm-time" id="homeAlarmTime">{alarmTime}</div>
             <div className="alarm-meta">
-              <div className="t">Despertar activo</div>
+              <div className="t">{t('home.active_wake')}</div>
               <div className="d" id="homeAlarmDesc">{alarmDesc}</div>
             </div>
             <div
@@ -104,14 +104,14 @@ export default function Home() {
           </div>
           <div className="alarm-foot">
             <button><span className="ex">●</span> {alarmEx.toUpperCase()}</button>
-            <button onClick={() => showRing(primary)}>▶ PROBAR ALARMA</button>
+            <button onClick={() => showRing(primary)}>▶ {t('home.test_alarm')}</button>
           </div>
         </div>
 
         {/* Retos rápidos (funcionalidad intacta) */}
         <div className="sec-h reveal d4">
-          <h2>RETOS RÁPIDOS</h2>
-          <span className="more">{challengesDone} COMPLETADOS</span>
+          <h2>{t('home.challenges_h')}</h2>
+          <span className="more">{t('home.completed', { n: challengesDone })}</span>
         </div>
         <div className="brenda-live reveal d4">
           {QUICK_CHALLENGES.map((ch) => (
@@ -123,7 +123,7 @@ export default function Home() {
                 {ch.emoji}
               </div>
               <h4>{ch.reps} {ch.label}</h4>
-              <p>{ch.level}</p>
+              <p>{t(ch.levelKey)}</p>
             </div>
           ))}
         </div>
@@ -134,13 +134,13 @@ export default function Home() {
         {isPremium ? (
           <div className="reveal d5">
             <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right">
-              <div className="hm-hero-t">✦ Tu plan con Brenda</div>
-              <div><span className="hm-hero-h">RUTINA Y DIETA LISTAS</span></div>
-              <p className="hm-hero-p">Tu rutina y tu plan de comidas personalizados te esperan. ¿Le entras hoy?</p>
+              <div className="hm-hero-t">{t('home.hero_kick')}</div>
+              <div><span className="hm-hero-h">{t('home.hero_title')}</span></div>
+              <p className="hm-hero-p">{t('home.hero_p')}</p>
               <div className="hm-quick">
-                <div className="hm-qbtn" onClick={() => navigate('/entrena')}><div className="e">🏋️</div><div className="l">Entrena</div></div>
-                <div className="hm-qbtn" onClick={() => navigate('/nutricion')}><div className="e">🥗</div><div className="l">Nutrición</div></div>
-                <div className="hm-qbtn" onClick={() => navigate('/progreso')}><div className="e">📊</div><div className="l">Progreso</div></div>
+                <div className="hm-qbtn" onClick={() => navigate('/entrena')}><div className="e">🏋️</div><div className="l">{t('nav.train')}</div></div>
+                <div className="hm-qbtn" onClick={() => navigate('/nutricion')}><div className="e">🥗</div><div className="l">{t('nav.nutrition')}</div></div>
+                <div className="hm-qbtn" onClick={() => navigate('/progreso')}><div className="e">📊</div><div className="l">{t('nav.progress')}</div></div>
               </div>
             </DestelloCard>
           </div>
@@ -149,9 +149,9 @@ export default function Home() {
             <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right">
               <div className="lock-pill" style={{ position: 'static', display: 'inline-block', marginBottom: 10 }}>🔒 PREMIUM</div>
               <div><span className="hm-hero-h">BRENDA FITNESS</span></div>
-              <p className="hm-hero-p">Rutinas y dieta 100% personalizadas por IA para tu meta, tu nivel y tus días. Además, tu progreso con gráficas.</p>
+              <p className="hm-hero-p">{t('home.locked_p')}</p>
               {!isIOSNative() && (
-                <div className="hm-hero-cta"><button className="unlock" onClick={() => openSheet('paywall')}>DESBLOQUEAR →</button></div>
+                <div className="hm-hero-cta"><button className="unlock" onClick={() => openSheet('paywall')}>{t('home.unlock')}</button></div>
               )}
             </DestelloCard>
           </div>

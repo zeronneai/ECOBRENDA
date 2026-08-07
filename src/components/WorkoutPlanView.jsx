@@ -11,7 +11,7 @@ import DestelloCard from './ui/DestelloCard'
 import AiPlanFooter from './AiPlanFooter'
 
 export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDevForce }) {
-  const { getPlanCompletions, toggleExerciseDone, showToast, confetti } = useApp()
+  const { getPlanCompletions, toggleExerciseDone, showToast, confetti, t } = useApp()
   const days = plan?.days || []
   const planKey = `${plan?.title || 'plan'}::${days.length}`
 
@@ -63,9 +63,9 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDev
           <p>{plan.note}</p>
         </div>
         <div className="wk-kpis">
-          <div className="wk-kpi"><span className="n">{kpis.days}</span><div className="k">Días</div></div>
-          <div className="wk-kpi"><span className="n">{kpis.ex}</span><div className="k">Ejercicios</div></div>
-          <div className="wk-kpi"><span className="n">{kpis.sets}</span><div className="k">Series</div></div>
+          <div className="wk-kpi"><span className="n">{kpis.days}</span><div className="k">{t('ai.kpi_days')}</div></div>
+          <div className="wk-kpi"><span className="n">{kpis.ex}</span><div className="k">{t('ai.kpi_ex')}</div></div>
+          <div className="wk-kpi"><span className="n">{kpis.sets}</span><div className="k">{t('ai.kpi_sets')}</div></div>
         </div>
       </DestelloCard>
 
@@ -93,7 +93,7 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDev
 
               {open === di && (
                 <div className="wk-day-body">
-                  {d.warmup && <div className="wk-warmup"><b>🔥 Calentamiento:</b> {d.warmup}</div>}
+                  {d.warmup && <div className="wk-warmup"><b>{t('ai.warmup')}</b> {d.warmup}</div>}
                   {(d.exercises || []).map((e, ei) => {
                     const on = isDone(di, ei)
                     return (
@@ -103,7 +103,7 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDev
                             <h4>{e.name}</h4>
                             <span className="wk-ex-sr">{e.sets}×{e.reps}</span>
                           </div>
-                          <div className="wk-ex-meta">Descanso {e.rest}</div>
+                          <div className="wk-ex-meta">{t('ai.rest', { rest: e.rest })}</div>
                           {e.tip && <div className="wk-ex-tip">💡 {e.tip}</div>}
                         </div>
                         <button
@@ -111,7 +111,7 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDev
                           onClick={() => toggle(di, ei, total, d.focus)}
                           aria-pressed={on}
                         >
-                          {on ? '✓ Hecho' : 'Marcar'}
+                          {on ? t('ai.done') : t('ai.mark')}
                         </button>
                       </div>
                     )

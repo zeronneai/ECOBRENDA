@@ -144,16 +144,16 @@ function RecipeDetail({ recipe, onBack }) {
 // Referencias para conservar imports de fallback sin romper el build.
 void PLANS; void RECIPES; void RECIPE_CATEGORIES; void SUPPLEMENTS; void getPlan; void getRecipe; void supplementColor
 
-const INTRO = {
-  kick: 'Tu plan de comidas personalizado',
-  title: 'BRENDA TIENE TU PLAN DE COMIDAS',
-  sub: 'Hecho para tu cuerpo y tus metas. ¿Vas a poder seguirlo? 💪',
-  cta: 'GENERAR MI PLAN CON BRENDA',
-}
-
 export default function Nutricion() {
-  const { openSheet } = useApp()
+  const { t, openSheet } = useApp()
   const { isPremium } = useSubscription()
+
+  const INTRO = {
+    kick: t('nutricion.intro_kick'),
+    title: t('nutricion.intro_title'),
+    sub: t('nutricion.intro_sub'),
+    cta: t('nutricion.intro_cta'),
+  }
 
   // Gate premium (PRODUCCIÓN). El bypass solo ocurre con USE_MOCK_PLANS (dev).
   if (!isPremium && !USE_MOCK_PLANS) {
@@ -161,7 +161,7 @@ export default function Nutricion() {
       <section className="screen active" id="s-nutricion">
         <div className="scroll">
           <div className="topgap" />
-          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">NUTRICIÓN</div></div></div>
+          <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">{t('nutricion.header')}</div></div></div>
           <div className="pad reveal d2">
             {isIOSNative() ? (
               <PremiumLockedIOS />
@@ -170,10 +170,10 @@ export default function Nutricion() {
                 <div className="glow" /><div className="shimmer" />
                 <div className="lock-pill">🔒 PREMIUM</div>
                 <div className="inner">
-                  <div className="kick">Nutrición de Brenda</div>
-                  <h3>PLANES, RECETAS<br />Y SUPLEMENTOS</h3>
-                  <p>Planes de comida según tu objetivo, recetas fáciles y guía de suplementos.</p>
-                  <button className="unlock" onClick={() => openSheet('paywall')}>VER PLANES →</button>
+                  <div className="kick">{t('nutricion.promo_kick')}</div>
+                  <h3>{t('nutricion.promo_h')}</h3>
+                  <p>{t('nutricion.promo_p')}</p>
+                  <button className="unlock" onClick={() => openSheet('paywall')}>{t('paywall.see_plans')}</button>
                 </div>
               </div>
             )}
@@ -187,7 +187,7 @@ export default function Nutricion() {
     <section className="screen active" id="s-nutricion">
       <div className="scroll">
         <div className="topgap" />
-        <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">NUTRICIÓN</div></div></div>
+        <div className="hdr reveal d1"><div><div className="hi">Premium</div><div className="name destello-title">{t('nutricion.header')}</div></div></div>
         <div className="pad">
           <AiPlanFlow
             kind="diet"
