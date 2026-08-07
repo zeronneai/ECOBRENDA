@@ -59,13 +59,22 @@ async function authedPost(path, body) {
 }
 
 // En mock: refleja el check-in localmente (peso al perfil + entrada de progreso),
-// para que el ciclo se vea completo sin API.
+// para que el ciclo se vea completo sin API. Nota localizada al idioma actual.
+const CK_MOCK = {
+  es: { header: 'Check-in mensual:', felt: 'se sintió', met: 'cumplió',
+        feel: { easy: 'muy fácil', ok: 'bien', hard: 'muy difícil' },
+        done: { all: 'sí, todos', most: 'la mayoría', few: 'pocos' } },
+  en: { header: 'Monthly check-in:', felt: 'felt', met: 'completed',
+        feel: { easy: 'too easy', ok: 'good', hard: 'too hard' },
+        done: { all: 'yes, all', most: 'most', few: 'few' } },
+}
 function mockPersistCheckin(checkin) {
   if (!checkin) return
   if (checkin.weight != null) saveProfile({ weight: checkin.weight })
-  const feel = { easy: 'muy fácil', ok: 'bien', hard: 'muy difícil' }[checkin.feel] || checkin.feel
-  const done = { all: 'sí, todos', most: 'la mayoría', few: 'pocos' }[checkin.adherence] || checkin.adherence
-  const note = ['Check-in mensual:', feel && `se sintió ${feel}`, done && `cumplió ${done}`, checkin.comment && `— ${checkin.comment}`]
+  const c = CK_MOCK[getInitialLang()] || CK_MOCK.es
+  const feel = c.feel[checkin.feel] || checkin.feel
+  const done = c.done[checkin.adherence] || checkin.adherence
+  const note = [c.header, feel && `${c.felt} ${feel}`, done && `${c.met} ${done}`, checkin.comment && `— ${checkin.comment}`]
     .filter(Boolean).join(' ')
   addProgressEntry({ weight: checkin.weight ?? null, note })
 }
@@ -78,7 +87,7 @@ export async function generateWorkout(checkin) {
     mockPersistCheckin(checkin)
     return { content: MOCK_WORKOUT, lockedUntil: lockISO() }
   }
-  const { plan, lockedUntil } = await authedPost('/api/generate-workout', { checkin })
+  const { plan, lockedUntil } = await authedPost('/api/generate-workout', { checkin, lang: getInitialLang() })
   return { content: plan, lockedUntil }
 }
 
@@ -89,7 +98,7 @@ export async function generateDiet(checkin) {
     mockPersistCheckin(checkin)
     return { content: MOCK_DIET, lockedUntil: lockISO() }
   }
-  const { plan, lockedUntil } = await authedPost('/api/generate-diet', { checkin })
+  const { plan, lockedUntil } = await authedPost('/api/generate-diet', { checkin, lang: getInitialLang() })
   return { content: plan, lockedUntil }
 }
 
