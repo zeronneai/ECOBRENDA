@@ -14,6 +14,7 @@
 
 import { Capacitor } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { translate, getInitialLang } from '../i18n'
 
 export const isNativeApp = () => Capacitor.isNativePlatform()
 
@@ -74,7 +75,7 @@ export async function rescheduleNativeAlarms(alarms = []) {
       list.push({
         id: notifId(a.id, dow),
         title: '🍑 Booty Alarm',
-        body: `Hora de tus ${a.reps} ${exLabel}. No se apaga hasta que completes tus reps.`,
+        body: translate(getInitialLang(), 'notif.alarm_body', { reps: a.reps, ex: exLabel }),
         channelId: CHANNEL_ID,           // Android: el sonido lo pone el channel (res/raw/alarm).
         sound: 'alarm.caf',              // iOS: archivo CAF empaquetado en el bundle (formato nativo de Apple, más fiable que WAV con LocalNotifications). ≤30s.
         schedule: { on: { weekday: WEEKDAY_BY_DOW[dow], hour: hh, minute: mm }, allowWhileIdle: true },

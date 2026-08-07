@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useApp } from '../store'
 import { signUp, signIn, resetPassword } from '../lib/auth'
 import { openLegal } from '../lib/openLegal'
 
@@ -12,6 +13,7 @@ import { openLegal } from '../lib/openLegal'
    - onAuthed(session): callback al autenticar (lo usa el Paso 5)
 */
 export default function Auth({ initialView = 'signup', recap = '', onAuthed, onClose }) {
+  const { t } = useApp()
   const [view, setView] = useState(initialView)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,8 +26,8 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
 
   const doSignup = async () => {
     setError('')
-    if (!email.trim()) return setError('Escribe tu email.')
-    if (password.length < 6) return setError('La contraseña necesita mínimo 6 caracteres.')
+    if (!email.trim()) return setError(t('auth.err_email'))
+    if (password.length < 6) return setError(t('auth.err_pw_short'))
     setBusy(true)
     const r = await signUp(email.trim(), password)
     setBusy(false)
@@ -35,8 +37,8 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
 
   const doLogin = async () => {
     setError('')
-    if (!email.trim()) return setError('Escribe tu email.')
-    if (!password) return setError('Escribe tu contraseña.')
+    if (!email.trim()) return setError(t('auth.err_email'))
+    if (!password) return setError(t('auth.err_pw'))
     setBusy(true)
     const r = await signIn(email.trim(), password)
     setBusy(false)
@@ -46,7 +48,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
 
   const doRecover = async () => {
     setError('')
-    if (!email.trim()) return setError('Escribe tu email.')
+    if (!email.trim()) return setError(t('auth.err_email'))
     setBusy(true)
     const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined
     const r = await resetPassword(email.trim(), redirectTo)
@@ -58,15 +60,15 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
   return (
     <div id="auth">
       {onClose && view !== 'recover' && (
-        <button type="button" className="auth-back" onClick={onClose} aria-label="Cerrar">✕</button>
+        <button type="button" className="auth-back" onClick={onClose} aria-label={t('common.back')}>✕</button>
       )}
       <div className="auth-brand">🍑 BOOTY ALARM</div>
 
       {view === 'signup' && (
         <div className="auth-card">
-          <div className="auth-kick">Último paso 🔥</div>
-          <h1 className="auth-title">CREA TU CUENTA</h1>
-          <p className="auth-sub">Guarda tu plan, racha y alarmas en la nube.</p>
+          <div className="auth-kick">{t('auth.signup_kick')}</div>
+          <h1 className="auth-title">{t('auth.signup_title')}</h1>
+          <p className="auth-sub">{t('auth.signup_sub')}</p>
 
           {recap && <div className="auth-recap">{recap}</div>}
 
@@ -76,7 +78,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
               type="email"
               inputMode="email"
               autoComplete="email"
-              placeholder="tu@correo.com"
+              placeholder={t('auth.email_ph')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -87,12 +89,12 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
               className="auth-input"
               type={showPw ? 'text' : 'password'}
               autoComplete="new-password"
-              placeholder="Contraseña (mín. 6)"
+              placeholder={t('auth.pw_ph_signup')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') doSignup() }}
             />
-            <button type="button" className="auth-eye" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Ocultar' : 'Mostrar'}>
+            <button type="button" className="auth-eye" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? t('auth.hide') : t('auth.show')}>
               {showPw ? '🙈' : '👁'}
             </button>
           </div>
@@ -100,28 +102,28 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
           {error && <div className="auth-error">{error}</div>}
 
           <button className="cta full auth-cta" onClick={doSignup} disabled={busy}>
-            {busy ? 'CREANDO CUENTA…' : 'CREAR CUENTA'}
+            {busy ? t('auth.creating') : t('auth.create')}
           </button>
 
           <div className="auth-consent">
-            Al crear cuenta aceptas nuestros{' '}
-            <span className="auth-link" onClick={() => openLegal('/terms')}>Términos</span>
-            {' '}y la{' '}
-            <span className="auth-link" onClick={() => openLegal('/privacy')}>Política de Privacidad</span>.
+            {t('auth.consent_a')}{' '}
+            <span className="auth-link" onClick={() => openLegal('/terms')}>{t('auth.terms')}</span>
+            {' '}{t('auth.consent_and')}{' '}
+            <span className="auth-link" onClick={() => openLegal('/privacy')}>{t('auth.privacy')}</span>.
           </div>
 
           <div className="auth-links">
-            <span>¿Ya tienes cuenta? </span>
-            <span className="auth-link" onClick={() => go('login')}>Inicia sesión</span>
+            <span>{t('auth.have_account')} </span>
+            <span className="auth-link" onClick={() => go('login')}>{t('auth.signin_link')}</span>
           </div>
         </div>
       )}
 
       {view === 'login' && (
         <div className="auth-card">
-          <div className="auth-kick">Bienvenida de vuelta 🍑</div>
-          <h1 className="auth-title">INICIA SESIÓN</h1>
-          <p className="auth-sub">Entra para seguir con tu plan.</p>
+          <div className="auth-kick">{t('auth.login_kick')}</div>
+          <h1 className="auth-title">{t('auth.login_title')}</h1>
+          <p className="auth-sub">{t('auth.login_sub')}</p>
 
           <div className="auth-field">
             <input
@@ -129,7 +131,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
               type="email"
               inputMode="email"
               autoComplete="email"
-              placeholder="tu@correo.com"
+              placeholder={t('auth.email_ph')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -140,12 +142,12 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
               className="auth-input"
               type={showPw ? 'text' : 'password'}
               autoComplete="current-password"
-              placeholder="Contraseña"
+              placeholder={t('auth.pw_ph')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') doLogin() }}
             />
-            <button type="button" className="auth-eye" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Ocultar' : 'Mostrar'}>
+            <button type="button" className="auth-eye" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? t('auth.hide') : t('auth.show')}>
               {showPw ? '🙈' : '👁'}
             </button>
           </div>
@@ -153,14 +155,14 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
           {error && <div className="auth-error">{error}</div>}
 
           <button className="cta full auth-cta" onClick={doLogin} disabled={busy}>
-            {busy ? 'ENTRANDO…' : 'INICIAR SESIÓN'}
+            {busy ? t('auth.entering') : t('auth.login_btn')}
           </button>
 
           <div className="auth-links">
-            <div><span className="auth-link" onClick={() => go('recover')}>¿Olvidaste tu contraseña?</span></div>
+            <div><span className="auth-link" onClick={() => go('recover')}>{t('auth.forgot')}</span></div>
             <div style={{ marginTop: 8 }}>
-              <span>¿No tienes cuenta? </span>
-              <span className="auth-link" onClick={() => go('signup')}>Regístrate</span>
+              <span>{t('auth.no_account')} </span>
+              <span className="auth-link" onClick={() => go('signup')}>{t('auth.signup_link')}</span>
             </div>
           </div>
         </div>
@@ -168,13 +170,13 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
 
       {view === 'recover' && (
         <div className="auth-card">
-          <button type="button" className="auth-back" onClick={() => go('login')} aria-label="Volver">‹</button>
+          <button type="button" className="auth-back" onClick={() => go('login')} aria-label={t('common.back')}>‹</button>
 
           {!sent ? (
             <>
-              <div className="auth-kick">Sin bronca</div>
-              <h1 className="auth-title">RECUPERA TU ACCESO</h1>
-              <p className="auth-sub">Te mandamos un link a tu correo para crear una nueva contraseña.</p>
+              <div className="auth-kick">{t('auth.recover_kick')}</div>
+              <h1 className="auth-title">{t('auth.recover_title')}</h1>
+              <p className="auth-sub">{t('auth.recover_sub')}</p>
 
               <div className="auth-field">
                 <input
@@ -182,7 +184,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
                   type="email"
                   inputMode="email"
                   autoComplete="email"
-                  placeholder="tu@correo.com"
+                  placeholder={t('auth.email_ph')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') doRecover() }}
@@ -192,15 +194,15 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
               {error && <div className="auth-error">{error}</div>}
 
               <button className="cta full auth-cta" onClick={doRecover} disabled={busy}>
-                {busy ? 'ENVIANDO…' : 'ENVIAR LINK'}
+                {busy ? t('auth.sending') : t('auth.send_link')}
               </button>
             </>
           ) : (
             <div className="auth-sent">
               <div className="ic">📧</div>
-              <h1 className="auth-title">REVISA TU CORREO</h1>
-              <p className="auth-sub">Te enviamos un link a <b style={{ color: '#fff' }}>{email.trim()}</b> para crear una nueva contraseña.</p>
-              <button className="cta full auth-cta" onClick={() => go('login')}>VOLVER A INICIAR SESIÓN</button>
+              <h1 className="auth-title">{t('auth.sent_title')}</h1>
+              <p className="auth-sub">{t('auth.sent_sub_a')} <b style={{ color: '#fff' }}>{email.trim()}</b> {t('auth.sent_sub_b')}</p>
+              <button className="cta full auth-cta" onClick={() => go('login')}>{t('auth.back_to_login')}</button>
             </div>
           )}
         </div>

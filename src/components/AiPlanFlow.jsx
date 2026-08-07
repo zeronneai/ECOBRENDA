@@ -21,7 +21,7 @@ import AiConsentModal from './AiConsentModal'
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
-  const { profile, updateProfile } = useApp()
+  const { profile, updateProfile, t } = useApp()
   const hasConsent = !!profile?.aiConsent?.accepted
 
   const [status, setStatus] = useState('loading') // loading|invite|generating|ready|checkin|error
@@ -48,7 +48,7 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
       const r = await generate(checkin)
       setPlan(r); setForced(false); setStatus('ready')
     } catch (e) {
-      setErrMsg(e?.message || 'No se pudo generar el plan.'); setStatus('error')
+      setErrMsg(e?.message || t('errors.plan_generate')); setStatus('error')
     }
   }
 

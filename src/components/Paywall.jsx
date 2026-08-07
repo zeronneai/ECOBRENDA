@@ -6,30 +6,31 @@ import { isIOSNative } from '../lib/platform'
 
 /* Paywall con dos planes, precio tachado y "EMPEZAR" por tarjeta.
    Los precios mostrados son visuales; los reales vienen de los Price IDs de
-   Stripe en el servidor. El "tachado" es marketing local. */
+   Stripe en el servidor. El "tachado" es marketing local. Los textos salen de
+   i18n (es/en); los datos numéricos/estructurales viven aquí. */
 const PLANS = [
   {
     id: 'monthly',
-    name: 'MENSUAL',
-    badge: null,
+    nameKey: 'paywall.monthly',
+    badgeKey: null,
     old: '$299',
     price: '$99',
-    unit: '/mes',
-    sub: 'Cancela cuando quieras',
+    unitKey: 'paywall.monthly_unit',
+    subKey: 'paywall.monthly_sub',
   },
   {
     id: 'annual',
-    name: 'ANUAL',
-    badge: 'MEJOR · AHORRA 72%',
+    nameKey: 'paywall.annual',
+    badgeKey: 'paywall.annual_badge',
     old: '$3,499',
     price: '$999',
-    unit: '/año',
-    sub: 'Equivale a $83/mes',
+    unitKey: 'paywall.annual_unit',
+    subKey: 'paywall.annual_sub',
   },
 ]
 
 export default function Paywall() {
-  const { closeSheet, checkoutPlan } = useApp()
+  const { closeSheet, checkoutPlan, t } = useApp()
   const [busy, setBusy] = useState(null)
 
   // iOS: defensa en profundidad — si alguien abre el paywall en iOS, mostramos
@@ -56,31 +57,31 @@ export default function Paywall() {
   return (
     <Sheet>
       <h3>BRENDA FITNESS</h3>
-      <p className="lead">Desbloquea todo: rutinas, recetas y progreso. Cancela cuando quieras.</p>
+      <p className="lead">{t('paywall.lead')}</p>
 
       <div className="pwgrid">
         {PLANS.map((p) => (
           <div key={p.id} className={'pwcard' + (p.id === 'annual' ? ' best' : '')}>
-            {p.badge && <div className="pwbadge">{p.badge}</div>}
-            <div className="pwname">{p.name}</div>
+            {p.badgeKey && <div className="pwbadge">{t(p.badgeKey)}</div>}
+            <div className="pwname">{t(p.nameKey)}</div>
             <div className="pwold">{p.old}</div>
-            <div className="pwprice">{p.price}<small>{p.unit}</small></div>
-            <div className="pwsub">{p.sub}</div>
+            <div className="pwprice">{p.price}<small>{t(p.unitKey)}</small></div>
+            <div className="pwsub">{t(p.subKey)}</div>
             <button className="cta full pwgo" disabled={busy === p.id} onClick={() => go(p.id)}>
-              {busy === p.id ? 'ABRIENDO PAGO…' : 'EMPEZAR'}
+              {busy === p.id ? t('paywall.opening') : t('paywall.go')}
             </button>
           </div>
         ))}
       </div>
 
       <div className="pwfeats">
-        <div className="feat"><div className="fi">✓</div>Rutina semanal hecha para tu objetivo</div>
-        <div className="feat"><div className="fi">✓</div>Plan de comidas según tu cuerpo</div>
-        <div className="feat"><div className="fi">✓</div>Actualizado conforme avanzas</div>
-        <div className="feat"><div className="fi">✓</div>Sin anuncios · todo el método Brenda</div>
+        <div className="feat"><div className="fi">✓</div>{t('paywall.feat_1')}</div>
+        <div className="feat"><div className="fi">✓</div>{t('paywall.feat_2')}</div>
+        <div className="feat"><div className="fi">✓</div>{t('paywall.feat_3')}</div>
+        <div className="feat"><div className="fi">✓</div>{t('paywall.feat_4')}</div>
       </div>
 
-      <div className="note">Pago seguro vía Stripe · Cancela cuando quieras</div>
+      <div className="note">{t('paywall.secure')}</div>
     </Sheet>
   )
 }

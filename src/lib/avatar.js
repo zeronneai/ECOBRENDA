@@ -8,6 +8,9 @@
 import { Capacitor } from '@capacitor/core'
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { supabase } from './supabase'
+import { translate, getInitialLang } from '../i18n'
+
+const tr = (k) => translate(getInitialLang(), k)
 
 export function avatarCloudReady() { return !!supabase }
 
@@ -78,9 +81,9 @@ export async function pickAvatarPhoto() {
       width: 512,
       height: 512,
       correctOrientation: true,
-      promptLabelHeader: 'Foto de perfil',
-      promptLabelPhoto: 'Elegir de galería',
-      promptLabelPicture: 'Tomar foto',
+      promptLabelHeader: tr('avatar.header'),
+      promptLabelPhoto: tr('avatar.gallery'),
+      promptLabelPicture: tr('avatar.take'),
     })
     return photo?.dataUrl || null
   } catch {
@@ -90,11 +93,11 @@ export async function pickAvatarPhoto() {
 
 // Sube un dataUrl a Storage. Requiere sesión. Devuelve la URL pública (cache-bust).
 export async function uploadAvatarDataUrl(dataUrl) {
-  if (!supabase) throw new Error('Falta configurar la nube.')
-  if (!dataUrl) throw new Error('Sin imagen.')
+  if (!supabase) throw new Error(tr('errors.cloud_missing'))
+  if (!dataUrl) throw new Error(tr('errors.no_image'))
   const { data: sess } = await supabase.auth.getSession()
   const uid = sess?.session?.user?.id
-  if (!uid) throw new Error('Inicia sesión primero.')
+  if (!uid) throw new Error(tr('errors.login_first'))
 
   const blob = dataUrlToBlob(dataUrl)
   const path = `${uid}/avatar.jpg`

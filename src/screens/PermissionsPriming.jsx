@@ -5,7 +5,7 @@ import { useApp } from '../store'
    onboarding, explica POR QUÉ antes de pedir cámara + notificaciones, y al
    aceptar lanza los prompts del sistema. En web nunca aparece. */
 export default function PermissionsPriming() {
-  const { primePermissions } = useApp()
+  const { primePermissions, t } = useApp()
   const [busy, setBusy] = useState(false)
 
   const allow = async () => {
@@ -18,19 +18,19 @@ export default function PermissionsPriming() {
     <div id="perms" className="show">
       <div className="perms-card">
         <div className="perms-emoji">🔔</div>
-        <h2 className="perms-title">UN PASO MÁS</h2>
-        <p className="perms-lead">Para que la alarma funcione de verdad, Booty Alarm necesita dos permisos:</p>
+        <h2 className="perms-title">{t('perms.title')}</h2>
+        <p className="perms-lead">{t('perms.lead')}</p>
 
         <div className="perms-row">
           <div className="perms-ic">⏰</div>
-          <div className="perms-tx"><b>Notificaciones</b><span>Para que la alarma suene a su hora, aunque la app esté cerrada.</span></div>
+          <div className="perms-tx"><b>{t('perms.notif_t')}</b><span>{t('perms.notif_d')}</span></div>
         </div>
         <div className="perms-row">
           <div className="perms-ic">📷</div>
-          <div className="perms-tx"><b>Cámara</b><span>Cuenta tus reps en tu teléfono. El video no se sube a ningún lado.</span></div>
+          <div className="perms-tx"><b>{t('perms.cam_t')}</b><span>{t('perms.cam_d')}</span></div>
         </div>
 
-        <button className="perms-go" onClick={allow} disabled={busy}>{busy ? 'PERMITIENDO…' : 'PERMITIR'}</button>
+        <button className="perms-go" onClick={allow} disabled={busy}>{busy ? t('perms.allowing') : t('perms.allow')}</button>
       </div>
     </div>
   )

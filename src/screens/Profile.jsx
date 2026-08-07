@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
-import { GOALS, LEVELS, DAYS_OPTIONS, goalLabel } from '../data/onboarding'
+import { GOALS, LEVELS, DAYS_OPTIONS } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
 import { isIOSNative } from '../lib/platform'
 import { pickAndUploadAvatar } from '../lib/avatar'
@@ -18,7 +18,7 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast,
+  const { t, profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast,
           cloudEnabled, session, openAuth, signOutAccount, openPortal, deleteAccount, language, setLanguage } = useApp()
   const { isPremium } = useSubscription()
 
@@ -41,19 +41,21 @@ export default function Profile() {
     setChangingAvatar(true)
     try {
       const url = await pickAndUploadAvatar()
-      if (url) { updateProfile({ avatarUrl: url }); showToast('Foto actualizada') }
+      if (url) { updateProfile({ avatarUrl: url }); showToast(t('profile.toast_photo_ok')) }
     } catch (e) {
-      showToast(e?.message || 'No se pudo actualizar la foto')
+      showToast(e?.message || t('profile.toast_photo_err'))
     } finally {
       setChangingAvatar(false)
     }
   }
 
-  const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : 'HOLA'
+  const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : t('home.hi')
   const avatarLetter = firstName[0] || 'B'
   const memberSince = profile.createdAt
-    ? cap(new Date(profile.createdAt).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }))
+    ? cap(new Date(profile.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { month: 'long', year: 'numeric' }))
     : null
+  const goalText = profile.goal ? t('onboarding.goals.' + profile.goal + '.label') : ''
+  const levelText = profile.level ? t('onboarding.levels.' + profile.level + '.label') : ''
 
   // ── Medidas ──
   const onWeight = (val) => {
@@ -86,7 +88,7 @@ export default function Profile() {
   }
 
   // ── Zona de peligro ──
-  const doReset = () => { resetProgress(); setConfirm(null); showToast('Progreso reiniciado') }
+  const doReset = () => { resetProgress(); setConfirm(null); showToast(t('profile.toast_reset')) }
   const doStartOver = () => {
     Object.keys(localStorage).filter((k) => k.startsWith('bf:') || k.startsWith('bac:')).forEach((k) => localStorage.removeItem(k))
     window.location.reload()
@@ -98,7 +100,7 @@ export default function Profile() {
       await deleteAccount() // recarga a onboarding si tiene éxito
     } catch (e) {
       setDeleting(false)
-      showToast(e?.message || 'No se pudo eliminar la cuenta')
+      showToast(e?.message || t('profile.toast_delete_err'))
     }
   }
 
@@ -110,19 +112,19 @@ export default function Profile() {
     <section className="screen active" id="s-profile">
       <div className="scroll">
         <div className="topgap" />
-        <div className="hdr reveal d1"><div><div className="hi">Cuenta</div><div className="name">PERFIL</div></div></div>
+        <div className="hdr reveal d1"><div><div className="hi">{t('profile.hi')}</div><div className="name">{t('profile.header')}</div></div></div>
 
         <div className="pad">
           {/* Tarjeta de usuario */}
           <div className="pf-user reveal d1">
-            <button type="button" className="pf-avatar" onClick={changeAvatar} aria-label="Cambiar foto">
+            <button type="button" className="pf-avatar" onClick={changeAvatar} aria-label={t('profile.change_photo')}>
               {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : avatarLetter}
               <span className="pf-avatar-cam">📷</span>
             </button>
             <div>
               <div className="pf-name">{firstName}</div>
-              <div className="pf-meta">{goalLabel(profile.goal)}{profile.level ? ` · ${cap(profile.level)}` : ''}</div>
-              {memberSince && <div className="pf-since">Miembro desde {memberSince}</div>}
+              <div className="pf-meta">{goalText}{levelText ? ` · ${levelText}` : ''}</div>
+              {memberSince && <div className="pf-since">{t('profile.member_since', { date: memberSince })}</div>}
             </div>
           </div>
 
@@ -131,8 +133,8 @@ export default function Profile() {
             <button className="pf-pe-btn" onClick={() => navigate('/progreso')}>
               <div className="pf-pe-ic">📊</div>
               <div className="pf-pe-tx">
-                <span className="destello-title pf-pe-title">Mi Progreso</span>
-                <span className="pf-pe-sub">Peso, gráficas, racha y logros</span>
+                <span className="destello-title pf-pe-title">{t('profile.progress_title')}</span>
+                <span className="pf-pe-sub">{t('profile.progress_sub')}</span>
               </div>
               <div className="pf-pe-chev">›</div>
             </button>
@@ -141,34 +143,34 @@ export default function Profile() {
           {/* Suscripción */}
           <div className={'pf-sub reveal d2' + (isPremium ? ' prem' : '') + (isIOSNative() && !isPremium ? ' info-only' : '')}>
             <div>
-              <div className="pf-sub-t">{isPremium ? 'Premium · Brenda Fitness' : 'Plan gratuito'}</div>
-              <div className="pf-sub-d">{isPremium ? `Plan ${subscription.plan || 'activo'} · activo` : 'Booty Alarm · alarma incluida'}</div>
+              <div className="pf-sub-t">{isPremium ? t('profile.sub_premium_t') : t('profile.sub_free_t')}</div>
+              <div className="pf-sub-d">{isPremium ? t('profile.sub_premium_d', { plan: subscription.plan || t('profile.sub_premium_d_active') }) : t('profile.sub_free_d')}</div>
             </div>
             {/* iOS sin premium: SIN botón (App Store Rule 3.1.1). Con premium:
                 "Gestionar" abre Customer Portal — Apple lo permite porque el
                 usuario ya es suscriptor, no es un flujo de compra nueva. */}
             {isPremium ? (
-              <button onClick={() => openPortal()}>Gestionar</button>
+              <button onClick={() => openPortal()}>{t('profile.manage')}</button>
             ) : (
-              !isIOSNative() && <button onClick={() => openSheet('paywall')}>Hazte premium</button>
+              !isIOSNative() && <button onClick={() => openSheet('paywall')}>{t('profile.go_premium')}</button>
             )}
           </div>
 
           {/* Cuenta en la nube (sesión) */}
           {cloudEnabled && (
             <div className="pf-sec reveal d2">
-              <h3>CUENTA EN LA NUBE</h3>
+              <h3>{t('profile.cloud_h')}</h3>
               {session ? (
                 <>
-                  <div className="pf-link-row"><span>Sesión</span><span className="v" style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis' }}>{session.user?.email}</span></div>
-                  <button className="pf-danger-btn" onClick={signOutAccount}>Cerrar sesión</button>
+                  <div className="pf-link-row"><span>{t('profile.session')}</span><span className="v" style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis' }}>{session.user?.email}</span></div>
+                  <button className="pf-danger-btn" onClick={signOutAccount}>{t('profile.sign_out')}</button>
                 </>
               ) : (
                 <>
-                  <div className="set-row"><div><div className="t">Guarda tus datos</div><div className="d">Crea tu cuenta para no perder tu progreso</div></div></div>
-                  <button className="cta full" style={{ marginTop: 12 }} onClick={() => openAuth('signup')}>CREAR CUENTA</button>
+                  <div className="set-row"><div><div className="t">{t('profile.save_data_t')}</div><div className="d">{t('profile.save_data_d')}</div></div></div>
+                  <button className="cta full" style={{ marginTop: 12 }} onClick={() => openAuth('signup')}>{t('profile.create_account')}</button>
                   <div className="pf-link-row" style={{ justifyContent: 'center', marginTop: 6 }} onClick={() => openAuth('login')}>
-                    <span className="auth-link">Ya tengo cuenta — Iniciar sesión</span>
+                    <span className="auth-link">{t('profile.have_account_login')}</span>
                   </div>
                 </>
               )}
@@ -183,36 +185,36 @@ export default function Profile() {
 
           {/* Mi cuenta */}
           <div className="pf-sec reveal d3">
-            <h3>MI CUENTA</h3>
+            <h3>{t('profile.account_h')}</h3>
             <div className="pf-field">
-              <label>Nombre</label>
+              <label>{t('profile.name')}</label>
               <input className="pf-input" value={profile.name} onChange={(e) => updateProfile({ name: e.target.value })} />
             </div>
             <div className="pf-field">
-              <label>Objetivo</label>
+              <label>{t('profile.goal')}</label>
               <select className="pf-select" value={profile.goal} onChange={(e) => updateProfile({ goal: e.target.value })}>
-                {GOALS.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
+                {GOALS.map((g) => <option key={g.id} value={g.id}>{t('onboarding.goals.' + g.id + '.label')}</option>)}
               </select>
             </div>
             <div className="pf-field">
-              <label>Nivel</label>
+              <label>{t('profile.level')}</label>
               <select className="pf-select" value={profile.level || 'principiante'} onChange={(e) => updateProfile({ level: e.target.value })}>
-                {LEVELS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+                {LEVELS.map((l) => <option key={l.id} value={l.id}>{t('onboarding.levels.' + l.id + '.label')}</option>)}
               </select>
             </div>
             <div className="pf-field">
-              <label>Días por semana</label>
+              <label>{t('profile.days_week')}</label>
               <select className="pf-select" value={profile.daysPerWeek || 4} onChange={(e) => updateProfile({ daysPerWeek: parseInt(e.target.value, 10) })}>
-                {DAYS_OPTIONS.map((d) => <option key={d} value={d}>{d} días</option>)}
+                {DAYS_OPTIONS.map((d) => <option key={d} value={d}>{t('profile.days_unit', { n: d })}</option>)}
               </select>
             </div>
           </div>
 
           {/* Medidas */}
           <div className="pf-sec reveal d4">
-            <h3>MEDIDAS</h3>
+            <h3>{t('profile.measures_h')}</h3>
             <div className="pf-field">
-              <label>Peso</label>
+              <label>{t('profile.weight')}</label>
               <div className="pf-measure">
                 <input className="pf-input" type="number" step="0.1" inputMode="decimal" value={wVal} onChange={(e) => onWeight(e.target.value)} />
                 <div className="unit-toggle">
@@ -222,14 +224,14 @@ export default function Profile() {
               </div>
             </div>
             <div className="pf-field">
-              <label>Altura</label>
+              <label>{t('profile.height')}</label>
               <div className="pf-measure">
                 {hUnit === 'cm' ? (
                   <input className="pf-input" type="number" inputMode="numeric" value={cmVal} onChange={(e) => onCm(e.target.value)} />
                 ) : (
                   <div className="pf-ft">
-                    <input className="pf-input" type="number" inputMode="numeric" placeholder="pies" value={ftVal} onChange={(e) => onFtIn(e.target.value, inVal)} />
-                    <input className="pf-input" type="number" inputMode="numeric" placeholder="pulg" value={inVal} onChange={(e) => onFtIn(ftVal, e.target.value)} />
+                    <input className="pf-input" type="number" inputMode="numeric" placeholder={t('profile.ft')} value={ftVal} onChange={(e) => onFtIn(e.target.value, inVal)} />
+                    <input className="pf-input" type="number" inputMode="numeric" placeholder={t('profile.in')} value={inVal} onChange={(e) => onFtIn(ftVal, e.target.value)} />
                   </div>
                 )}
                 <div className="unit-toggle">
@@ -242,98 +244,98 @@ export default function Profile() {
 
           {/* Notificaciones */}
           <div className="pf-sec reveal d5">
-            <h3>NOTIFICACIONES</h3>
+            <h3>{t('profile.notif_h')}</h3>
             <div className="set-row">
-              <div><div className="t">Recordatorio diario</div><div className="d">Un empujón para moverte</div></div>
+              <div><div className="t">{t('profile.reminder_t')}</div><div className="d">{t('profile.reminder_d')}</div></div>
               <Toggle on={settings.reminder} onClick={() => saveSettings({ reminder: !settings.reminder })} />
             </div>
             {settings.reminder && (
               <div className="pf-field" style={{ marginTop: 12 }}>
-                <label>Hora del recordatorio</label>
+                <label>{t('profile.reminder_time')}</label>
                 <input className="pf-input" type="time" value={settings.reminderTime} onChange={(e) => saveSettings({ reminderTime: e.target.value })} />
               </div>
             )}
             <div className="set-row">
-              <div><div className="t">Alertas de racha</div><div className="d">Avísame si voy a perder mi racha</div></div>
+              <div><div className="t">{t('profile.streak_alerts_t')}</div><div className="d">{t('profile.streak_alerts_d')}</div></div>
               <Toggle on={settings.streakAlerts} onClick={() => saveSettings({ streakAlerts: !settings.streakAlerts })} />
             </div>
             <div className="set-row">
-              <div><div className="t">Reporte semanal</div><div className="d">Resumen de tu semana</div></div>
+              <div><div className="t">{t('profile.weekly_t')}</div><div className="d">{t('profile.weekly_d')}</div></div>
               <Toggle on={settings.weeklyReport} onClick={() => saveSettings({ weeklyReport: !settings.weeklyReport })} />
             </div>
           </div>
 
           {/* Legal */}
           <div className="pf-sec reveal d6">
-            <h3>LEGAL</h3>
+            <h3>{t('profile.legal_h')}</h3>
             <div className="pf-link-row" onClick={() => openLegal('/privacy')}>
-              <span>Política de Privacidad</span><span className="v">›</span>
+              <span>{t('profile.privacy')}</span><span className="v">›</span>
             </div>
             <div className="pf-link-row" onClick={() => openLegal('/terms')}>
-              <span>Términos y Condiciones</span><span className="v">›</span>
+              <span>{t('profile.terms')}</span><span className="v">›</span>
             </div>
             <div className="pf-link-row" onClick={() => setShowAiInfo(true)}>
-              <span>Privacidad de IA</span><span className="v">›</span>
+              <span>{t('profile.ai_privacy')}</span><span className="v">›</span>
             </div>
             <div className="pf-link-row">
-              <span>Versión</span><span className="v">0.1.0</span>
+              <span>{t('profile.version')}</span><span className="v">0.1.0</span>
             </div>
           </div>
 
           {/* Zona de peligro */}
           <div className="pf-sec reveal d6">
-            <h3>ZONA DE PELIGRO</h3>
+            <h3>{t('profile.danger_h')}</h3>
 
             {confirm === 'reset' ? (
               <div className="pf-danger-confirm">
-                <p>¿Reiniciar tu progreso? Se borran tus entrenamientos y registros de peso. Tu perfil y suscripción se mantienen.</p>
+                <p>{t('profile.reset_confirm')}</p>
                 <div className="row">
-                  <button className="yes" onClick={doReset}>Sí, reiniciar</button>
-                  <button className="no" onClick={() => setConfirm(null)}>Cancelar</button>
+                  <button className="yes" onClick={doReset}>{t('profile.reset_yes')}</button>
+                  <button className="no" onClick={() => setConfirm(null)}>{t('common.cancel')}</button>
                 </div>
               </div>
             ) : (
-              <button className="pf-danger-btn" onClick={() => setConfirm('reset')}>Reiniciar progreso</button>
+              <button className="pf-danger-btn" onClick={() => setConfirm('reset')}>{t('profile.reset_btn')}</button>
             )}
 
             {confirm === 'startover' ? (
               <div className="pf-danger-confirm">
-                <p>¿Empezar de nuevo? Se borra TODO (perfil, alarmas, progreso) y volverás al onboarding. No se puede deshacer.</p>
+                <p>{t('profile.startover_confirm')}</p>
                 <div className="row">
-                  <button className="yes" onClick={doStartOver}>Sí, borrar todo</button>
-                  <button className="no" onClick={() => setConfirm(null)}>Cancelar</button>
+                  <button className="yes" onClick={doStartOver}>{t('profile.startover_yes')}</button>
+                  <button className="no" onClick={() => setConfirm(null)}>{t('common.cancel')}</button>
                 </div>
               </div>
             ) : (
-              <button className="pf-danger-btn hard" onClick={() => setConfirm('startover')}>Empezar de nuevo</button>
+              <button className="pf-danger-btn hard" onClick={() => setConfirm('startover')}>{t('profile.startover_btn')}</button>
             )}
 
             {confirm === 'delete' ? (
               <div className="pf-danger-confirm">
-                <p><b>Eliminar tu cuenta es permanente.</b> Se borran para siempre tu cuenta, tu perfil, tus planes de IA, tu progreso y tu suscripción. Esta acción <b>no se puede deshacer</b>.</p>
-                <p style={{ marginTop: 8 }}>Para confirmar, escribe <b>ELIMINAR</b>:</p>
+                <p><b>{t('profile.delete_perm')}</b> {t('profile.delete_desc')}</p>
+                <p style={{ marginTop: 8 }}>{t('profile.delete_type')} <b>{t('profile.delete_keyword')}</b>:</p>
                 <input
                   className="pf-input"
                   style={{ marginTop: 8 }}
                   value={deleteText}
                   onChange={(e) => setDeleteText(e.target.value)}
-                  placeholder="ELIMINAR"
+                  placeholder={t('profile.delete_keyword')}
                   autoCapitalize="characters"
                   autoCorrect="off"
                 />
                 <div className="row" style={{ marginTop: 10 }}>
                   <button
                     className="yes"
-                    disabled={deleteText.trim().toUpperCase() !== 'ELIMINAR' || deleting}
+                    disabled={deleteText.trim().toUpperCase() !== t('profile.delete_keyword').toUpperCase() || deleting}
                     onClick={doDelete}
                   >
-                    {deleting ? 'Eliminando…' : 'Eliminar mi cuenta'}
+                    {deleting ? t('profile.delete_btn_busy') : t('profile.delete_btn')}
                   </button>
-                  <button className="no" onClick={() => { setConfirm(null); setDeleteText('') }}>Cancelar</button>
+                  <button className="no" onClick={() => { setConfirm(null); setDeleteText('') }}>{t('common.cancel')}</button>
                 </div>
               </div>
             ) : (
-              <button className="pf-danger-btn hard" onClick={() => { setConfirm('delete'); setDeleteText('') }}>Eliminar mi cuenta</button>
+              <button className="pf-danger-btn hard" onClick={() => { setConfirm('delete'); setDeleteText('') }}>{t('profile.delete_btn')}</button>
             )}
           </div>
         </div>

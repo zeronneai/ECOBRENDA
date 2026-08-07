@@ -118,9 +118,10 @@ export class RepCounter {
   // Valida la rep al volver arriba. Devuelve true si cuenta; si no, deja aviso.
   _tryComplete(ts) {
     const dur = ts - this.downStartTs
-    if (dur < this.o.minRepMs) { this._setNotice('Más despacio', ts); return false }
-    if (dur > this.o.maxRepMs) { this._setNotice('Repite el movimiento', ts); return false }
-    if (!this.reachedDepth) { this._setNotice('Baja más', ts); return false }
+    // Se emiten CÓDIGOS estables (no texto); la UI (CameraScan) los traduce.
+    if (dur < this.o.minRepMs) { this._setNotice('SLOW_DOWN', ts); return false }
+    if (dur > this.o.maxRepMs) { this._setNotice('REDO', ts); return false }
+    if (!this.reachedDepth) { this._setNotice('GO_LOWER', ts); return false }
     this.count++
     this.o.onRep?.(this.count)
     return true
@@ -141,7 +142,7 @@ export class RepCounter {
     )
     if (!ready) {
       this.phase = 'NOT_READY'
-      this.o.onState?.('NOT_READY', { depth: 0, count: this.count, reason: 'Ponte de cuerpo completo en cuadro' })
+      this.o.onState?.('NOT_READY', { depth: 0, count: this.count, reason: 'FRAME' })
       return
     }
 

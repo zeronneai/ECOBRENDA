@@ -10,7 +10,11 @@ const R = 92
 const CIRC = 2 * Math.PI * R
 
 export default function CameraScan() {
-  const { workout, stopSong, stopScan, showCelebration, recordRep, completeWakeWorkout, incrementChallenge, logWorkout } = useApp()
+  const { workout, stopSong, stopScan, showCelebration, recordRep, completeWakeWorkout, incrementChallenge, logWorkout, t } = useApp()
+
+  // Traduce los CÓDIGOS de coaching que emite RepCounter (texto en i18n).
+  const REASON_KEY = { FRAME: 'scan.cue_frame', SLOW_DOWN: 'scan.cue_slow', REDO: 'scan.cue_redo', GO_LOWER: 'scan.cue_lower' }
+  const WARN_CODES = ['GO_LOWER', 'SLOW_DOWN', 'REDO']
   const goal = workout?.reps ?? 10
   const exercise = workout?.exercise === 'lunges' ? 'lunges' : 'squats'
   const exKind = exercise === 'lunges' ? 'lunge' : 'squat'
@@ -20,7 +24,7 @@ export default function CameraScan() {
   const [stage, setStage] = useState('priming')
   const [ready, setReady] = useState(false) // cámara en vivo
   const [reps, setReps] = useState(0)
-  const [hud, setHud] = useState({ phase: 'NOT_READY', depth: 0, msg: 'Colócate de cuerpo completo en cuadro' })
+  const [hud, setHud] = useState({ phase: 'NOT_READY', depth: 0, msg: t('scan.cue_frame'), warn: true })
   const [taunt, setTaunt] = useState(null) // frase provocadora a mitad de rutina
 
   const videoRef = useRef(null)
@@ -79,10 +83,10 @@ export default function CameraScan() {
   }
 
   const cueFor = (phase, info) => {
-    if (phase === 'NOT_READY') return info.reason || 'Ponte de cuerpo completo en cuadro'
-    if (info.reason) return info.reason // aviso de rechazo (p. ej. "Baja más")
-    if (phase === 'DOWN') return '¡Bien! Sube'
-    return '¡Baja!'
+    if (info.reason) return t(REASON_KEY[info.reason] || 'scan.cue_frame') // código → texto
+    if (phase === 'NOT_READY') return t('scan.cue_frame')
+    if (phase === 'DOWN') return t('scan.cue_up')
+    return t('scan.cue_down')
   }
 
   // Arranca modelo + cámara cuando el usuario acepta el priming.
@@ -98,7 +102,7 @@ export default function CameraScan() {
         if (n >= goal) finish()
       },
       onState: (phase, info) => {
-        if (!cancelled) setHud({ phase, depth: info.depth ?? 0, msg: cueFor(phase, info) })
+        if (!cancelled) setHud({ phase, depth: info.depth ?? 0, msg: cueFor(phase, info), warn: phase === 'NOT_READY' || WARN_CODES.includes(info.reason) })
       },
     })
 
@@ -154,12 +158,12 @@ export default function CameraScan() {
     setTaunt(null)
     setReady(false)
     setReps(0)
-    setHud({ phase: 'NOT_READY', depth: 0, msg: 'Colócate de cuerpo completo en cuadro' })
+    setHud({ phase: 'NOT_READY', depth: 0, msg: t('scan.cue_frame'), warn: true })
     setStage('active')
   }
 
   const pct = Math.min(reps / goal, 1)
-  const isWarning = hud.phase === 'NOT_READY' || ['Baja más', 'Más despacio', 'Repite el movimiento'].includes(hud.msg)
+  const isWarning = !!hud.warn
 
   return (
     <div id="scan">
@@ -170,25 +174,22 @@ export default function CameraScan() {
       {stage === 'priming' && (
         <div className="scan-card">
           <div className="scan-emoji">📷</div>
-          <h2 className="scan-title">ESCANEO DE CUERPO</h2>
+          <h2 className="scan-title">{t('scan.priming_title')}</h2>
           <p className="scan-lead">
-            Tu cámara cuenta tus <b style={{ color: '#fff' }}>{goal} {exLabel.toLowerCase()}</b> en
-            tiempo real. El video <b style={{ color: '#fff' }}>no se sube</b>: todo se procesa en tu
-            teléfono.
+            {t('scan.priming_lead_a')} <b style={{ color: '#fff' }}>{goal} {exLabel.toLowerCase()}</b> {t('scan.priming_lead_b')} <b style={{ color: '#fff' }}>{t('scan.priming_lead_c')}</b>{t('scan.priming_lead_d')}
           </p>
-          <button className="scan-go" onClick={activate}>ACTIVAR CÁMARA</button>
+          <button className="scan-go" onClick={activate}>{t('scan.activate')}</button>
         </div>
       )}
 
       {stage === 'denied' && (
         <div className="scan-card">
           <div className="scan-emoji">🚫</div>
-          <h2 className="scan-title">SIN ACCESO A LA CÁMARA</h2>
+          <h2 className="scan-title">{t('scan.denied_title')}</h2>
           <p className="scan-lead">
-            Necesito tu cámara para contar tus reps (no hay forma de saltarlo). Activa el permiso
-            en los ajustes de la app y reintenta.
+            {t('scan.denied_lead')}
           </p>
-          <button className="scan-go" onClick={activate}>REINTENTAR</button>
+          <button className="scan-go" onClick={activate}>{t('scan.retry')}</button>
         </div>
       )}
 
@@ -198,11 +199,11 @@ export default function CameraScan() {
       {stage === 'active' && (
         <>
           <div className="scan-top">
-            <div className="scan-live"><span className="dot" /> EN VIVO</div>
+            <div className="scan-live"><span className="dot" /> {t('scan.live')}</div>
             <div className="scan-ex">{exLabel}</div>
           </div>
 
-          {!ready && <div className="scan-prep">Preparando cámara…</div>}
+          {!ready && <div className="scan-prep">{t('scan.preparing')}</div>}
 
           {ready && (
             <>
@@ -221,7 +222,7 @@ export default function CameraScan() {
                 <div className={'scan-status' + (isWarning ? ' warn' : '')}>{hud.msg}</div>
                 {hud.phase !== 'NOT_READY' && (
                   <div className={'scan-phase ' + (hud.phase === 'DOWN' ? 'down' : 'up')}>
-                    {hud.phase === 'DOWN' ? 'ABAJO' : 'ARRIBA'}
+                    {hud.phase === 'DOWN' ? t('scan.down') : t('scan.up')}
                   </div>
                 )}
                 <div className="scan-ring">

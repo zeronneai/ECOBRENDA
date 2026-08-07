@@ -48,12 +48,15 @@ export const DAYS_OPTIONS = [2, 3, 4, 5, 6]
 
 // Días de la semana para alarmas (0=Lun … 6=Dom).
 export const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-export function formatDays(days = []) {
-  if (days.length === 7) return 'Diario'
+// `t` opcional: si se pasa el traductor, los textos salen de i18n (es/en).
+export function formatDays(days = [], t = null) {
+  const tr = (k, fb) => (t ? t(k) : fb)
+  if (days.length === 7) return tr('days.daily', 'Diario')
   const sorted = [...days].sort((a, b) => a - b)
-  if (sorted.length === 5 && sorted.every((d, i) => d === i)) return 'L a V'
-  if (sorted.length === 0) return 'Sin días'
-  return sorted.map((d) => DAY_LABELS[d]).join('·')
+  if (sorted.length === 5 && sorted.every((d, i) => d === i)) return tr('days.weekdays', 'L a V')
+  if (sorted.length === 0) return tr('days.none', 'Sin días')
+  const labels = t ? t('days.initials').split(',') : DAY_LABELS
+  return sorted.map((d) => labels[d]).join('·')
 }
 
 export function goalById(id) {

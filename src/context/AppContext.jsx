@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { getBrendaPlan } from '../data/plans'
 import { ACHIEVEMENTS } from '../data/achievements'
-import { goalLabel } from '../data/onboarding'
 import { songUrlById } from '../data/songs'
 import * as dataStore from '../lib/dataStore'
 import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
@@ -649,20 +648,21 @@ export function AppProvider({ children }) {
   // paywall cae al demo local (unlock).
   const checkoutPlan = useCallback(async (plan) => {
     if (!isSupabaseConfigured) { unlock(); return }
-    try { await startCheckout(plan) } catch (e) { showToast(e.message || 'No se pudo iniciar el pago') }
-  }, [unlock])
+    try { await startCheckout(plan) } catch (e) { showToast(e.message || t('errors.checkout')) }
+  }, [unlock, t])
   const openPortal = useCallback(async () => {
-    try { await openBillingPortal() } catch (e) { showToast(e.message || 'No se pudo abrir el portal') }
-  }, [])
+    try { await openBillingPortal() } catch (e) { showToast(e.message || t('errors.portal')) }
+  }, [t])
 
   // Cuenta OBLIGATORIA (Opción B): con Supabase configurado, tras el onboarding y
   // sin sesión, hay que crear cuenta para entrar. Sin Supabase (dev) -> se omite.
   const needsAccount = isSupabaseConfigured && authChecked && !session && !!profile.onboarded
   const accountRecap = useMemo(() => {
-    const g = goalLabel(profile.goal)
-    const t = fmt12(profile.wakeTime)
-    return `Hola, ${profile.name || ''}${g ? ' · ' + g : ''}${t ? ' · ' + t : ''}`
-  }, [profile.name, profile.goal, profile.wakeTime])
+    const g = profile.goal ? translate(language, 'onboarding.goals.' + profile.goal + '.label') : ''
+    const time = fmt12(profile.wakeTime)
+    const hi = translate(language, 'auth.recap_hi')
+    return `${hi} ${profile.name || ''}${g ? ' · ' + g : ''}${time ? ' · ' + time : ''}`
+  }, [profile.name, profile.goal, profile.wakeTime, language])
 
   const value = {
     language, setLanguage, t,

@@ -8,7 +8,7 @@ import { useApp } from '../store'
    damos feedback visual mientras llega el webhook. */
 export default function PremiumReturn() {
   const navigate = useNavigate()
-  const { subscription, refreshPremium } = useApp()
+  const { subscription, refreshPremium, t } = useApp()
   const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
   const canceled = params.get('canceled') === '1'
   const active = subscription.status === 'active'
@@ -24,22 +24,22 @@ export default function PremiumReturn() {
         {canceled ? (
           <>
             <div className="perms-emoji">↩️</div>
-            <h2 className="perms-title">PAGO CANCELADO</h2>
-            <p className="perms-lead">No se cobró nada. Puedes intentarlo de nuevo cuando quieras.</p>
-            <button className="perms-go" onClick={() => navigate('/')}>VOLVER A LA APP</button>
+            <h2 className="perms-title">{t('preturn.canceled_title')}</h2>
+            <p className="perms-lead">{t('preturn.canceled_lead')}</p>
+            <button className="perms-go" onClick={() => navigate('/')}>{t('preturn.back_app')}</button>
           </>
         ) : active ? (
           <>
             <div className="perms-emoji">🎉</div>
-            <h2 className="perms-title">¡PREMIUM ACTIVO!</h2>
-            <p className="perms-lead">Brenda Fitness desbloqueado. Tu plan ya está listo.</p>
-            <button className="perms-go" onClick={() => navigate('/')}>EMPEZAR</button>
+            <h2 className="perms-title">{t('preturn.active_title')}</h2>
+            <p className="perms-lead">{t('preturn.active_lead')}</p>
+            <button className="perms-go" onClick={() => navigate('/')}>{t('preturn.start')}</button>
           </>
         ) : (
           <>
             <div className="perms-emoji">⏳</div>
-            <h2 className="perms-title">CONFIRMANDO PAGO…</h2>
-            <p className="perms-lead">Estamos activando tu suscripción. Esto tarda unos segundos.</p>
+            <h2 className="perms-title">{t('preturn.confirming_title')}</h2>
+            <p className="perms-lead">{t('preturn.confirming_lead')}</p>
           </>
         )}
       </div>

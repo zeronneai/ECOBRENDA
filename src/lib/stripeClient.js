@@ -11,6 +11,7 @@
 import { Capacitor } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
 import { supabase } from './supabase'
+import { translate, getInitialLang } from '../i18n'
 
 const API_BASE = Capacitor.isNativePlatform()
   ? (import.meta.env.VITE_API_BASE || 'https://ecobrenda.vercel.app')
@@ -33,7 +34,7 @@ async function authedFetch(path, body) {
   if (!supabase) throw new Error('Falta configurar la nube.')
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
-  if (!token) throw new Error('Inicia sesión primero.')
+  if (!token) throw new Error(translate(getInitialLang(), 'errors.login_first'))
   const resp = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

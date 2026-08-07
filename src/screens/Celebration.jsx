@@ -7,13 +7,13 @@ const BRENDA_WIN_IMG =
 
 export default function Celebration() {
   const navigate = useNavigate()
-  const { profile, confetti, hideCelebration, streak, challengesDone, workout, setWorkout } = useApp()
+  const { profile, confetti, hideCelebration, streak, challengesDone, workout, setWorkout, t } = useApp()
   const name = profile.name ? profile.name.split(' ')[0].toUpperCase() : ''
   const isChallenge = workout?.source === 'challenge'
 
   const stat = isChallenge
-    ? `💪 ${challengesDone} ${challengesDone === 1 ? 'RETO COMPLETADO' : 'RETOS COMPLETADOS'}`
-    : `🔥 RACHA DE ${streak} ${streak === 1 ? 'DÍA' : 'DÍAS'}`
+    ? t(challengesDone === 1 ? 'celebration.stat_challenge_one' : 'celebration.stat_challenge_many', { n: challengesDone })
+    : t(streak === 1 ? 'celebration.stat_streak_one' : 'celebration.stat_streak_many', { n: streak })
 
   // Confeti tipo fiesta: varias rafagas escalonadas para que dure unos segundos.
   useEffect(() => {
@@ -35,14 +35,14 @@ export default function Celebration() {
   return (
     <div id="celebrate" className="show">
       <img className="celebrate-img" src={BRENDA_WIN_IMG} alt="Brenda" />
-      <div className="celebrate-kick">Reto completado</div>
+      <div className="celebrate-kick">{t('celebration.kick')}</div>
       <h2 className="celebrate-title">
-        {name ? `¡LO LOGRASTE, ${name}! 🔥` : '¡LO LOGRASTE! 🔥'}
+        {name ? t('celebration.title', { name }) : t('celebration.title_noname')}
       </h2>
       <div className="celebrate-stat">{stat}</div>
-      <p className="celebrate-msg">Empieza tu día con todo.</p>
+      <p className="celebrate-msg">{t('celebration.msg')}</p>
       <div className="celebrate-sign">— Brenda 💕</div>
-      <button className="celebrate-go" onClick={goHome}>CONTINUAR</button>
+      <button className="celebrate-go" onClick={goHome}>{t('celebration.go')}</button>
     </div>
   )
 }

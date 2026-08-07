@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { translate, getInitialLang } from '../i18n'
 
 /* Página legal pública (Privacy / Terms). Vive FUERA de AppShell para que la
    carga directa por URL (Apple/Google reviewers) funcione sin login, sin
-   onboarding, sin gate de cuenta. */
+   onboarding, sin gate de cuenta. Sin AppProvider aquí: el idioma se lee de
+   localStorage vía getInitialLang(). */
 export default function LegalPage({ title, markdown }) {
+  const lang = getInitialLang()
   useEffect(() => {
     const prev = document.title
     document.title = `${title} — Booty Alarm`
@@ -14,7 +17,7 @@ export default function LegalPage({ title, markdown }) {
   return (
     <div id="legal">
       <header className="legal-top">
-        <a href="/" className="legal-back" aria-label="Volver al inicio">‹ Volver</a>
+        <a href="/" className="legal-back" aria-label={translate(lang, 'legal.back_aria')}>{translate(lang, 'legal.back')}</a>
         <div className="legal-brand">🍑 BOOTY ALARM</div>
         <div className="legal-spacer" />
       </header>

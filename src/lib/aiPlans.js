@@ -14,6 +14,7 @@ import { Capacitor } from '@capacitor/core'
 import { supabase } from './supabase'
 import { MOCK_WORKOUT, MOCK_DIET } from '../../lib/ai/mockPlans'
 import { saveProfile, addProgressEntry } from './dataStore'
+import { translate, getInitialLang } from '../i18n'
 
 /* USE_MOCK_PLANS: bandera de DESARROLLO.
    - true  → NO se llama la API (0 créditos): generate* simula una espera y
@@ -41,7 +42,7 @@ async function authedPost(path, body) {
   if (!supabase) throw new Error('Falta configurar la nube.')
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
-  if (!token) throw new Error('Inicia sesión primero.')
+  if (!token) throw new Error(translate(getInitialLang(), 'errors.login_first'))
   const resp = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -50,7 +51,7 @@ async function authedPost(path, body) {
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}))
     if (err.error === 'timeout' || err.error === 'truncated') {
-      throw new Error('La generación tardó demasiado. Intenta de nuevo.')
+      throw new Error(translate(getInitialLang(), 'errors.gen_timeout'))
     }
     throw new Error(err.message || err.error || 'No se pudo generar el plan.')
   }

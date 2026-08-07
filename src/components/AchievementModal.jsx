@@ -4,7 +4,7 @@ import { getAchievement } from '../data/achievements'
 import { getBrendaMessage } from '../data/brendaMessages'
 
 export default function AchievementModal() {
-  const { achievementQueue, dismissAchievement, confetti } = useApp()
+  const { achievementQueue, dismissAchievement, confetti, t } = useApp()
   const id = achievementQueue[0]
   const a = id ? getAchievement(id) : null
 
@@ -27,11 +27,11 @@ export default function AchievementModal() {
     <div id="achv" className="show">
       <div className="achv-card">
         <div className="achv-emoji">{a.emoji}</div>
-        <div className="achv-kick">Logro desbloqueado</div>
-        <h2 className="achv-title">¡{a.name}!</h2>
-        <p className="achv-desc">{a.desc}</p>
+        <div className="achv-kick">{t('achievement.kick')}</div>
+        <h2 className="achv-title">{t('achievement.title', { name: t('progreso.ach.' + a.id + '.name') })}</h2>
+        <p className="achv-desc">{t('achievement.desc.' + a.id)}</p>
         <div className="achv-brenda">{brendaMsg || a.brendaMsg}</div>
-        <button className="achv-go" onClick={dismissAchievement}>¡GENIAL!</button>
+        <button className="achv-go" onClick={dismissAchievement}>{t('achievement.go')}</button>
       </div>
     </div>
   )

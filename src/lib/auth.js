@@ -2,25 +2,29 @@
    Si Supabase no está configurado, devuelve un error claro (no truena). */
 
 import { supabase, isSupabaseConfigured } from './supabase'
+import { translate, getInitialLang } from '../i18n'
+
+// Traductor puntual (fuera de React): el idioma vive en localStorage.
+const tr = (k) => translate(getInitialLang(), k)
 
 export const authReady = () => isSupabaseConfigured
 
 export async function signUp(email, password) {
-  if (!supabase) return { error: 'Falta configurar Supabase.' }
+  if (!supabase) return { error: tr('errors.cloud_missing') }
   const { data, error } = await supabase.auth.signUp({ email, password })
   if (error) return { error: humanError(error) }
   return { session: data.session, user: data.user }
 }
 
 export async function signIn(email, password) {
-  if (!supabase) return { error: 'Falta configurar Supabase.' }
+  if (!supabase) return { error: tr('errors.cloud_missing') }
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) return { error: humanError(error) }
   return { session: data.session, user: data.user }
 }
 
 export async function resetPassword(email, redirectTo) {
-  if (!supabase) return { error: 'Falta configurar Supabase.' }
+  if (!supabase) return { error: tr('errors.cloud_missing') }
   const opts = redirectTo ? { redirectTo } : undefined
   const { error } = await supabase.auth.resetPasswordForEmail(email, opts)
   if (error) return { error: humanError(error) }
@@ -45,12 +49,12 @@ export function onAuthChange(cb) {
 
 function humanError(error) {
   const m = (error?.message || '').toLowerCase()
-  if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already')) return 'Ese email ya está registrado.'
-  if (m.includes('invalid login') || m.includes('invalid credentials')) return 'Email o contraseña incorrectos.'
-  if (m.includes('at least 6') || m.includes('password should be at least')) return 'La contraseña necesita mínimo 6 caracteres.'
-  if (m.includes('invalid email') || m.includes('unable to validate email')) return 'Ese email no parece válido.'
-  if (m.includes('email not confirmed')) return 'Tu email aún no está confirmado.'
-  if (m.includes('rate limit') || m.includes('too many')) return 'Demasiados intentos, espera un momento.'
-  if (m.includes('network') || m.includes('failed to fetch')) return 'Revisa tu conexión e inténtalo de nuevo.'
-  return error?.message || 'Algo salió mal, intenta de nuevo.'
+  if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already')) return tr('autherr.email_taken')
+  if (m.includes('invalid login') || m.includes('invalid credentials')) return tr('autherr.bad_login')
+  if (m.includes('at least 6') || m.includes('password should be at least')) return tr('autherr.pw_short')
+  if (m.includes('invalid email') || m.includes('unable to validate email')) return tr('autherr.bad_email')
+  if (m.includes('email not confirmed')) return tr('autherr.not_confirmed')
+  if (m.includes('rate limit') || m.includes('too many')) return tr('autherr.rate_limit')
+  if (m.includes('network') || m.includes('failed to fetch')) return tr('autherr.network')
+  return error?.message || tr('autherr.generic')
 }

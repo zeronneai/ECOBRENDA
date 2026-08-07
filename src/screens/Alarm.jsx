@@ -7,7 +7,7 @@ import GlowButton from '../components/ui/GlowButton'
    este rediseño es solo visual sobre la lista. Toda la funcionalidad
    (toggle, abrir editor, nueva alarma) se conserva igual. */
 export default function Alarm() {
-  const { alarms, toggleAlarm, openAlarmEditor } = useApp()
+  const { alarms, toggleAlarm, openAlarmEditor, t } = useApp()
 
   return (
     <section className="screen active" id="s-alarm">
@@ -15,8 +15,8 @@ export default function Alarm() {
         <div className="topgap" />
         <div className="hdr reveal d1">
           <div>
-            <div className="hi">Movimiento</div>
-            <div className="name destello-title">ALARMAS</div>
+            <div className="hi">{t('alarm.hi')}</div>
+            <div className="name destello-title">{t('alarm.header')}</div>
           </div>
         </div>
 
@@ -31,8 +31,8 @@ export default function Alarm() {
               >
                 <div className="al-time">{a.hour}</div>
                 <div className="al-meta">
-                  <div className="t">{i === 0 ? 'Despertar activo' : 'Alarma'}</div>
-                  <div className="d">{a.reps} {ex} · {formatDays(a.days)}</div>
+                  <div className="t">{i === 0 ? t('alarm.wake') : t('alarm.alarm')}</div>
+                  <div className="d">{a.reps} {ex} · {formatDays(a.days, t)}</div>
                 </div>
                 <div
                   className={'toggle' + (a.active ? ' on' : '')}
@@ -46,7 +46,7 @@ export default function Alarm() {
         </div>
 
         <div className="al-new reveal d4">
-          <GlowButton fullWidth onClick={() => openAlarmEditor(null)}>＋ Nueva alarma</GlowButton>
+          <GlowButton fullWidth onClick={() => openAlarmEditor(null)}>{t('alarm.new')}</GlowButton>
         </div>
       </div>
     </section>

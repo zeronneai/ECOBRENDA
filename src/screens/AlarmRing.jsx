@@ -6,7 +6,7 @@ import { isAndroid } from '../lib/androidAlarm'
 import { getBrendaMessage } from '../data/brendaMessages'
 
 export default function AlarmRing() {
-  const { profile, ringAlarm, playSong, startWorkout } = useApp()
+  const { profile, ringAlarm, playSong, startWorkout, t } = useApp()
 
   const exercise = ringAlarm?.exercise === 'lunges' ? 'lunges' : 'squats'
   const reps = ringAlarm?.reps ?? 10
@@ -36,11 +36,11 @@ export default function AlarmRing() {
       <div className="pulse">🍑</div>
       <div className="ring-brenda">{alarmMsg}</div>
       <div className="ring-msg">
-        No se apaga hasta que completes <b style={{ color: '#fff' }}>{reps} {exercise}</b>. La cámara los cuenta.
+        {t('alarmring.unstoppable_a')} <b style={{ color: '#fff' }}>{reps} {exercise}</b>{t('alarmring.unstoppable_b')}
       </div>
-      <button className="ring-go" onClick={startCamera}>A DARLE 💪</button>
+      <button className="ring-go" onClick={startCamera}>{t('alarmring.go')}</button>
       <div className="ring-note">
-        En iOS la app debe estar abierta · en Android suena en segundo plano
+        {t('alarmring.note')}
       </div>
     </div>
   )

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../store'
-import { DAY_LABELS } from '../data/onboarding'
 import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
 import { unlockPreview, playPreview, stopPreview as stopPreviewAudio } from '../lib/previewAudio'
 import Sheet from './Sheet'
@@ -19,8 +18,9 @@ function parseHour(hhmm) {
 }
 
 export default function AlarmSheet() {
-  const { editingAlarm, alarms, addAlarm, updateAlarm, deleteAlarm, closeSheet, showToast } = useApp()
+  const { editingAlarm, alarms, addAlarm, updateAlarm, deleteAlarm, closeSheet, showToast, t } = useApp()
   const init = parseHour(editingAlarm?.hour)
+  const dayLabels = t('days.initials').split(',')
 
   const [hour, setHour] = useState(String(init.h12))
   const [minute, setMinute] = useState(String(init.min).padStart(2, '0'))
@@ -71,20 +71,20 @@ export default function AlarmSheet() {
     if (editingAlarm) updateAlarm(editingAlarm.id, payload)
     else addAlarm({ ...payload, active: true })
     closeSheet()
-    showToast(editingAlarm ? 'Alarma actualizada ✓' : 'Alarma creada ✓')
+    showToast(editingAlarm ? t('alarm.toast_updated') : t('alarm.toast_created'))
   }
 
   const remove = () => {
     stopPreview()
     deleteAlarm(editingAlarm.id)
     closeSheet()
-    showToast('Alarma eliminada')
+    showToast(t('alarm.toast_deleted'))
   }
 
   return (
     <Sheet>
-      <h3>{editingAlarm ? 'EDITAR ALARMA' : 'NUEVA ALARMA'}</h3>
-      <p className="lead">Define la hora y el reto que tendrás que completar para apagarla.</p>
+      <h3>{editingAlarm ? t('alarm.edit_title') : t('alarm.new_title')}</h3>
+      <p className="lead">{t('alarm.lead')}</p>
 
       <div className="wheel-wrap">
         <div className="wheel-line" />
@@ -96,16 +96,16 @@ export default function AlarmSheet() {
 
       {unlocked >= 2 && (
         <div className="cfg-stage">
-          <div className="sec-h" style={{ margin: '6px 0 12px' }}><h2 style={{ fontSize: 18 }}>EJERCICIO</h2></div>
+          <div className="sec-h" style={{ margin: '6px 0 12px' }}><h2 style={{ fontSize: 18 }}>{t('alarm.exercise_h')}</h2></div>
           <div className="chip-row">
             <div className={'chip' + (exercise === 'squats' ? ' sel' : '')} onClick={() => { setExercise('squats'); unlock(3) }}>🍑<span>Squats</span></div>
             <div className={'chip' + (exercise === 'lunges' ? ' sel' : '')} onClick={() => { setExercise('lunges'); unlock(3) }}>🦵<span>Lunges</span></div>
           </div>
 
-          <div className="sec-h" style={{ margin: '16px 0 12px' }}><h2 style={{ fontSize: 18 }}>REPETICIONES</h2></div>
+          <div className="sec-h" style={{ margin: '16px 0 12px' }}><h2 style={{ fontSize: 18 }}>{t('alarm.reps_h')}</h2></div>
           <div className="chip-row">
             {REPS_OPTIONS.map((r) => (
-              <div key={r} className={'chip' + (reps === r ? ' sel' : '')} onClick={() => { setReps(r); unlock(3) }}>{r}<span>reps</span></div>
+              <div key={r} className={'chip' + (reps === r ? ' sel' : '')} onClick={() => { setReps(r); unlock(3) }}>{r}<span>{t('alarm.reps_unit')}</span></div>
             ))}
           </div>
         </div>
@@ -113,9 +113,9 @@ export default function AlarmSheet() {
 
       {unlocked >= 3 && (
         <div className="cfg-stage">
-          <div className="sec-h" style={{ margin: '16px 0 12px' }}><h2 style={{ fontSize: 18 }}>DÍAS</h2></div>
+          <div className="sec-h" style={{ margin: '16px 0 12px' }}><h2 style={{ fontSize: 18 }}>{t('alarm.days_h')}</h2></div>
           <div className="daysel">
-            {DAY_LABELS.map((lbl, d) => (
+            {dayLabels.map((lbl, d) => (
               <div key={d} className={'d' + (days.includes(d) ? ' on' : '')} onClick={() => { toggleDay(d); unlock(4) }}>{lbl}</div>
             ))}
           </div>
@@ -124,7 +124,7 @@ export default function AlarmSheet() {
 
       {unlocked >= 4 && (
         <div className="cfg-stage">
-          <div className="sec-h" style={{ margin: '16px 0 12px' }}><h2 style={{ fontSize: 18 }}>SONIDO DE ALARMA</h2></div>
+          <div className="sec-h" style={{ margin: '16px 0 12px' }}><h2 style={{ fontSize: 18 }}>{t('alarm.sound_h')}</h2></div>
           <div className="songsel">
             {ALARM_SONGS.map((song) => (
               <div
@@ -138,7 +138,7 @@ export default function AlarmSheet() {
                   type="button"
                   className={'songplay' + (previewId === song.id ? ' on' : '')}
                   onClick={(e) => { e.stopPropagation(); togglePreview(song) }}
-                  aria-label={previewId === song.id ? 'Detener' : 'Escuchar'}
+                  aria-label={previewId === song.id ? t('alarm.stop') : t('alarm.listen')}
                 >
                   {previewId === song.id ? '◼' : '▶'}
                 </button>
@@ -149,7 +149,7 @@ export default function AlarmSheet() {
       )}
 
       {unlocked < 4 && !editingAlarm && (
-        <div className="cfg-hint">{unlocked === 1 ? 'Ajusta la hora para continuar ▾' : unlocked === 2 ? 'Elige ejercicio y reps ▾' : 'Elige los días ▾'}</div>
+        <div className="cfg-hint">{unlocked === 1 ? t('alarm.hint1') : unlocked === 2 ? t('alarm.hint2') : t('alarm.hint3')}</div>
       )}
 
       <button
@@ -157,10 +157,10 @@ export default function AlarmSheet() {
         style={{ marginTop: 20 }}
         onClick={() => { if (!editingAlarm && unlocked < 4) { setUnlocked((u) => u + 1); return } save() }}
       >
-        {editingAlarm ? 'GUARDAR CAMBIOS' : unlocked < 4 ? 'CONTINUAR' : 'CREAR ALARMA'}
+        {editingAlarm ? t('alarm.save_changes') : unlocked < 4 ? t('alarm.continue') : t('alarm.create')}
       </button>
       {canDelete && (
-        <div className="alarm-delete" onClick={remove}>Eliminar alarma</div>
+        <div className="alarm-delete" onClick={remove}>{t('alarm.delete')}</div>
       )}
     </Sheet>
   )
