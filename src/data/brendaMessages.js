@@ -1,8 +1,9 @@
-/* Banco de mensajes FIJOS con la voz de Brenda (retador, atrabancado, mexicano).
-   Cero API: se eligen al azar dentro de cada categoría. getBrendaMessage()
-   reemplaza variables como {streak}. */
+/* Banco de mensajes FIJOS con la voz de Brenda (retador, atrabancado).
+   Cero API: se eligen al azar dentro de cada categoría. getBrendaMessage(lang, …)
+   elige el banco según el idioma del usuario y reemplaza variables como {streak}.
+   El inglés NO es traducción literal: mantiene la misma actitud exigente. */
 
-export const BRENDA_MESSAGES = {
+const BRENDA_MESSAGES_ES = {
   homeStreak: [
     "{streak} días seguidos. ¿Vas a tirar todo hoy o le sigues? Demuéstrame. 🔥",
     "Llevas {streak} días. Los débiles ya se habrían rendido. Tú no. Dale. 💪",
@@ -42,9 +43,53 @@ export const BRENDA_MESSAGES = {
   ],
 }
 
-// Helper: elige aleatorio y reemplaza {var} si aplica.
-export function getBrendaMessage(category, vars = {}) {
-  const list = BRENDA_MESSAGES[category] || []
+const BRENDA_MESSAGES_EN = {
+  homeStreak: [
+    "{streak} days straight. You gonna throw it all away today or keep going? Prove it. 🔥",
+    "{streak} days in. The weak would've quit by now. Not you. Let's go. 💪",
+    "{streak}-day streak. Don't you dare flake on me today. 🔥",
+  ],
+  homeNoWorkoutYet: [
+    "What are you waiting for? Your body won't move itself. Come on. 💪",
+    "Day's slipping away and you haven't moved. You got this or you don't? 🔥",
+    "Excuses don't burn calories. Move it! 💪",
+  ],
+  homeStreakBroken: [
+    "Streak's gone. So what? Winners start over. Today. 🔥",
+    "You slipped. Get up. Don't make me say it twice. 💪",
+  ],
+  exerciseDone: [
+    "That's it! 💥", "One down 🔥", "Don't ease up 💪", "Yes! 🔥", "Keep it up 💥", "That's it 👊",
+  ],
+  dayCompleted: [
+    "DAY DONE! That's character. Not everyone's got it. 🔥",
+    "You finished! That's what discipline looks like. Proud of you. 💪",
+    "DONE! See? You had it in you. Again tomorrow. 🔥",
+  ],
+  achievement: [
+    "New achievement. You earned every bit of it. Keep going. 💪",
+    "You unlocked something! This is for the few. 🔥",
+  ],
+  alarm: [
+    "UP! Squats NOW. Don't keep me waiting. 🔥",
+    "Come on, drop the excuses! Let's move. 💪",
+    "The bed won't give you the body you want. Get up! 🔥",
+  ],
+  emptyProgress: [
+    "Your story goes right here. Start writing it. 💪",
+  ],
+  emptyPlan: [
+    "I've got something ready for you. You up for it? 🔥",
+  ],
+}
+
+const BANKS = { es: BRENDA_MESSAGES_ES, en: BRENDA_MESSAGES_EN }
+
+// Helper: elige aleatorio del banco del idioma y reemplaza {var} si aplica.
+// `lang` = 'es' | 'en' (viene del Context/perfil). Cae a español si no existe.
+export function getBrendaMessage(lang, category, vars = {}) {
+  const bank = BANKS[lang] || BANKS.es
+  const list = bank[category] || BANKS.es[category] || []
   if (list.length === 0) return ''
   let msg = list[Math.floor(Math.random() * list.length)]
   Object.keys(vars).forEach((k) => {

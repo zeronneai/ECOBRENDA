@@ -14,8 +14,6 @@ import { weightSeries, workoutsByWeek, squatLungeSplit } from '../lib/progressSt
 import { getBrendaMessage } from '../data/brendaMessages'
 import Button3D from '../components/ui/Button3D'
 
-const EMPTY_PROGRESS_MSG = getBrendaMessage('emptyProgress')
-
 const MAGENTA = '#ff1f6b'
 const LIME = '#d8ff3e'
 const tooltipStyle = { background: '#141418', border: '1px solid rgba(255,255,255,.14)', borderRadius: 12, color: '#fff' }
@@ -94,7 +92,7 @@ function PremiumGate({ navigate, openSheet }) {
 
 export default function Progreso() {
   const navigate = useNavigate()
-  const { t, progressLog, addProgressEntry, deleteProgressEntry, streak, totals, workoutLog, openSheet } = useApp()
+  const { t, language, progressLog, addProgressEntry, deleteProgressEntry, streak, totals, workoutLog, openSheet } = useApp()
   const { isPremium } = useSubscription()
 
   const [weight, setWeight] = useState('')
@@ -263,7 +261,7 @@ export default function Progreso() {
           {progressLog.length === 0 ? (
             <div className="pg2-empty reveal d6">
               <div className="pg2-empty-emoji">📝</div>
-              <p>{EMPTY_PROGRESS_MSG}</p>
+              <p>{getBrendaMessage(language, 'emptyProgress')}</p>
             </div>
           ) : (
             <div className="pg2-hist reveal d6">

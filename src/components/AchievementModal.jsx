@@ -4,13 +4,13 @@ import { getAchievement } from '../data/achievements'
 import { getBrendaMessage } from '../data/brendaMessages'
 
 export default function AchievementModal() {
-  const { achievementQueue, dismissAchievement, confetti, t } = useApp()
+  const { achievementQueue, dismissAchievement, confetti, t, language } = useApp()
   const id = achievementQueue[0]
   const a = id ? getAchievement(id) : null
 
   // Mensaje retador de Brenda por desbloqueo (estable mientras se ve el logro).
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const brendaMsg = useMemo(() => getBrendaMessage('achievement'), [id])
+  const brendaMsg = useMemo(() => getBrendaMessage(language, 'achievement'), [id, language])
 
   // Confeti fiesta al aparecer cada logro.
   useEffect(() => {

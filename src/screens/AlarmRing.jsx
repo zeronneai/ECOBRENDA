@@ -6,13 +6,13 @@ import { isAndroid } from '../lib/androidAlarm'
 import { getBrendaMessage } from '../data/brendaMessages'
 
 export default function AlarmRing() {
-  const { profile, ringAlarm, playSong, startWorkout, t } = useApp()
+  const { profile, ringAlarm, playSong, startWorkout, t, language } = useApp()
 
   const exercise = ringAlarm?.exercise === 'lunges' ? 'lunges' : 'squats'
   const reps = ringAlarm?.reps ?? 10
   const time = ringAlarm?.hour || profile.wakeTime
   // Solo visual: mensaje retador de Brenda (uno nuevo por cada sonada).
-  const alarmMsg = useMemo(() => getBrendaMessage('alarm'), [])
+  const alarmMsg = useMemo(() => getBrendaMessage(language, 'alarm'), [language])
 
   // En Android el SERVICIO NATIVO ya reproduce la canción en loop (sonido
   // imparable), así que el JS NO arranca su propio audio (evita doble sonido).

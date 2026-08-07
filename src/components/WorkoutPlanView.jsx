@@ -11,7 +11,7 @@ import DestelloCard from './ui/DestelloCard'
 import AiPlanFooter from './AiPlanFooter'
 
 export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDevForce }) {
-  const { getPlanCompletions, toggleExerciseDone, showToast, confetti, t } = useApp()
+  const { getPlanCompletions, toggleExerciseDone, showToast, confetti, t, language } = useApp()
   const days = plan?.days || []
   const planKey = `${plan?.title || 'plan'}::${days.length}`
 
@@ -44,11 +44,11 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, onRenew, onDev
       if (nowComplete && !wasComplete) {
         // Día completado por primera vez: celebración destacada.
         confetti?.(60)
-        setFlash(getBrendaMessage('dayCompleted'))
+        setFlash(getBrendaMessage(language, 'dayCompleted'))
         setTimeout(() => setFlash(''), 2500)
       } else {
         // Micro-mensaje sutil por ejercicio marcado.
-        showToast?.(getBrendaMessage('exerciseDone'))
+        showToast?.(getBrendaMessage(language, 'exerciseDone'))
       }
     }
   }

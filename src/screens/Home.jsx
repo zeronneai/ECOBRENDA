@@ -22,7 +22,7 @@ const QUICK_CHALLENGES = [
 
 export default function Home() {
   const navigate = useNavigate()
-  const { t, profile, streak, weekChart, challengesDone, totals, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
+  const { t, language, profile, streak, weekChart, challengesDone, totals, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
   const { isPremium } = useSubscription()
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : t('home.hi')
@@ -34,9 +34,9 @@ export default function Home() {
   // Estable por render (no reshuffle) vía useMemo sobre la categoría.
   const streakCategory = streak > 0 ? 'homeStreak' : best > 0 ? 'homeStreakBroken' : 'homeNoWorkoutYet'
   const brendaGreeting = useMemo(
-    () => getBrendaMessage(streakCategory, { streak }),
+    () => getBrendaMessage(language, streakCategory, { streak }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [streakCategory],
+    [streakCategory, language],
   )
 
   // Alarma principal (la primera de la lista real).
