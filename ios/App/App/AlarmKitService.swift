@@ -169,7 +169,9 @@ final class AlarmKitService {
     func engage(logicalId: String) {
         let map = defaults.dictionary(forKey: mapKey) as? [String: String] ?? [:]
         let mine = Set(map.filter { $0.value == logicalId }.map { $0.key })
-        for alarm in AlarmManager.shared.alarms where mine.contains(alarm.id.uuidString) {
+        // `alarms` es un getter throwing en iOS 26 → try?.
+        let current = (try? AlarmManager.shared.alarms) ?? []
+        for alarm in current where mine.contains(alarm.id.uuidString) {
             // Solo el que está alertando (no los .fixed pendientes).
             if String(describing: alarm.state).lowercased().contains("alert") {
                 try? AlarmManager.shared.stop(id: alarm.id)
