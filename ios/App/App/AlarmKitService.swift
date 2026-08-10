@@ -141,8 +141,9 @@ final class AlarmKitService {
             owned.append(primaryId.uuidString); primaries.append(primaryId.uuidString)
             map[primaryId.uuidString] = logicalId
 
-            // 2) RÁFAGA: 10 .fixed a T+60…T+600 de la PRÓXIMA ocurrencia.
+            // 2) RÁFAGA: 15 .fixed a T+20…T+300 de la PRÓXIMA ocurrencia.
             let base = nextOccurrence(hour: hour, minute: minute, days: days)
+            print("[AlarmKit] alarma \(logicalId): primario ~\(hour):\(minute), base ráfaga = \(base)")
             for i in 1...REARM_MAX {
                 let fireDate = base.addingTimeInterval(TimeInterval(i * REARM_INTERVAL_SEC))
                 let cfg = makeConfig(schedule: .fixed(fireDate), title: title,
@@ -151,6 +152,7 @@ final class AlarmKitService {
                 _ = try await AlarmManager.shared.schedule(id: rid, configuration: cfg)
                 owned.append(rid.uuidString)
                 map[rid.uuidString] = logicalId
+                if i == 1 || i == REARM_MAX { print("[AlarmKit]   ráfaga \(i) → \(fireDate)") }
             }
         }
 
@@ -209,12 +211,14 @@ final class AlarmKitService {
         try? AlarmManager.shared.stop(id: uuid)
     }
 
-    /// Cancela TODO lo que programamos (primario + ráfaga de todas las alarmas).
+    /// Cancela TODAS las alarmas de nuestra app (barre zombies de pruebas/reschedules
+    /// viejos). `AlarmManager.shared.alarms` solo lista las de esta app, así que es
+    /// seguro. Esto libera el cupo (AlarmKit ~64 alarmas por app) para que la ráfaga
+    /// nueva SÍ se programe.
     func cancelAll() {
-        let owned = defaults.stringArray(forKey: ownedKey) ?? []
-        for s in owned {
-            if let uuid = UUID(uuidString: s) { try? AlarmManager.shared.cancel(id: uuid) }
-        }
+        let current = (try? AlarmManager.shared.alarms) ?? []
+        for alarm in current { try? AlarmManager.shared.cancel(id: alarm.id) }
+        print("[AlarmKit] cancelAll → canceladas \(current.count) alarmas (barrido total)")
         defaults.set([String](), forKey: ownedKey)
         defaults.set([String](), forKey: primaryKey)
         defaults.set([String: String](), forKey: mapKey)

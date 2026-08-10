@@ -170,6 +170,8 @@ export function AppProvider({ children }) {
     // alarma y rearma la PRÓXIMA ocurrencia. (La ráfaga NO se corta al abrir/tocar
     // el botón, solo AQUÍ, al completar reps.)
     const aid = activeAlarmIdRef.current
+    alarmSessionActiveRef.current = false
+    clearTimeout(sessionTimerRef.current)
     if (aid != null) {
       completeAlarmKit(aid)
       activeAlarmIdRef.current = null
@@ -426,6 +428,9 @@ export function AppProvider({ children }) {
   schedRef.current = { alarms, ringOpen, scanning, celebrating, onboarding }
   const activeAlarmIdRef = useRef(null) // AlarmKit: id de la alarma que suena (para complete)
   const lastSchedSigRef = useRef('')    // firma de scheduling (evita reagendar por lastTriggered)
+  const didInitSchedRef = useRef(false) // ¿ya corrió la reagenda de arranque?
+  const alarmSessionActiveRef = useRef(false) // ¿hay una alarma sonando ahora? (no reagendar → protege la ráfaga)
+  const sessionTimerRef = useRef(null)  // limpia la sesión activa tras la ventana de la ráfaga
   useEffect(() => {
     const TOLERANCE_MS = 90 * 1000
     const tick = () => {
@@ -465,20 +470,49 @@ export function AppProvider({ children }) {
     showRing(a)
   }, [updateAlarm, showRing])
 
+  // AlarmKit: la app se abrió por "HACER SQUATS". Marca sesión activa (para NO
+  // reagendar y no cancelar la ráfaga), silencia el tono y entra a AlarmRing.
+  // La sesión se limpia al COMPLETAR squats o tras la ventana de la ráfaga (~6 min).
+  const openFromAlarmKit = useCallback((id) => {
+    alarmSessionActiveRef.current = true
+    clearTimeout(sessionTimerRef.current)
+    sessionTimerRef.current = setTimeout(() => { alarmSessionActiveRef.current = false }, 6 * 60 * 1000)
+    engageAlarmKit(id)
+    triggerAlarmById(id)
+  }, [triggerAlarmById])
+
   // Reagenda al cambiar las alarmas. Android: plugin nativo (AlarmManager + FGS).
   // iOS: LocalNotifications. Web: nada.
   useEffect(() => {
-    // Solo reagendar si cambió algo de SCHEDULING (no por `lastTriggered`, que
-    // cambia al disparar la alarma). Reagendar en ese momento cancelaría la ráfaga
-    // de re-armado que está corriendo. La ráfaga se corta solo al COMPLETAR squats.
     const sig = (alarms || []).map((a) =>
       `${a.id}|${a.hour}|${(a.days || []).join(',')}|${a.exercise}|${a.reps}|${a.active ? 1 : 0}|${a.songId || ''}`
     ).join(';')
+
+    // ARRANQUE (mount): si abrimos por una alarma pendiente (cold start via
+    // "HACER SQUATS"), NO reagendes — reagendar haría cancelAll y borraría la
+    // ráfaga activa. Solo maneja la alarma. Si no hay pendiente, reagenda normal.
+    if (!didInitSchedRef.current) {
+      didInitSchedRef.current = true
+      lastSchedSigRef.current = sig
+      if (isAndroid()) { scheduleAndroidAlarms(alarms); return }
+      if (!isNativeApp()) return
+      if (isIOS()) {
+        getPendingAlarmKit().then((pid) => {
+          if (pid) openFromAlarmKit(pid)                                  // hay alarma sonando → no reagendar
+          else rescheduleAppleAlarms(schedRef.current.alarms || [])       // arranque normal → limpia zombies + arma
+        })
+      } else {
+        rescheduleAppleAlarms(alarms)
+      }
+      return
+    }
+
+    // CAMBIOS posteriores: solo reagenda si cambió el SCHEDULING (no por
+    // `lastTriggered`) y NO hay una alarma sonando (protege la ráfaga activa).
     if (sig === lastSchedSigRef.current) return
     lastSchedSigRef.current = sig
-
+    if (alarmSessionActiveRef.current) return
     if (isAndroid()) { scheduleAndroidAlarms(alarms); return }
-    // iOS: AlarmKit (iOS 26 + permiso) o fallback a local-notifications. Web: no-op.
     if (isNativeApp()) rescheduleAppleAlarms(alarms)
   }, [alarms])
 
@@ -494,11 +528,9 @@ export function AppProvider({ children }) {
     let off = () => {}
     let offFired = () => {}
 
-    // AlarmKit (iOS 26): el botón "HACER SQUATS" abrió la app → silencia el tono y
-    // entra a AlarmRing/cámara. El audio arranca con el gesto "A DARLE" (in-app).
-    const openFromAlarmKit = (id) => { engageAlarmKit(id); triggerAlarmById(id) }
+    // AlarmKit (iOS 26): "HACER SQUATS" (app viva) → abre AlarmRing/cámara.
+    // El cold start (app muerta) lo maneja el effect de reagenda vía getPending.
     onAlarmFired((id) => openFromAlarmKit(id)).then((fn) => { offFired = fn })
-    getPendingAlarmKit().then((id) => { if (id) openFromAlarmKit(id) }) // cold start
 
     onAlarmTapped((id) => {
       // D — iOS: el tap de la notificación ES el gesto. Aprovéchalo SÍNCRONO
@@ -515,7 +547,7 @@ export function AppProvider({ children }) {
       triggerAlarmById(id)
     }).then((fn) => { off = fn })
     return () => { off(); offFired() }
-  }, [triggerAlarmById, playSong])
+  }, [triggerAlarmById, playSong, openFromAlarmKit])
 
   // Permisos nativos: pedir UNA vez (cámara + notificaciones) tras el onboarding.
   const needsPriming = isNativeApp() && !onboarding && profile.onboarded && !settings.permsPrimed
