@@ -172,6 +172,14 @@ cubriendo también cámara/fotos. Tarea pequeña aparte (requiere Xcode). Texto 
       de firma al compilar en Xcode 26 (marcados `⚠️ CONFIRMAR SDK`). **Pendiente: compilar
       + HITO en device (¿rompe Silencio/Focus?).**
 
+### ⚠️ Registro del plugin (Capacitor 6+)
+Los plugins locales del target App **no se auto-descubren** en Capacitor 6+. Hay que
+registrarlos con `bridge?.registerPluginInstance(...)` en `capacitorDidLoad()` de una
+subclase de `CAPBridgeViewController`. Implementado en `MainViewController.swift` +
+`Main.storyboard` apuntando su VC a `MainViewController` (module `App`). Sin esto, el
+JS da "plugin is not implemented on ios". `MainViewController.swift` debe estar en el
+target App.
+
 ### Fase 2 — pasos para compilar y probar (device iPhone iOS 26)
 1. `git pull` de `feature/alarmkit`; `npx cap sync ios`.
 2. En **Xcode 26**, añadir los 2 `.swift` al target **App**: click derecho en el grupo
