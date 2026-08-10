@@ -48,6 +48,8 @@
 	<string>Booty Alarm accede a tus fotos solo cuando eliges una para tu foto de perfil.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Booty Alarm no guarda imágenes en tu galería automáticamente. iOS solicita este permiso por el framework de Fotos que usa la función de cámara.</string>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>Booty Alarm usa las alarmas del sistema para despertarte de verdad: suenan aunque el iPhone esté en silencio o en Concentración, y no se detienen hasta que completas tus repeticiones.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
