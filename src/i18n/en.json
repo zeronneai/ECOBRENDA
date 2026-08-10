@@ -218,6 +218,8 @@
     "notif_d": "So the alarm rings on time, even when the app is closed.",
     "cam_t": "Camera",
     "cam_d": "Counts your reps on your phone. The video isn't uploaded anywhere.",
+    "alarmkit_t": "Unstoppable alarm",
+    "alarmkit_d": "Rings even when your iPhone is on Silent or Focus, like Apple's Clock.",
     "allowing": "ALLOWING…",
     "allow": "ALLOW"
   },
@@ -428,7 +430,8 @@
     "take": "Take photo"
   },
   "notif": {
-    "alarm_body": "Time for your {{reps}} {{ex}}. It won't stop until you finish your reps."
+    "alarm_body": "Time for your {{reps}} {{ex}}. It won't stop until you finish your reps.",
+    "alarm_title": "🍑 UP! {{reps}} {{ex}}"
   },
   "legal": {
     "back": "‹ Back",

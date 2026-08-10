@@ -86,6 +86,62 @@ final class AlarmKitService {
         return id.uuidString
     }
 
+    // MARK: - Scheduling real (Fase 3)
+
+    private let ownedKey = "alarmkit.ownedIds"          // [uuidString] de las alarmas que programamos
+    private let mapKey   = "alarmkit.uuidToLogicalId"   // uuidString → logicalId (para routing en Fase 4)
+    private var defaults: UserDefaults { .standard }
+
+    /// Reagenda TODAS las alarmas activas (cancela lo previo y reescribe).
+    /// Fase 3: solo el ring PRIMARIO con recurrencia semanal + botón Detener.
+    /// (El botón "HACER SQUATS" y la ráfaga de re-armado llegan en Fase 4.)
+    /// `alarms`: [{ id, hour, minute, days:[0..6 Lun..Dom], exercise, reps, title, stopLabel }]
+    func reschedule(_ alarms: [[String: Any]]) async throws {
+        cancelAll()
+        var owned: [String] = []
+        var map: [String: String] = [:]
+
+        for a in alarms {
+            guard let logicalId = a["id"] as? String else { continue }
+            let hour = a["hour"] as? Int ?? 7
+            let minute = a["minute"] as? Int ?? 0
+            let days = (a["days"] as? [Int]) ?? [0, 1, 2, 3, 4]
+            let title = a["title"] as? String ?? "Booty Alarm"
+            let stopLabel = a["stopLabel"] as? String ?? "Detener"
+
+            let stopButton = AlarmButton(
+                text: LocalizedStringResource(stringLiteral: stopLabel),
+                textColor: .white,
+                systemImageName: "xmark.circle.fill"
+            )
+            let alert = AlarmPresentation.Alert(
+                title: LocalizedStringResource(stringLiteral: title),
+                stopButton: stopButton
+            )
+            let attributes = AlarmAttributes<BootyAlarmMetadata>(
+                presentation: AlarmPresentation(alert: alert),
+                metadata: BootyAlarmMetadata(),
+                tintColor: Color.pink
+            )
+
+            // ⚠️ CONFIRMAR SDK: Alarm.Schedule.Relative.Time / .Recurrence.weekly([Locale.Weekday]).
+            let time = Alarm.Schedule.Relative.Time(hour: hour, minute: minute)
+            let weekdays = days.map { weekday(fromDow: $0) }
+            let recurrence = Alarm.Schedule.Relative.Recurrence.weekly(weekdays)
+            let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
+
+            let config = AlarmManager.AlarmConfiguration(schedule: schedule, attributes: attributes)
+
+            let id = UUID()
+            _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
+            owned.append(id.uuidString)
+            map[id.uuidString] = logicalId
+        }
+
+        defaults.set(owned, forKey: ownedKey)
+        defaults.set(map, forKey: mapKey)
+    }
+
     // MARK: - Control
 
     func stop(idString: String) {
@@ -93,8 +149,30 @@ final class AlarmKitService {
         try? AlarmManager.shared.stop(id: uuid)   // síncrono pero throwing en iOS 26
     }
 
+    /// Cancela todas las alarmas que programamos nosotros (las "owned").
     func cancelAll() {
-        // En la fase de prueba basta con stop(id) del id devuelto por scheduleTest.
-        // El barrido completo (enumerar AlarmManager.shared.alarms + cancel(id:)) llega en Fase 3.
+        let owned = defaults.stringArray(forKey: ownedKey) ?? []
+        for s in owned {
+            if let uuid = UUID(uuidString: s) {
+                // ⚠️ CONFIRMAR SDK: cancel(id:) — síncrono throwing (como stop).
+                try? AlarmManager.shared.cancel(id: uuid)
+            }
+        }
+        defaults.set([String](), forKey: ownedKey)
+        defaults.set([String: String](), forKey: mapKey)
+    }
+
+    // 0=Lun … 6=Dom  →  Locale.Weekday
+    // ⚠️ CONFIRMAR SDK: tipo exacto que espera Recurrence.weekly (Locale.Weekday).
+    private func weekday(fromDow dow: Int) -> Locale.Weekday {
+        switch dow {
+        case 0: return .monday
+        case 1: return .tuesday
+        case 2: return .wednesday
+        case 3: return .thursday
+        case 4: return .friday
+        case 5: return .saturday
+        default: return .sunday
+        }
     }
 }

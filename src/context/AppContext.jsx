@@ -4,7 +4,8 @@ import { ACHIEVEMENTS } from '../data/achievements'
 import { songUrlById } from '../data/songs'
 import * as dataStore from '../lib/dataStore'
 import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
-import { isNativeApp, rescheduleNativeAlarms, onAlarmTapped } from '../lib/nativeAlarm'
+import { isNativeApp, onAlarmTapped } from '../lib/nativeAlarm'
+import { rescheduleAppleAlarms, requestAlarmKitAuthIfSupported } from '../lib/iosAlarm'
 import { primeNativePermissions } from '../lib/nativePerms'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
@@ -456,7 +457,8 @@ export function AppProvider({ children }) {
   // iOS: LocalNotifications. Web: nada.
   useEffect(() => {
     if (isAndroid()) { scheduleAndroidAlarms(alarms); return }
-    if (isNativeApp()) rescheduleNativeAlarms(alarms)
+    // iOS: AlarmKit (iOS 26 + permiso) o fallback a local-notifications. Web: no-op.
+    if (isNativeApp()) rescheduleAppleAlarms(alarms)
   }, [alarms])
 
   // Disparo nativo -> dispara la alarma. Android: evento 'native-alarm' (+ cold
@@ -491,10 +493,11 @@ export function AppProvider({ children }) {
   const primePermissions = useCallback(async () => {
     await primeNativePermissions()
     if (isAndroid()) await ensureExactAlarmAllowed() // Android 12+: permiso de alarma exacta
+    else if (isIOS()) { try { await requestAlarmKitAuthIfSupported() } catch { /* noop */ } } // iOS 26: alarma imparable
     setSettingsState({ ...dataStore.saveSettings({ permsPrimed: true }) })
     const al = dataStore.getAlarms()
     if (isAndroid()) scheduleAndroidAlarms(al)
-    else rescheduleNativeAlarms(al)
+    else rescheduleAppleAlarms(al)
   }, [])
 
   // Desbloqueo de audio en el primer gesto (cualquier toque, incl. guardar una

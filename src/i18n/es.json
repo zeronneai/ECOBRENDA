@@ -218,6 +218,8 @@
     "notif_d": "Para que la alarma suene a su hora, aunque la app esté cerrada.",
     "cam_t": "Cámara",
     "cam_d": "Cuenta tus reps en tu teléfono. El video no se sube a ningún lado.",
+    "alarmkit_t": "Alarma imparable",
+    "alarmkit_d": "Suena aunque el iPhone esté en Silencio o Concentración, como el Reloj de Apple.",
     "allowing": "PERMITIENDO…",
     "allow": "PERMITIR"
   },
@@ -428,7 +430,8 @@
     "take": "Tomar foto"
   },
   "notif": {
-    "alarm_body": "Hora de tus {{reps}} {{ex}}. No se apaga hasta que completes tus reps."
+    "alarm_body": "Hora de tus {{reps}} {{ex}}. No se apaga hasta que completes tus reps.",
+    "alarm_title": "🍑 ¡ARRIBA! {{reps}} {{ex}}"
   },
   "legal": {
     "back": "‹ Volver",

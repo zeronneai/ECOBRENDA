@@ -203,7 +203,33 @@ target App.
    alerta **grande a pantalla completa** en el lock screen (estilo Reloj) + Dynamic Island?
    ¿el botón **Detener** la silencia? — Si algo NO aparece alert-only sin countdown,
    probablemente pida **Widget Extension** (target extra en Xcode; te aviso).
-- [ ] **Fase 3** — schedule/cancel/reschedule (one-time + semanal).
+- [x] **Fase 3 (código)** — scheduling real conectado al flujo de la app:
+      - Swift: `reschedule([alarms])` (ring primario con recurrencia semanal
+        `Alarm.Schedule.Relative.Recurrence.weekly`), `cancelAll` real (owned ids en
+        UserDefaults), mapeo día 0=Lun..6=Dom → `Locale.Weekday`. Plugin: método
+        `reschedule` (recibe `alarmsJson`). ⚠️ `Locale.Weekday`, `.weekly(_:)` y
+        `cancel(id:)` marcados CONFIRMAR SDK.
+      - JS: `src/lib/iosAlarm.js` (binding + dispatcher `rescheduleAppleAlarms`:
+        AlarmKit si iOS26+autorizado, si no fallback a `rescheduleNativeAlarms`).
+        `nativeAlarm.cancelLocalPending` para no duplicar al cambiar de modo.
+      - AppContext: dispatcher en los 2 sitios de reagenda; permiso AlarmKit pedido
+        en `primePermissions` (priming). PermissionsPriming: fila "Alarma imparable"
+        en iOS 26. i18n: `notif.alarm_title`, `perms.alarmkit_t/_d` (es/en, paridad 476).
+      - Fase 3 = solo botón Detener (sin "HACER SQUATS" ni re-armado → Fase 4).
+      **Pendiente: compilar + HITO en device.**
+
+#### Fase 3 — pasos para compilar y probar (device iPhone iOS 26)
+1. `git pull origin feature/alarmkit` → `npx cap sync ios`.
+2. Xcode: **⌘B**. Corregir cualquier `⚠️ CONFIRMAR SDK` nuevo (weekday/recurrence/cancel)
+   con el autocompletado; si algo no cuadra, mandar el error.
+3. Correr en el iPhone (iOS 26). Si es la primera vez, pasar el priming y **aceptar
+   el permiso de "Alarma imparable"** (AlarmKit). Si ya lo pasaste, borrar y reinstalar
+   la app para volver a ver el priming, o aceptar el permiso cuando lo pida.
+4. En la app, **crear/activar una alarma** 1–2 min en el futuro, en ciertos días.
+5. **Hito Fase 3:** a esa hora suena vía AlarmKit (tono del sistema), **rompe Silencio/
+   Focus**, aparece grande; en los días correctos. Solo botón **Detener** (aún sin squats).
+6. **Fallback:** en un iPhone con iOS < 26 (o denegando el permiso), la alarma sigue
+   funcionando por local-notifications igual que antes (sin romper silencio).
 - [ ] **Fase 4** — alerta + `OpenSquatsIntent` + re-armado.
 - [ ] **Fase 5** — dispatcher JS + fallback.
 - [ ] **Fase 6** — QA device + notas App Review.

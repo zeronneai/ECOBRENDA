@@ -89,6 +89,18 @@ export async function rescheduleNativeAlarms(alarms = []) {
   }
 }
 
+// Cancela TODAS las notificaciones locales pendientes (sin reagendar). Lo usa el
+// dispatcher iOS al pasar a AlarmKit, para no dejar alarmas duplicadas.
+export async function cancelLocalPending() {
+  if (!isNativeApp()) return
+  try {
+    const pending = await LocalNotifications.getPending()
+    if (pending.notifications?.length) {
+      await LocalNotifications.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) })
+    }
+  } catch { /* noop */ }
+}
+
 // Registra el tap de la notificación -> cb(alarmId). Devuelve una función para
 // quitar el listener. En web no hace nada.
 export async function onAlarmTapped(cb) {

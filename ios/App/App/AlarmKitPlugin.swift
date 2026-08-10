@@ -21,6 +21,7 @@ public class AlarmKitPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "getAuthorizationStatus", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestAuthorization",   returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "scheduleTest",           returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "reschedule",             returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stop",                   returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "cancelAll",              returnType: CAPPluginReturnPromise),
     ]
@@ -63,6 +64,23 @@ public class AlarmKitPlugin: CAPPlugin, CAPBridgedPlugin {
                 call.resolve(["id": id])
             } catch {
                 call.reject("schedule_failed", nil, error)
+            }
+        }
+    }
+
+    // Reagenda TODAS las alarmas activas. El JS manda `alarmsJson` (JSON.stringify)
+    // para evitar los quirks de arrays tipados de Capacitor.
+    @objc func reschedule(_ call: CAPPluginCall) {
+        guard #available(iOS 26.0, *) else { call.resolve(["ok": false]); return }
+        let json = call.getString("alarmsJson") ?? "[]"
+        Task {
+            do {
+                let data = Data(json.utf8)
+                let arr = (try JSONSerialization.jsonObject(with: data) as? [[String: Any]]) ?? []
+                try await AlarmKitService.shared.reschedule(arr)
+                call.resolve(["ok": true])
+            } catch {
+                call.reject("reschedule_failed", nil, error)
             }
         }
     }
