@@ -3,8 +3,7 @@
     Este archivo NO importa AlarmKit: es seguro en cualquier iOS. Toda la lógica
     que toca AlarmKit vive en AlarmKitService.swift, detrás de @available(iOS 26).
 
-    ⚠️ Para que compile debes AÑADIR ESTE ARCHIVO (y AlarmKitService.swift) al
-    target "App" en Xcode (Add Files to "App"… → marcar el target App).
+    ⚠️ Para que compile debe estar añadido al target "App" en Xcode (ya lo está).
 
     Fase 2 (validación): isSupported / auth / scheduleTest / stop / cancelAll.
     El schedule real (semanal), la alerta con "HACER SQUATS" y el re-armado
@@ -37,10 +36,7 @@ public class AlarmKitPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func getAuthorizationStatus(_ call: CAPPluginCall) {
         guard #available(iOS 26.0, *) else { call.resolve(["status": "unsupported"]); return }
-        Task {
-            let status = AlarmKitService.shared.authorizationStatusString()
-            call.resolve(["status": status])
-        }
+        call.resolve(["status": AlarmKitService.shared.authorizationStatusString()])
     }
 
     @objc func requestAuthorization(_ call: CAPPluginCall) {
@@ -74,17 +70,13 @@ public class AlarmKitPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func stop(_ call: CAPPluginCall) {
         guard #available(iOS 26.0, *) else { call.resolve(); return }
         guard let id = call.getString("id") else { call.reject("missing_id"); return }
-        Task {
-            await AlarmKitService.shared.stop(idString: id)
-            call.resolve()
-        }
+        AlarmKitService.shared.stop(idString: id)
+        call.resolve()
     }
 
     @objc func cancelAll(_ call: CAPPluginCall) {
         guard #available(iOS 26.0, *) else { call.resolve(); return }
-        Task {
-            await AlarmKitService.shared.cancelAll()
-            call.resolve()
-        }
+        AlarmKitService.shared.cancelAll()
+        call.resolve()
     }
 }

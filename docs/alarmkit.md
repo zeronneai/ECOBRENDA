@@ -72,12 +72,14 @@ let config = AlarmManager.AlarmConfiguration(schedule: s2, attributes: attrs,
 ### Sonido (resuelve DUDA #2 — sonido custom)
 La API soporta sonido custom del bundle, PERO en **iOS 26.0 estable el sonido custom
 de AlarmKit está ROTO** (bug de Apple, varios Feedback abiertos): se ignora y suena el
-`.default`. Decisión: **usar `.default`** (el tono de alarma del sistema — justo el que
-rompe Silencio/Focus) y dejar un **flag** para volver a custom cuando Apple lo arregle:
+default. Decisión Fase 2: **NO pasar el parámetro `sound`** → AlarmKit usa su tono de
+alarma por defecto (justo el que rompe Silencio/Focus). Esto además evita depender del
+nombre exacto del tipo de sonido (que en el SDK real NO es `AlertConfiguration.AlertSound`
+como decía el resumen de WWDC — ese tipo no existe con ese nombre y rompía la compilación).
 ```swift
-// iOS 26.0: sonidos custom rotos → tono del sistema. Poner true cuando Apple lo arregle.
-let USE_CUSTOM_ALARM_SOUND = false
-let sound: AlertConfiguration.AlertSound = USE_CUSTOM_ALARM_SOUND ? .named("alarm") : .default
+// Fase 2: omitimos `sound` → tono del sistema (rompe Silencio/Focus).
+let config = AlarmManager.AlarmConfiguration(schedule: .fixed(fireDate), attributes: attributes)
+// Cuando Apple arregle el custom (iOS 26.x): añadir `sound: <TipoDelSDK>.named("alarm")`.
 ```
 La **canción elegida** NO va en AlarmKit: suena **in-app (Web Audio)** al abrir la
 cámara. AlarmKit solo aporta el tono del sistema que despierta rompiendo Silencio/Focus.
