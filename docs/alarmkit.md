@@ -164,7 +164,35 @@ cubriendo también cámara/fotos. Tarea pequeña aparte (requiere Xcode). Texto 
       alert-only y nombre exacto de `alarmUpdates`.
 - [x] **Fase 1** — `NSAlarmKitUsageDescription` en Info.plist; deployment target 15.0
       (sin cambio); baseline web verde. Sin código AlarmKit todavía.
-- [ ] **Fase 2** — Plugin Swift (auth + schedule de prueba) + **hito: alarma que rompe Silencio**.
+- [x] **Fase 2 (código)** — Plugin Swift redactado (`ios/App/App/AlarmKitPlugin.swift`,
+      `AlarmKitService.swift`) + hook JS (`src/lib/alarmKitTest.js`, `window.AlarmKitTest`).
+      ⚠️ Escrito contra la API de WWDC25, NO contra headers del SDK → esperar 1–3 ajustes
+      de firma al compilar en Xcode 26 (marcados `⚠️ CONFIRMAR SDK`). **Pendiente: compilar
+      + HITO en device (¿rompe Silencio/Focus?).**
+
+### Fase 2 — pasos para compilar y probar (device iPhone iOS 26)
+1. `git pull` de `feature/alarmkit`; `npx cap sync ios`.
+2. En **Xcode 26**, añadir los 2 `.swift` al target **App**: click derecho en el grupo
+   `App` → *Add Files to "App"…* → seleccionar `AlarmKitPlugin.swift` y
+   `AlarmKitService.swift` → marcar el target **App**. (Si ya aparecen en el target, saltar.)
+3. **Weak-link**: Target App → General → *Frameworks, Libraries, and Embedded Content* →
+   `+` → **AlarmKit.framework** → ponerlo en **Optional** (imprescindible con target iOS 15).
+4. Compilar. Si hay errores de firma, corregir los puntos `⚠️ CONFIRMAR SDK` con el
+   autocompletado (son de AlarmKit, framework nuevo). Mandarme el error si algo no cuadra.
+5. Correr en el **iPhone real (iOS 26)**. Con el iPhone conectado al Mac:
+   Safari → Desarrollo → [iPhone] → [app] → Consola:
+   ```js
+   await window.AlarmKitTest.isSupported()          // { supported: true }
+   await window.AlarmKitTest.requestAuthorization()  // aceptar el permiso
+   await window.AlarmKitTest.scheduleTest(10)        // suena en 10s
+   ```
+6. **Escenarios a probar** (dispara scheduleTest(10) y en <10s):
+   Silencio ON (switch lateral) · un Focus/No molestar activo · pantalla bloqueada ·
+   app cerrada (swipe up para matarla).
+7. **Qué observar:** ¿suena el tono de alarma? ¿rompe Silencio y Focus? ¿aparece la
+   alerta **grande a pantalla completa** en el lock screen (estilo Reloj) + Dynamic Island?
+   ¿el botón **Detener** la silencia? — Si algo NO aparece alert-only sin countdown,
+   probablemente pida **Widget Extension** (target extra en Xcode; te aviso).
 - [ ] **Fase 3** — schedule/cancel/reschedule (one-time + semanal).
 - [ ] **Fase 4** — alerta + `OpenSquatsIntent` + re-armado.
 - [ ] **Fase 5** — dispatcher JS + fallback.
