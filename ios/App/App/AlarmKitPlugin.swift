@@ -25,6 +25,7 @@ public class AlarmKitPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "engage",                 returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "complete",               returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getPending",             returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "list",                   returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stop",                   returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "cancelAll",              returnType: CAPPluginReturnPromise),
     ]
@@ -121,6 +122,17 @@ public class AlarmKitPlugin: CAPPlugin, CAPBridgedPlugin {
     // Cold start: devuelve (y limpia) el alarmId pendiente que dejó el App Intent.
     @objc func getPending(_ call: CAPPluginCall) {
         call.resolve(["alarmId": AlarmBridge.consumePending() as Any])
+    }
+
+    // DEBUG: cuántas alarmas hay realmente programadas en AlarmKit (vs las que creímos).
+    @objc func list(_ call: CAPPluginCall) {
+        guard #available(iOS 26.0, *) else { call.resolve(["supported": false]); return }
+        let items = AlarmKitService.shared.debugList()
+        call.resolve([
+            "systemCount": items.count,                       // lo que AlarmKit reporta
+            "ownedCount": AlarmKitService.shared.ownedCount(), // lo que creímos programar (~16)
+            "alarms": items,
+        ])
     }
 
     @objc func stop(_ call: CAPPluginCall) {

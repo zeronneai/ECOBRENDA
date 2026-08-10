@@ -191,6 +191,17 @@ final class AlarmKitService {
         defaults.set(owned, forKey: ownedKey)
     }
 
+    // MARK: - Debug (window.AlarmKitTest.list)
+
+    /// Lista las alarmas que AlarmKit tiene programadas ahora mismo (id + estado).
+    func debugList() -> [[String: String]] {
+        let current = (try? AlarmManager.shared.alarms) ?? []
+        return current.map { ["id": $0.id.uuidString, "state": String(describing: $0.state)] }
+    }
+
+    /// Cuántas alarmas creímos programar (las guardadas en UserDefaults).
+    func ownedCount() -> Int { (defaults.stringArray(forKey: ownedKey) ?? []).count }
+
     // MARK: - Control
 
     func stop(idString: String) {

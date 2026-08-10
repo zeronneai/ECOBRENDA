@@ -19,6 +19,7 @@ export const AlarmKitTest = {
     AlarmKit.scheduleTest({ seconds, title: '¡ARRIBA! Booty Alarm 🍑', stopLabel: 'Detener' }),
   stop: (id) => AlarmKit.stop({ id }),
   cancelAll: () => AlarmKit.cancelAll(),
+  list: () => AlarmKit.list(),           // DEBUG: cuántas alarmas hay programadas
 }
 
 if (typeof window !== 'undefined') {
