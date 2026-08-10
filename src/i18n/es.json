@@ -431,7 +431,8 @@
   },
   "notif": {
     "alarm_body": "Hora de tus {{reps}} {{ex}}. No se apaga hasta que completes tus reps.",
-    "alarm_title": "🍑 ¡ARRIBA! {{reps}} {{ex}}"
+    "alarm_title": "🍑 ¡ARRIBA! {{reps}} {{ex}}",
+    "squats_btn": "HACER SQUATS 🍑"
   },
   "legal": {
     "back": "‹ Volver",

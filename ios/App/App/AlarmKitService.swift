@@ -2,21 +2,25 @@
     @available(iOS 26.0, *). Solo la llama AlarmKitPlugin dentro de checks de
     disponibilidad, así la app corre en iOS 15–25 vía fallback.
 
-    ⚠️ WEAK-LINK: AlarmKit debe enlazarse como "Optional" en Xcode
-    (Target App → General → Frameworks, Libraries → AlarmKit.framework → Optional),
-    porque el deployment target es iOS 15 y el framework solo existe en iOS 26+.
+    ⚠️ WEAK-LINK: AlarmKit debe enlazarse como "Optional" en Xcode.
+    SONIDO: sin `sound:` → tono de alarma por defecto (rompe Silencio/Focus).
 
-    SONIDO (Fase 2): NO pasamos `sound` → AlarmKit usa su tono de alarma por
-    defecto, que es justo el que ROMPE Silencio/Focus. (Los sonidos custom de
-    AlarmKit están rotos en iOS 26.0; cuando Apple lo arregle añadimos el parámetro
-    `sound:` con el tipo correcto del SDK — ver nota en scheduleTest.)
+    Fase 4 — modelo por alarma:
+    - PRIMARIO: recurrencia semanal (suena a su hora, app-independiente).
+    - RÁFAGA: 10 alarmas .fixed a T+60…T+600 de la PRÓXIMA ocurrencia (re-armado
+      pre-programado; funciona con la app cerrada).
+    Ambos con el botón "HACER SQUATS" (App Intent → abre la app a la cámara).
+    - complete(logicalId): cancela la ráfaga restante (corta el re-armado). El
+      primario recurrente se queda.
+    - engage(logicalId): silencia el tono que está sonando al abrir por "HACER SQUATS"
+      (NO toca la ráfaga → el re-armado se corta solo al COMPLETAR).
 */
 import Foundation
 
 #if canImport(AlarmKit)
 import AlarmKit
 import AppIntents
-import SwiftUI   // Color (tintColor)
+import SwiftUI
 #endif
 
 @available(iOS 26.0, *)
@@ -24,9 +28,16 @@ final class AlarmKitService {
     static let shared = AlarmKitService()
     private init() {}
 
-    // Metadata que viaja con la alarma. En Fase 2 va vacía; en Fase 3/4 llevará
-    // logicalId, exercise, reps, rearmCount, completed.
+    // Constantes de re-armado (ajustables).
+    private let REARM_MAX = 10
+    private let REARM_INTERVAL_SEC = 60
+
     struct BootyAlarmMetadata: AlarmMetadata {}
+
+    private let ownedKey   = "alarmkit.ownedIds"          // [uuidString] de todo lo que programamos
+    private let mapKey     = "alarmkit.uuidToLogicalId"   // uuidString → logicalId
+    private let primaryKey = "alarmkit.primaryIds"        // [uuidString] que son PRIMARIO (no ráfaga)
+    private var defaults: UserDefaults { .standard }
 
     // MARK: - Autorización
 
@@ -48,57 +59,65 @@ final class AlarmKitService {
         }
     }
 
-    // MARK: - Alarma de prueba (Fase 2)
+    // MARK: - Alarma de prueba (Fase 2, debug: window.AlarmKitTest.scheduleTest)
 
-    /// One-shot a `seconds` segundos, tono de alarma del sistema (por defecto),
-    /// con botón Detener. Objetivo del hito: validar que suena y ROMPE Silencio/Focus.
     func scheduleTest(seconds: Int, title: String, stopLabel: String) async throws -> String {
         let id = UUID()
         let fireDate = Date().addingTimeInterval(TimeInterval(max(1, seconds)))
-
         let stopButton = AlarmButton(
             text: LocalizedStringResource(stringLiteral: stopLabel),
-            textColor: .white,
-            systemImageName: "xmark.circle.fill"
-        )
-
+            textColor: .white, systemImageName: "xmark.circle.fill")
         let alert = AlarmPresentation.Alert(
             title: LocalizedStringResource(stringLiteral: title),
-            stopButton: stopButton
-        )
-
+            stopButton: stopButton)
         let attributes = AlarmAttributes<BootyAlarmMetadata>(
             presentation: AlarmPresentation(alert: alert),
             metadata: BootyAlarmMetadata(),
-            tintColor: Color.pink
-        )
-
-        // Sin `sound:` → tono de alarma por defecto (rompe Silencio/Focus).
-        // Para sonido custom más adelante (cuando Apple arregle iOS 26.0):
-        //   añadir `sound: <AlarmSoundType>.named("alarm")` al init de abajo, con el
-        //   tipo exacto que exponga el SDK.
-        let config = AlarmManager.AlarmConfiguration(
-            schedule: .fixed(fireDate),
-            attributes: attributes
-        )
-
+            tintColor: Color.pink)
+        let config = AlarmManager.AlarmConfiguration(schedule: .fixed(fireDate), attributes: attributes)
         _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
         return id.uuidString
     }
 
-    // MARK: - Scheduling real (Fase 3)
+    // MARK: - Construcción de la alerta + config (primario y ráfaga comparten esto)
 
-    private let ownedKey = "alarmkit.ownedIds"          // [uuidString] de las alarmas que programamos
-    private let mapKey   = "alarmkit.uuidToLogicalId"   // uuidString → logicalId (para routing en Fase 4)
-    private var defaults: UserDefaults { .standard }
+    private func makeConfig(schedule: Alarm.Schedule, title: String, stopLabel: String,
+                            squatsLabel: String, logicalId: String)
+        -> AlarmManager.AlarmConfiguration<BootyAlarmMetadata> {
 
-    /// Reagenda TODAS las alarmas activas (cancela lo previo y reescribe).
-    /// Fase 3: solo el ring PRIMARIO con recurrencia semanal + botón Detener.
-    /// (El botón "HACER SQUATS" y la ráfaga de re-armado llegan en Fase 4.)
-    /// `alarms`: [{ id, hour, minute, days:[0..6 Lun..Dom], exercise, reps, title, stopLabel }]
+        let stopButton = AlarmButton(
+            text: LocalizedStringResource(stringLiteral: stopLabel),
+            textColor: .white, systemImageName: "xmark.circle.fill")
+        let squatsButton = AlarmButton(
+            text: LocalizedStringResource(stringLiteral: squatsLabel),
+            textColor: .white, systemImageName: "figure.strengthtraining.functional")
+
+        // ⚠️ CONFIRMAR SDK: Alert(title:stopButton:secondaryButton:secondaryButtonBehavior:)
+        let alert = AlarmPresentation.Alert(
+            title: LocalizedStringResource(stringLiteral: title),
+            stopButton: stopButton,
+            secondaryButton: squatsButton,
+            secondaryButtonBehavior: .custom)
+
+        let attributes = AlarmAttributes<BootyAlarmMetadata>(
+            presentation: AlarmPresentation(alert: alert),
+            metadata: BootyAlarmMetadata(),
+            tintColor: Color.pink)
+
+        // ⚠️ CONFIRMAR SDK: init con `schedule:` + `secondaryIntent:` (coexisten).
+        return AlarmManager.AlarmConfiguration(
+            schedule: schedule,
+            attributes: attributes,
+            secondaryIntent: OpenSquatsIntent(alarmID: logicalId))
+    }
+
+    // MARK: - Reagenda (primario recurrente + ráfaga pre-programada)
+
+    /// `alarms`: [{ id, hour, minute, days:[0..6 Lun..Dom], exercise, reps, title, stopLabel, squatsLabel }]
     func reschedule(_ alarms: [[String: Any]]) async throws {
         cancelAll()
         var owned: [String] = []
+        var primaries: [String] = []
         var map: [String: String] = [:]
 
         for a in alarms {
@@ -108,62 +127,89 @@ final class AlarmKitService {
             let days = (a["days"] as? [Int]) ?? [0, 1, 2, 3, 4]
             let title = a["title"] as? String ?? "Booty Alarm"
             let stopLabel = a["stopLabel"] as? String ?? "Detener"
+            let squatsLabel = a["squatsLabel"] as? String ?? "HACER SQUATS"
 
-            let stopButton = AlarmButton(
-                text: LocalizedStringResource(stringLiteral: stopLabel),
-                textColor: .white,
-                systemImageName: "xmark.circle.fill"
-            )
-            let alert = AlarmPresentation.Alert(
-                title: LocalizedStringResource(stringLiteral: title),
-                stopButton: stopButton
-            )
-            let attributes = AlarmAttributes<BootyAlarmMetadata>(
-                presentation: AlarmPresentation(alert: alert),
-                metadata: BootyAlarmMetadata(),
-                tintColor: Color.pink
-            )
-
-            // ⚠️ CONFIRMAR SDK: Alarm.Schedule.Relative.Time / .Recurrence.weekly([Locale.Weekday]).
+            // 1) PRIMARIO: recurrencia semanal.
             let time = Alarm.Schedule.Relative.Time(hour: hour, minute: minute)
             let weekdays = days.map { weekday(fromDow: $0) }
             let recurrence = Alarm.Schedule.Relative.Recurrence.weekly(weekdays)
-            let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
+            let primarySchedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
+            let primaryConfig = makeConfig(schedule: primarySchedule, title: title,
+                                           stopLabel: stopLabel, squatsLabel: squatsLabel, logicalId: logicalId)
+            let primaryId = UUID()
+            _ = try await AlarmManager.shared.schedule(id: primaryId, configuration: primaryConfig)
+            owned.append(primaryId.uuidString); primaries.append(primaryId.uuidString)
+            map[primaryId.uuidString] = logicalId
 
-            let config = AlarmManager.AlarmConfiguration(schedule: schedule, attributes: attributes)
-
-            let id = UUID()
-            _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
-            owned.append(id.uuidString)
-            map[id.uuidString] = logicalId
+            // 2) RÁFAGA: 10 .fixed a T+60…T+600 de la PRÓXIMA ocurrencia.
+            let base = nextOccurrence(hour: hour, minute: minute, days: days)
+            for i in 1...REARM_MAX {
+                let fireDate = base.addingTimeInterval(TimeInterval(i * REARM_INTERVAL_SEC))
+                let cfg = makeConfig(schedule: .fixed(fireDate), title: title,
+                                     stopLabel: stopLabel, squatsLabel: squatsLabel, logicalId: logicalId)
+                let rid = UUID()
+                _ = try await AlarmManager.shared.schedule(id: rid, configuration: cfg)
+                owned.append(rid.uuidString)
+                map[rid.uuidString] = logicalId
+            }
         }
 
         defaults.set(owned, forKey: ownedKey)
+        defaults.set(primaries, forKey: primaryKey)
         defaults.set(map, forKey: mapKey)
+    }
+
+    // MARK: - Runtime (squats)
+
+    /// Silencia el tono que está SONANDO para este logicalId (al abrir por "HACER SQUATS").
+    /// NO toca las alarmas .fixed futuras (la ráfaga) ni la recurrencia → el re-armado
+    /// se corta solo al COMPLETAR.
+    /// ⚠️ CONFIRMAR SDK: obtención de alarmas + estado. Si `alarms` es async, añade `await`;
+    /// si el chequeo de estado difiere, ajusta el filtro. Es el punto más probable de ajuste.
+    func engage(logicalId: String) {
+        let map = defaults.dictionary(forKey: mapKey) as? [String: String] ?? [:]
+        let mine = Set(map.filter { $0.value == logicalId }.map { $0.key })
+        for alarm in AlarmManager.shared.alarms where mine.contains(alarm.id.uuidString) {
+            // Solo el que está alertando (no los .fixed pendientes).
+            if String(describing: alarm.state).lowercased().contains("alert") {
+                try? AlarmManager.shared.stop(id: alarm.id)
+            }
+        }
+    }
+
+    /// Squats completados → cancela la ráfaga restante de este logicalId. El primario recurrente se queda.
+    func complete(logicalId: String) {
+        let map = defaults.dictionary(forKey: mapKey) as? [String: String] ?? [:]
+        let primaries = Set(defaults.stringArray(forKey: primaryKey) ?? [])
+        var owned = defaults.stringArray(forKey: ownedKey) ?? []
+        for (uuidStr, lid) in map where lid == logicalId && !primaries.contains(uuidStr) {
+            if let uuid = UUID(uuidString: uuidStr) { try? AlarmManager.shared.cancel(id: uuid) }
+            owned.removeAll { $0 == uuidStr }
+        }
+        defaults.set(owned, forKey: ownedKey)
     }
 
     // MARK: - Control
 
     func stop(idString: String) {
         guard let uuid = UUID(uuidString: idString) else { return }
-        try? AlarmManager.shared.stop(id: uuid)   // síncrono pero throwing en iOS 26
+        try? AlarmManager.shared.stop(id: uuid)
     }
 
-    /// Cancela todas las alarmas que programamos nosotros (las "owned").
+    /// Cancela TODO lo que programamos (primario + ráfaga de todas las alarmas).
     func cancelAll() {
         let owned = defaults.stringArray(forKey: ownedKey) ?? []
         for s in owned {
-            if let uuid = UUID(uuidString: s) {
-                // ⚠️ CONFIRMAR SDK: cancel(id:) — síncrono throwing (como stop).
-                try? AlarmManager.shared.cancel(id: uuid)
-            }
+            if let uuid = UUID(uuidString: s) { try? AlarmManager.shared.cancel(id: uuid) }
         }
         defaults.set([String](), forKey: ownedKey)
+        defaults.set([String](), forKey: primaryKey)
         defaults.set([String: String](), forKey: mapKey)
     }
 
-    // 0=Lun … 6=Dom  →  Locale.Weekday
-    // ⚠️ CONFIRMAR SDK: tipo exacto que espera Recurrence.weekly (Locale.Weekday).
+    // MARK: - Helpers
+
+    // 0=Lun … 6=Dom → Locale.Weekday
     private func weekday(fromDow dow: Int) -> Locale.Weekday {
         switch dow {
         case 0: return .monday
@@ -174,5 +220,21 @@ final class AlarmKitService {
         case 5: return .saturday
         default: return .sunday
         }
+    }
+
+    // Próxima fecha futura que cae en `days` (0=Lun..6=Dom) a hour:minute.
+    private func nextOccurrence(hour: Int, minute: Int, days: [Int]) -> Date {
+        let cal = Calendar.current
+        let now = Date()
+        for offset in 0...7 {
+            guard let day = cal.date(byAdding: .day, value: offset, to: now) else { continue }
+            var comps = cal.dateComponents([.year, .month, .day], from: day)
+            comps.hour = hour; comps.minute = minute; comps.second = 0
+            guard let candidate = cal.date(from: comps), candidate > now else { continue }
+            // Calendar weekday: 1=Dom..7=Sáb → dow 0=Lun..6=Dom.
+            let dow = (cal.component(.weekday, from: candidate) + 5) % 7
+            if days.contains(dow) { return candidate }
+        }
+        return now.addingTimeInterval(60)
     }
 }

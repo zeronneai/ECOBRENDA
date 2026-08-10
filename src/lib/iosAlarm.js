@@ -55,8 +55,34 @@ function toPayload(alarms) {
         reps,
         title: translate(lang, 'notif.alarm_title', { reps, ex: exLabel }),
         stopLabel: translate(lang, 'alarm.stop'),
+        squatsLabel: translate(lang, 'notif.squats_btn'),
       }
     })
+}
+
+// ── Runtime (Fase 4): botón squats + re-armado ────────────────────────────────
+// Silencia el tono al abrir por "HACER SQUATS" (no corta la ráfaga).
+export async function engageAlarmKit(id) {
+  if (!isIOSPlatform() || id == null) return
+  try { await AlarmKit.engage({ id: String(id) }) } catch { /* noop */ }
+}
+// Squats completados → corta la ráfaga restante.
+export async function completeAlarmKit(id) {
+  if (!isIOSPlatform() || id == null) return
+  try { await AlarmKit.complete({ id: String(id) }) } catch { /* noop */ }
+}
+// Cold start: alarmId pendiente que dejó el App Intent (o null).
+export async function getPendingAlarmKit() {
+  if (!isIOSPlatform()) return null
+  try { return (await AlarmKit.getPending()).alarmId || null } catch { return null }
+}
+// Evento cuando el usuario abre por "HACER SQUATS". Devuelve función para quitar el listener.
+export async function onAlarmFired(cb) {
+  if (!isIOSPlatform()) return () => {}
+  try {
+    const sub = await AlarmKit.addListener('alarmFired', (e) => { if (e?.alarmId != null) cb(e.alarmId) })
+    return () => { try { sub.remove() } catch { /* noop */ } }
+  } catch { return () => {} }
 }
 
 // ── Dispatcher iOS: AlarmKit o fallback (local-notifications) ─────────────────

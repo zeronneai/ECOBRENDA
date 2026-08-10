@@ -5,7 +5,7 @@ import { songUrlById } from '../data/songs'
 import * as dataStore from '../lib/dataStore'
 import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarmTone'
 import { isNativeApp, onAlarmTapped } from '../lib/nativeAlarm'
-import { rescheduleAppleAlarms, requestAlarmKitAuthIfSupported } from '../lib/iosAlarm'
+import { rescheduleAppleAlarms, requestAlarmKitAuthIfSupported, engageAlarmKit, completeAlarmKit, getPendingAlarmKit, onAlarmFired } from '../lib/iosAlarm'
 import { primeNativePermissions } from '../lib/nativePerms'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
@@ -166,6 +166,9 @@ export function AppProvider({ children }) {
     dataStore.completeWakeWorkout()
     setStreak(dataStore.getStreak())
     syncAchievements()
+    // AlarmKit (iOS 26): squats completados → corta la ráfaga de re-armado de esta alarma.
+    const aid = activeAlarmIdRef.current
+    if (aid != null) { completeAlarmKit(aid); activeAlarmIdRef.current = null }
   }, [syncAchievements])
 
   // Reto rápido completado → su contador propio (no toca la racha).
@@ -415,6 +418,7 @@ export function AppProvider({ children }) {
   // sonido automático) requiere la capa NATIVA con Capacitor.
   const schedRef = useRef({})
   schedRef.current = { alarms, ringOpen, scanning, celebrating, onboarding }
+  const activeAlarmIdRef = useRef(null) // AlarmKit: id de la alarma que suena (para complete)
   useEffect(() => {
     const TOLERANCE_MS = 90 * 1000
     const tick = () => {
@@ -448,6 +452,7 @@ export function AppProvider({ children }) {
   const triggerAlarmById = useCallback((id) => {
     const a = (schedRef.current.alarms || []).find((x) => String(x.id) === String(id))
     if (!a) return
+    activeAlarmIdRef.current = a.id // AlarmKit: recordar cuál suena para cortar la ráfaga al completar
     const today = dataStore.todayKey()
     if (a.lastTriggered !== today) updateAlarm(a.id, { lastTriggered: today })
     showRing(a)
@@ -471,6 +476,14 @@ export function AppProvider({ children }) {
     }
     if (!isNativeApp()) return
     let off = () => {}
+    let offFired = () => {}
+
+    // AlarmKit (iOS 26): el botón "HACER SQUATS" abrió la app → silencia el tono y
+    // entra a AlarmRing/cámara. El audio arranca con el gesto "A DARLE" (in-app).
+    const openFromAlarmKit = (id) => { engageAlarmKit(id); triggerAlarmById(id) }
+    onAlarmFired((id) => openFromAlarmKit(id)).then((fn) => { offFired = fn })
+    getPendingAlarmKit().then((id) => { if (id) openFromAlarmKit(id) }) // cold start
+
     onAlarmTapped((id) => {
       // D — iOS: el tap de la notificación ES el gesto. Aprovéchalo SÍNCRONO
       // para resumir el AudioContext y bendecir el <audio> antes de que el
@@ -485,8 +498,18 @@ export function AppProvider({ children }) {
       }
       triggerAlarmById(id)
     }).then((fn) => { off = fn })
-    return () => off()
+    return () => { off(); offFired() }
   }, [triggerAlarmById, playSong])
+
+  // AlarmKit (iOS 26): al volver la app a primer plano, refresca la ráfaga de
+  // re-armado de la PRÓXIMA ocurrencia (cancel + reescribe). Barato e idempotente.
+  useEffect(() => {
+    if (!isNativeApp() || !isIOS()) return
+    let sub
+    CapApp.addListener('resume', () => { rescheduleAppleAlarms(schedRef.current.alarms || []) })
+      .then((s) => { sub = s })
+    return () => { try { sub && sub.remove() } catch { /* noop */ } }
+  }, [])
 
   // Permisos nativos: pedir UNA vez (cámara + notificaciones) tras el onboarding.
   const needsPriming = isNativeApp() && !onboarding && profile.onboarded && !settings.permsPrimed

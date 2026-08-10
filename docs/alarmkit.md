@@ -230,6 +230,35 @@ target App.
    Focus**, aparece grande; en los días correctos. Solo botón **Detener** (aún sin squats).
 6. **Fallback:** en un iPhone con iOS < 26 (o denegando el permiso), la alarma sigue
    funcionando por local-notifications igual que antes (sin romper silencio).
-- [ ] **Fase 4** — alerta + `OpenSquatsIntent` + re-armado.
+- [x] **Fase 4 (código)** — botón "HACER SQUATS" + re-armado pre-programado:
+      - 🆕 `SquatsAppIntent.swift` (**agregar al target App**): `OpenSquatsIntent`
+        (`LiveActivityIntent`, `openAppWhenRun`) + `AlarmBridge` (pending + NotificationCenter).
+      - `AlarmKitService`: alerta con `secondaryButton` "HACER SQUATS" + `secondaryIntent`;
+        `reschedule` ahora programa PRIMARIO (recurrente) + RÁFAGA (10 `.fixed` a
+        T+60…T+600 de la próxima ocurrencia); `engage(logicalId)` (silencia el que suena),
+        `complete(logicalId)` (cancela la ráfaga), `nextOccurrence`. Consts REARM_MAX=10,
+        REARM_INTERVAL_SEC=60. ⚠️ CONFIRMAR SDK en: Alert con secondary, `secondaryIntent:`,
+        y **`engage` (lectura de `AlarmManager.shared.alarms` + estado)** ← el más probable de ajustar.
+      - `AlarmKitPlugin`: métodos `engage`/`complete`/`getPending`; `load()` observa
+        `AlarmBridge.firedNotification` → emite evento `alarmFired`.
+      - JS: `iosAlarm` (`engageAlarmKit`/`completeAlarmKit`/`getPendingAlarmKit`/`onAlarmFired`,
+        `squatsLabel` en el payload); `AppContext` (listener `alarmFired` → engage+trigger,
+        `getPending` cold start, `complete` en `completeWakeWorkout`, refresh de ráfaga en `resume`).
+      - i18n: `notif.squats_btn` (es/en, paridad 477). Build web verde.
+      **Pendiente: compilar + HITO en device.**
+
+#### Fase 4 — pasos para compilar y probar (device iPhone iOS 26)
+1. `git pull origin feature/alarmkit` → `npx cap sync ios`.
+2. Xcode: **agregar `SquatsAppIntent.swift` al target App** (Add Files to "App"… → marcar App).
+   Luego **⌘B**. Corregir `⚠️ CONFIRMAR SDK` si aparecen (sobre todo `engage`); mandar el error.
+3. Correr en iPhone iOS 26 (permiso AlarmKit concedido). Crear/activar una alarma 1–2 min futuro.
+4. **HITO Fase 4 — validar:**
+   - Suena → **Detener** sin squats → **vuelve a sonar en ~60s** (hasta 10×). ✅
+   - Tocar **"HACER SQUATS"** → **abre la app a la cámara**. ✅
+     (Si abre pero la cámara NO arranca → el App Intent corre fuera de proceso → añadimos
+     **App Group** en Xcode; avisar.)
+   - Hacer squats → **se apaga y se corta la ráfaga** (no vuelve a sonar). ✅
+   - Desactivar la alarma (**off duro**) → **se cancela todo**. ✅
+   - Al abrir por squats, ¿el tono de AlarmKit **se silencia**? (si no, ajustamos `engage`).
 - [ ] **Fase 5** — dispatcher JS + fallback.
 - [ ] **Fase 6** — QA device + notas App Review.
