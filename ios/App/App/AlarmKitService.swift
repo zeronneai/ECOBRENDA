@@ -28,9 +28,9 @@ final class AlarmKitService {
     static let shared = AlarmKitService()
     private init() {}
 
-    // Constantes de re-armado (ajustables).
-    private let REARM_MAX = 10
-    private let REARM_INTERVAL_SEC = 60
+    // Constantes de re-armado (ajustables). 15 × 20s ≈ 5 min de insistencia.
+    private let REARM_MAX = 15
+    private let REARM_INTERVAL_SEC = 20
 
     struct BootyAlarmMetadata: AlarmMetadata {}
 

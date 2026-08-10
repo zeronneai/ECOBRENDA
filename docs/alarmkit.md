@@ -115,8 +115,8 @@ Apple obliga a un botón **Detener** (no existe alarma indestructible). Se logra
 
 Constantes (fáciles de tunear):
 ```
-REARM_MAX = 10           // máx re-armados (~10 min de persistencia)
-REARM_INTERVAL_SEC = 60  // intervalo entre re-armados
+REARM_MAX = 15           // máx re-armados
+REARM_INTERVAL_SEC = 20  // intervalo entre re-armados → 15 × 20s ≈ 5 min de insistencia
 ```
 Off duro (desactivar la alarma) o completar squats → cancela la cadena al instante.
 Nota App Review: comportamiento acotado (≈snooze múltiple) + control del usuario; se
@@ -253,7 +253,7 @@ target App.
    Luego **⌘B**. Corregir `⚠️ CONFIRMAR SDK` si aparecen (sobre todo `engage`); mandar el error.
 3. Correr en iPhone iOS 26 (permiso AlarmKit concedido). Crear/activar una alarma 1–2 min futuro.
 4. **HITO Fase 4 — validar:**
-   - Suena → **Detener** sin squats → **vuelve a sonar en ~60s** (hasta 10×). ✅
+   - Suena → **Detener** sin squats → **vuelve a sonar en ~20s** (hasta 15×, ≈5 min). ✅
    - Tocar **"HACER SQUATS"** → **abre la app a la cámara**. ✅
      (Si abre pero la cámara NO arranca → el App Intent corre fuera de proceso → añadimos
      **App Group** en Xcode; avisar.)
