@@ -82,7 +82,7 @@ final class AlarmKitService {
             attributes: attributes
         )
 
-        try await AlarmManager.shared.schedule(id: id, configuration: config)
+        _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
         return id.uuidString
     }
 
@@ -90,7 +90,7 @@ final class AlarmKitService {
 
     func stop(idString: String) {
         guard let uuid = UUID(uuidString: idString) else { return }
-        AlarmManager.shared.stop(id: uuid)   // síncrono en iOS 26
+        try? AlarmManager.shared.stop(id: uuid)   // síncrono pero throwing en iOS 26
     }
 
     func cancelAll() {
