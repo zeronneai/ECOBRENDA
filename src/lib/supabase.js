@@ -1,18 +1,22 @@
 /* Cliente de Supabase (auth + datos en la nube).
 
-   Las credenciales se leen de variables de entorno de Vite — NUNCA se
-   hardcodean ni se suben al repo:
+   Credenciales: se prefieren las variables de entorno de Vite; si faltan (p. ej.
+   el build nativo iOS/Android que NO inyecta env), se cae a valores PÚBLICOS
+   horneados para que login + Storage (avatar) funcionen igual.
      - VITE_SUPABASE_URL      (ej. https://xxxx.supabase.co, SIN /rest/v1)
      - VITE_SUPABASE_ANON_KEY (clave pública "anon"; segura para el frontend)
 
-   Si faltan las variables (p. ej. build sin configurar), exportamos null y
-   `isSupabaseConfigured = false`, para que la app NO truene: el dataStore
-   seguirá funcionando con localStorage hasta que se configure. */
+   ⚠️ SOLO la clave `anon`/public va horneada (es pública: ya viaja en el bundle
+   web y RLS protege los datos). La `service_role` NUNCA se hornea aquí. */
 
 import { createClient } from '@supabase/supabase-js'
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Fallback horneado (público): permite que el build nativo funcione sin env.
+const FALLBACK_SUPABASE_URL = 'https://cmmssmcmftxlqpvrouri.supabase.co'
+const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtbXNzbWNtZnR4bHFwdnJvdXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTcyNTUsImV4cCI6MjA5NTQ3MzI1NX0.KgKWeENbQj9_jglYF5Hdcg5uD7ViMkdNgidek-HVAkE'
+
+const url = import.meta.env.VITE_SUPABASE_URL || FALLBACK_SUPABASE_URL
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY
 
 export const isSupabaseConfigured = Boolean(url && anonKey)
 
