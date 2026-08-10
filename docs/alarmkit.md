@@ -70,12 +70,22 @@ let config = AlarmManager.AlarmConfiguration(schedule: s2, attributes: attrs,
 ```
 
 ### Sonido (resuelve DUDA #2 — sonido custom)
-✅ **Soportado** — archivo del bundle (o `Library/Sounds`):
+La API soporta sonido custom del bundle, PERO en **iOS 26.0 estable el sonido custom
+de AlarmKit está ROTO** (bug de Apple, varios Feedback abiertos): se ignora y suena el
+`.default`. Decisión: **usar `.default`** (el tono de alarma del sistema — justo el que
+rompe Silencio/Focus) y dejar un **flag** para volver a custom cuando Apple lo arregle:
 ```swift
-let sound = AlertConfiguration.AlertSound.named("alarm")   // reutilizamos el sonido ya empaquetado
+// iOS 26.0: sonidos custom rotos → tono del sistema. Poner true cuando Apple lo arregle.
+let USE_CUSTOM_ALARM_SOUND = false
+let sound: AlertConfiguration.AlertSound = USE_CUSTOM_ALARM_SOUND ? .named("alarm") : .default
 ```
-La **canción elegida** sigue sonando in-app (Web Audio) al abrir la cámara; AlarmKit
-aporta el sonido que rompe el Silencio/Focus.
+La **canción elegida** NO va en AlarmKit: suena **in-app (Web Audio)** al abrir la
+cámara. AlarmKit solo aporta el tono del sistema que despierta rompiendo Silencio/Focus.
+
+**Arranque de la canción in-app (garantizado):** el botón "HACER SQUATS" abre la app a
+AlarmRing; el tap de **"A DARLE 💪"** dentro del WebView es el gesto que iOS exige para
+desbloquear Web Audio → ahí arrancan canción + cámara (patrón `unlockPreview` +
+`AVAudioSession .playback` que ya existe). Validar en device (Fase 2/4).
 
 ### Atributos
 ```swift
@@ -110,6 +120,12 @@ Off duro (desactivar la alarma) o completar squats → cancela la cadena al inst
 Nota App Review: comportamiento acotado (≈snooze múltiple) + control del usuario; se
 explica en las notas de la build.
 
+**Matiz Fase 4 — re-armado llaveado a COMPLETAR, no al stop:** al abrir por el botón
+`.custom` hay que **silenciar el tono de AlarmKit** (`stop(id)`) para que no se encime
+con la canción in-app. Ese stop NO debe disparar re-armado. Por eso la cadena se decide
+por "¿se completó el workout?", no por el evento de stop: al abrir se marca **engaged**;
+solo se re-arma si abandonan sin completar (app al fondo + timeout). Completar → cancela.
+
 ---
 
 ## Reparto Nativo (Swift) / JS
@@ -142,9 +158,10 @@ cubriendo también cámara/fotos. Tarea pequeña aparte (requiere Xcode). Texto 
 ---
 
 ## Estado de fases
-- [x] **Fase 0** — API confirmada (arriba). Dudas #1 (recurrencia) y #2 (sonido) y #3
-      (secondaryButtonBehavior) resueltas ✅. Pendiente confirmar en device: Widget
-      Extension para alert-only y nombre de `alarmUpdates`.
+- [x] **Fase 0** — API confirmada (arriba). Dudas resueltas: #1 recurrencia semanal ✅,
+      #2 sonido → **`.default` por bug de custom en iOS 26.0** (flag listo para custom) ✅,
+      #3 secondaryButtonBehavior ✅. Pendiente confirmar en device: Widget Extension para
+      alert-only y nombre exacto de `alarmUpdates`.
 - [x] **Fase 1** — `NSAlarmKitUsageDescription` en Info.plist; deployment target 15.0
       (sin cambio); baseline web verde. Sin código AlarmKit todavía.
 - [ ] **Fase 2** — Plugin Swift (auth + schedule de prueba) + **hito: alarma que rompe Silencio**.
