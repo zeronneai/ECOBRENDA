@@ -166,9 +166,15 @@ export function AppProvider({ children }) {
     dataStore.completeWakeWorkout()
     setStreak(dataStore.getStreak())
     syncAchievements()
-    // AlarmKit (iOS 26): squats completados → corta la ráfaga de re-armado de esta alarma.
+    // AlarmKit (iOS 26): squats completados → corta la ráfaga de re-armado de esta
+    // alarma y rearma la PRÓXIMA ocurrencia. (La ráfaga NO se corta al abrir/tocar
+    // el botón, solo AQUÍ, al completar reps.)
     const aid = activeAlarmIdRef.current
-    if (aid != null) { completeAlarmKit(aid); activeAlarmIdRef.current = null }
+    if (aid != null) {
+      completeAlarmKit(aid)
+      activeAlarmIdRef.current = null
+      if (isIOS()) rescheduleAppleAlarms(schedRef.current.alarms || []) // arma la siguiente ocurrencia
+    }
   }, [syncAchievements])
 
   // Reto rápido completado → su contador propio (no toca la racha).
@@ -419,6 +425,7 @@ export function AppProvider({ children }) {
   const schedRef = useRef({})
   schedRef.current = { alarms, ringOpen, scanning, celebrating, onboarding }
   const activeAlarmIdRef = useRef(null) // AlarmKit: id de la alarma que suena (para complete)
+  const lastSchedSigRef = useRef('')    // firma de scheduling (evita reagendar por lastTriggered)
   useEffect(() => {
     const TOLERANCE_MS = 90 * 1000
     const tick = () => {
@@ -461,6 +468,15 @@ export function AppProvider({ children }) {
   // Reagenda al cambiar las alarmas. Android: plugin nativo (AlarmManager + FGS).
   // iOS: LocalNotifications. Web: nada.
   useEffect(() => {
+    // Solo reagendar si cambió algo de SCHEDULING (no por `lastTriggered`, que
+    // cambia al disparar la alarma). Reagendar en ese momento cancelaría la ráfaga
+    // de re-armado que está corriendo. La ráfaga se corta solo al COMPLETAR squats.
+    const sig = (alarms || []).map((a) =>
+      `${a.id}|${a.hour}|${(a.days || []).join(',')}|${a.exercise}|${a.reps}|${a.active ? 1 : 0}|${a.songId || ''}`
+    ).join(';')
+    if (sig === lastSchedSigRef.current) return
+    lastSchedSigRef.current = sig
+
     if (isAndroid()) { scheduleAndroidAlarms(alarms); return }
     // iOS: AlarmKit (iOS 26 + permiso) o fallback a local-notifications. Web: no-op.
     if (isNativeApp()) rescheduleAppleAlarms(alarms)
@@ -500,16 +516,6 @@ export function AppProvider({ children }) {
     }).then((fn) => { off = fn })
     return () => { off(); offFired() }
   }, [triggerAlarmById, playSong])
-
-  // AlarmKit (iOS 26): al volver la app a primer plano, refresca la ráfaga de
-  // re-armado de la PRÓXIMA ocurrencia (cancel + reescribe). Barato e idempotente.
-  useEffect(() => {
-    if (!isNativeApp() || !isIOS()) return
-    let sub
-    CapApp.addListener('resume', () => { rescheduleAppleAlarms(schedRef.current.alarms || []) })
-      .then((s) => { sub = s })
-    return () => { try { sub && sub.remove() } catch { /* noop */ } }
-  }, [])
 
   // Permisos nativos: pedir UNA vez (cámara + notificaciones) tras el onboarding.
   const needsPriming = isNativeApp() && !onboarding && profile.onboarded && !settings.permsPrimed
