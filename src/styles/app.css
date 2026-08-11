@@ -597,8 +597,6 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .ring-msg{font-size:15px;color:var(--txt-dim);max-width:280px;line-height:1.5;margin-bottom:30px}
 .ring-go{background:#fff;color:#0a0a0a;border:none;padding:18px 44px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:17px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;box-shadow:0 10px 30px rgba(255,255,255,.2);animation:goBob 1.6s ease-in-out infinite}
 @keyframes goBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.ring-off{margin-top:16px;background:transparent;border:1px solid rgba(255,255,255,.25);color:var(--txt-dim);padding:10px 22px;border-radius:50px;font-family:'Archivo';font-weight:700;font-size:13px;letter-spacing:.03em;cursor:pointer}
-.ring-off:active{opacity:.7}
 .ring-note{font-size:11px;color:var(--txt-faint);margin-top:22px;max-width:260px;line-height:1.5}
 
 .toast{position:absolute;top:calc(var(--safe-top) + 14px);left:50%;transform:translateX(-50%) translateY(-90px);background:var(--surface-2);border:1px solid var(--line-strong);padding:13px 20px;border-radius:14px;font-size:13px;font-weight:600;z-index:300;transition:.45s cubic-bezier(.3,1.4,.5,1);display:flex;gap:9px;align-items:center;white-space:nowrap}
