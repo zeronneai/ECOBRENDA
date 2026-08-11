@@ -355,15 +355,6 @@ export function AppProvider({ children }) {
     try { el.load() } catch { /* noop */ } // C: fuerza reset (clave en iOS)
   }, [disarmAudioFallback])
 
-  // Apagado de EMERGENCIA: siempre disponible para que la alarma nunca quede
-  // sonando sin poder apagarla (clave en web/desktop sin cámara). Detiene audio,
-  // limpia el marcador de "sonando" y cierra el ring/cámara.
-  const dismissAlarm = useCallback(() => {
-    stopSong()
-    setScanning(false)
-    setRingOpen(false)
-  }, [stopSong])
-
   // Desbloqueo de audio: en el PRIMER gesto del usuario (cualquier toque) hace
   // un play/pause SILENCIOSO para "bendecir" la política de autoplay.
   //
@@ -809,7 +800,7 @@ export function AppProvider({ children }) {
     plan,
     sheet, openSheet, closeSheet,
     editingAlarm, openAlarmEditor,
-    ringOpen, ringAlarm, showRing, hideRing, dismissAlarm,
+    ringOpen, ringAlarm, showRing, hideRing,
     scanning, startScan, stopScan, startWorkout,
     celebrating, showCelebration, hideCelebration,
     toastMsg, showToast,
