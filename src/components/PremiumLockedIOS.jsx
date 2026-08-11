@@ -10,6 +10,7 @@ export default function PremiumLockedIOS() {
       <div className="premium-locked-ic">🔒</div>
       <h3 className="premium-locked-title">{t('premium.locked_title')}</h3>
       <p className="premium-locked-text">{t('premium.locked_text')}</p>
+      <p className="premium-locked-soon">{t('premium.coming_soon')}</p>
     </div>
   )
 }

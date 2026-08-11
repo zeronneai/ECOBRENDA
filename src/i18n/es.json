@@ -506,11 +506,11 @@
     "lead": "Desbloquea todo: rutinas, recetas y progreso. Cancela cuando quieras.",
     "monthly": "MENSUAL",
     "annual": "ANUAL",
-    "annual_badge": "MEJOR · AHORRA 72%",
+    "annual_badge": "MEJOR · AHORRA 17%",
     "monthly_unit": "/mes",
     "annual_unit": "/año",
     "monthly_sub": "Cancela cuando quieras",
-    "annual_sub": "Equivale a $83/mes",
+    "annual_sub": "Equivale a $49/mes",
     "go": "EMPEZAR",
     "opening": "ABRIENDO PAGO…",
     "feat_1": "Rutina semanal hecha para tu objetivo",
@@ -521,7 +521,8 @@
   },
   "premium": {
     "locked_title": "CONTENIDO EXCLUSIVO",
-    "locked_text": "Esta sección requiere una cuenta con acceso completo. Si ya tienes acceso, inicia sesión para continuar."
+    "locked_text": "Esta sección requiere una cuenta con acceso completo. Si ya tienes acceso, inicia sesión para continuar.",
+    "coming_soon": "Próximamente en App Store"
   },
   "entrena": {
     "header": "ENTRENA",
