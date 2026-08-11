@@ -510,11 +510,11 @@
     "lead": "Unlock everything: workouts, recipes and progress. Cancel anytime.",
     "monthly": "MONTHLY",
     "annual": "ANNUAL",
-    "annual_badge": "BEST · SAVE 72%",
+    "annual_badge": "BEST · SAVE 17%",
     "monthly_unit": "/mo",
     "annual_unit": "/yr",
     "monthly_sub": "Cancel anytime",
-    "annual_sub": "Just $83/mo",
+    "annual_sub": "Just $49/mo",
     "go": "START",
     "opening": "OPENING CHECKOUT…",
     "feat_1": "Weekly workout built for your goal",
@@ -525,7 +525,8 @@
   },
   "premium": {
     "locked_title": "EXCLUSIVE CONTENT",
-    "locked_text": "This section requires an account with full access. If you already have access, sign in to continue."
+    "locked_text": "This section requires an account with full access. If you already have access, sign in to continue.",
+    "coming_soon": "Coming soon on the App Store"
   },
   "entrena": {
     "header": "TRAIN",

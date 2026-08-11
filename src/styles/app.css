@@ -127,6 +127,7 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .premium-locked-ic{font-size:48px;margin-bottom:14px;line-height:1}
 .premium-locked-title{font-family:'Bebas Neue';font-size:30px;line-height:.95;letter-spacing:.06em;color:#fff;margin-bottom:12px}
 .premium-locked-text{font-family:'Archivo',sans-serif;font-size:14.5px;line-height:1.55;color:var(--txt-dim);max-width:320px;margin:0 auto}
+.premium-locked-soon{font-family:'Bebas Neue';font-size:16px;letter-spacing:.08em;color:#ff1a6b;margin:18px auto 0;max-width:320px}
 
 /* iOS, no premium: card de suscripción sin botón -> el texto ocupa todo el ancho limpio */
 .pf-sub.info-only{justify-content:flex-start}
