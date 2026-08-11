@@ -197,7 +197,7 @@ async function pushStreak() {
 // set local. Para no reinsertar en cada cambio, salto si la firma no cambió.
 // Nota: workout_logs reaprovecha columnas existentes (workout_id=source,
 // title=exercise, calories=reps) para no requerir cambios de esquema.
-const lastSig = { workout_logs: null, progress_logs: null }
+const lastSig = { workout_logs: null, progress_logs: null, alarms: null }
 
 function workoutRows() {
   return dataStore.getWorkoutLog().map((w) => ({
@@ -260,6 +260,55 @@ async function pullProgressLogs() {
   }
 }
 
+// ── Mapeo ALARMAS ───────────────────────────────────────────────────────────
+// La lista de alarmas del usuario sigue al login (mismo usuario = mismas alarmas
+// en cualquier dispositivo). Se preserva el `id` local (UUID) como PK para
+// identidad estable entre dispositivos. `last_triggered` NO se sincroniza: es
+// per-dispositivo (así la alarma suena en el equipo activo, no se suprime porque
+// sonó en otro). Local-first + last-write-wins, igual que workout/progress logs.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+function alarmRows() {
+  return (dataStore.getAlarms() || []).map((a) => ({
+    // id UUID válido → se preserva; si es un id legacy no-UUID, se omite y la BD
+    // genera uno (se "actualiza" en el próximo pull). Evita romper el insert.
+    ...(UUID_RE.test(String(a.id)) ? { id: a.id } : {}),
+    user_id: currentUser.id,
+    hour: a.hour ?? null,
+    exercise: a.exercise ?? null,
+    reps: typeof a.reps === 'number' ? a.reps : (a.reps != null ? Number(a.reps) : null),
+    days: Array.isArray(a.days) ? a.days : [],
+    active: a.active !== false,
+    song_id: a.songId ?? null,
+    // last_triggered: NO se sincroniza (per-dispositivo)
+  }))
+}
+function rowToAlarm(r, localById) {
+  return {
+    id: r.id,
+    hour: r.hour,
+    exercise: r.exercise === 'lunges' ? 'lunges' : 'squats',
+    reps: r.reps ?? 10,
+    days: Array.isArray(r.days) ? r.days : [],
+    active: r.active !== false,
+    songId: r.song_id ?? undefined,
+    // last_triggered per-dispositivo: conserva el local si esa alarma ya existía aquí.
+    lastTriggered: localById.get(r.id)?.lastTriggered,
+  }
+}
+async function pushAlarms() { await replaceCollection('alarms', alarmRows()) }
+async function pullAlarms() {
+  const { data, error } = await supabase.from('alarms').select('*').eq('user_id', currentUser.id)
+  if (error || !Array.isArray(data)) return
+  if (data.length === 0) {
+    // La nube aún NO tiene alarmas (primer sync): NO borres las locales — súbelas.
+    if ((dataStore.getAlarms() || []).length > 0) { try { await pushAlarms() } catch { /* noop */ } }
+    return
+  }
+  const localById = new Map((dataStore.getAlarms() || []).map((a) => [a.id, a]))
+  dataStore.setAlarms(data.map((r) => rowToAlarm(r, localById)))
+  lastSig.alarms = JSON.stringify(alarmRows()) // evita re-push inmediato
+}
+
 // (Antes existía pushSubscriptionNow() para el demo unlock. Con Stripe en su
 // lugar y RLS endurecido, el cliente NO escribe subscriptions; el webhook con
 // service_role es el único que actualiza el premium.)
@@ -275,6 +324,7 @@ async function pullAll() {
     await pullStreak()
     await pullWorkoutLogs()
     await pullProgressLogs()
+    await pullAlarms()
   } catch (e) {
     console.warn('[cloudSync] pull falló', e)
   } finally {
@@ -292,6 +342,7 @@ async function pushChanges() {
   await pushStreak()
   await pushWorkoutLogs()
   await pushProgressLogs()
+  await pushAlarms()
 }
 
 // Push de "siembra" al registrarse: sube todo lo que el cliente PUEDE escribir.
@@ -304,6 +355,7 @@ async function pushSeed() {
   await pushStreak()
   await pushWorkoutLogs()
   await pushProgressLogs()
+  await pushAlarms()
 }
 
 // Auto-seed (defensa en profundidad): si al usuario le falta la fila en alguna
