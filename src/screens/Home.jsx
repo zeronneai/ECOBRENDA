@@ -61,7 +61,9 @@ export default function Home() {
             <div className="hi" id="greeting">{greeting}</div>
             <div className="name destello-title" id="userName">{firstName}</div>
           </div>
-          <div className="avatar" id="avatarLetter">{avatarLetter}</div>
+          <div className="avatar" id="avatarLetter">
+            {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : avatarLetter}
+          </div>
         </div>
 
         {/* Racha */}
