@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../store'
-import { ALARM_SONGS, DEFAULT_SONG_ID } from '../data/songs'
+import { ALARM_SONGS, normalizeSongId } from '../data/songs'
 import { unlockPreview, playPreview, stopPreview as stopPreviewAudio } from '../lib/previewAudio'
 import Sheet from './Sheet'
 import WheelPicker from './WheelPicker'
@@ -28,7 +28,8 @@ export default function AlarmSheet() {
   const [exercise, setExercise] = useState(editingAlarm?.exercise === 'lunges' ? 'lunges' : 'squats')
   const [reps, setReps] = useState(editingAlarm?.reps ?? 10)
   const [days, setDays] = useState(editingAlarm?.days ? [...editingAlarm.days] : [0, 1, 2, 3, 4])
-  const [songId, setSongId] = useState(editingAlarm?.songId || DEFAULT_SONG_ID)
+  // Normaliza: si la alarma traía una canción vieja (ya borrada), cae a la default.
+  const [songId, setSongId] = useState(normalizeSongId(editingAlarm?.songId))
 
   // Desbloqueo progresivo (solo al CREAR): hora→ejercicio→días→canción. Al EDITAR
   // se muestra todo (ya está configurada).
