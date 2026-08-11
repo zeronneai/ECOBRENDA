@@ -23,11 +23,11 @@
    volumen de medios del dispositivo, que la web no puede forzar. */
 
 // Canción de la alarma por defecto (usada para preload en AppShell).
-// Debe coincidir con DEFAULT_SONG_ID de src/data/songs.js. Todas son libres
-// de derechos, empaquetadas en la cuenta de Cloudinary del proyecto.
+// Debe coincidir con DEFAULT_SONG_ID de src/data/songs.js (workout1). Libres de
+// derechos, empaquetadas en la cuenta de Cloudinary del proyecto.
 export const ALARM_AUDIO_SRC =
-  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1780939526/Would_It_Matter_-_Rose_Campbell_uvmool.mp3'
+  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1786411094/WORKOUT_1_kxnhvc.mp3'
 
 // Canción FIJA de los retos rápidos (distinta de la alarma).
 export const CHALLENGE_AUDIO_SRC =
-  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1780939523/Fearless_-_The_Soundlings_feat._Ruby_Jay_wwfgha.mp3'
+  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1786411095/WORKOUT_2_umnaig.mp3'
