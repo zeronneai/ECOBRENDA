@@ -13,7 +13,17 @@ export async function signUp(email, password) {
   if (!supabase) return { error: tr('errors.cloud_missing') }
   const { data, error } = await supabase.auth.signUp({ email, password })
   if (error) return { error: humanError(error) }
-  return { session: data.session, user: data.user }
+  // Correo YA registrado: con la confirmación desactivada Supabase NO devuelve
+  // error — ofusca con un user de `identities` vacío y sin sesión. Lo tratamos
+  // como "correo en uso" (no como "revisa tu correo").
+  const identities = data?.user?.identities
+  if (!data.session && Array.isArray(identities) && identities.length === 0) {
+    return { error: tr('autherr.email_taken') }
+  }
+  // needsConfirm = true SOLO si Supabase tiene activada la confirmación por correo
+  // (devuelve user con identities pero sin sesión). Con la confirmación DESACTIVADA
+  // (nuestro caso), la sesión llega de una y el usuario entra directo.
+  return { session: data.session, user: data.user, needsConfirm: !data.session }
 }
 
 export async function signIn(email, password) {

@@ -32,10 +32,10 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
     const r = await signUp(email.trim(), password)
     setBusy(false)
     if (r.error) { setError(r.error); return }
-    // Si Supabase tiene "Confirm email" activo, signUp devuelve sesión null: NO
-    // hay sesión aún. En vez de reabrir el gate sin feedback, mostramos "revisa
-    // tu correo" para que el usuario sepa qué hacer.
-    if (!r.session) { setSent(true); return }
+    // "Revisa tu correo" SOLO si Supabase pide confirmación (needsConfirm). Con la
+    // confirmación DESACTIVADA (nuestro caso), hay sesión → el usuario entra DIRECTO
+    // a la app, sin fricción.
+    if (r.needsConfirm) { setSent(true); return }
     onAuthed?.(r.session, 'signup')
   }
 
