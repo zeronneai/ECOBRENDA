@@ -13,7 +13,6 @@ const PLANS = [
     id: 'monthly',
     nameKey: 'paywall.monthly',
     badgeKey: null,
-    old: '$99',
     price: '$59',
     unitKey: 'paywall.monthly_unit',
     subKey: 'paywall.monthly_sub',
@@ -22,7 +21,6 @@ const PLANS = [
     id: 'annual',
     nameKey: 'paywall.annual',
     badgeKey: 'paywall.annual_badge',
-    old: '$999',
     price: '$590',
     unitKey: 'paywall.annual_unit',
     subKey: 'paywall.annual_sub',
@@ -64,7 +62,6 @@ export default function Paywall() {
           <div key={p.id} className={'pwcard' + (p.id === 'annual' ? ' best' : '')}>
             {p.badgeKey && <div className="pwbadge">{t(p.badgeKey)}</div>}
             <div className="pwname">{t(p.nameKey)}</div>
-            <div className="pwold">{p.old}</div>
             <div className="pwprice">{p.price}<small>{t(p.unitKey)}</small></div>
             <div className="pwsub">{t(p.subKey)}</div>
             <button className="cta full pwgo" disabled={busy === p.id} onClick={() => go(p.id)}>

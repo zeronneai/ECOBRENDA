@@ -32,6 +32,10 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
     const r = await signUp(email.trim(), password)
     setBusy(false)
     if (r.error) { setError(r.error); return }
+    // Si Supabase tiene "Confirm email" activo, signUp devuelve sesión null: NO
+    // hay sesión aún. En vez de reabrir el gate sin feedback, mostramos "revisa
+    // tu correo" para que el usuario sepa qué hacer.
+    if (!r.session) { setSent(true); return }
     onAuthed?.(r.session, 'signup')
   }
 
@@ -64,7 +68,18 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
       )}
       <div className="auth-brand">🍑 BOOTY ALARM</div>
 
-      {view === 'signup' && (
+      {view === 'signup' && sent && (
+        <div className="auth-card">
+          <div className="auth-sent">
+            <div className="ic">📧</div>
+            <h1 className="auth-title">{t('auth.signup_sent_title')}</h1>
+            <p className="auth-sub">{t('auth.signup_sent_sub_a')} <b style={{ color: '#fff' }}>{email.trim()}</b> {t('auth.signup_sent_sub_b')}</p>
+            <button className="cta full auth-cta" onClick={() => go('login')}>{t('auth.back_to_login')}</button>
+          </div>
+        </div>
+      )}
+
+      {view === 'signup' && !sent && (
         <div className="auth-card">
           <div className="auth-kick">{t('auth.signup_kick')}</div>
           <h1 className="auth-title">{t('auth.signup_title')}</h1>

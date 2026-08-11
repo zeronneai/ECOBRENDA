@@ -7,7 +7,6 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { AppProvider } from './context/AppContext.jsx'
 import './styles/tokens.css'
 import './styles/app.css'
-import './lib/alarmKitTest' // TEMP Fase 2: expone window.AlarmKitTest para probar en device (quitar antes de prod)
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -177,7 +177,10 @@
     "err_email": "Escribe tu email.",
     "err_pw_short": "La contraseña necesita mínimo 6 caracteres.",
     "err_pw": "Escribe tu contraseña.",
-    "recap_hi": "Hola,"
+    "recap_hi": "Hola,",
+    "signup_sent_title": "REVISA TU CORREO",
+    "signup_sent_sub_a": "Te enviamos un link a",
+    "signup_sent_sub_b": "para confirmar tu cuenta. Ábrelo y luego inicia sesión."
   },
   "celebration": {
     "kick": "Reto completado",

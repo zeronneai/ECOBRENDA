@@ -4,12 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#000000" />
+    <meta name="description" content="La alarma que solo se apaga haciendo squats. Rutinas, recetas y progreso con Brenda Fitness." />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- iOS: standalone (pantalla completa sin barra del navegador al agregar a inicio) -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Booty Alarm" />
+
     <title>Booty Alarm</title>
+
+    <!-- Loader inline: se ve al instante (fondo oscuro + logo) mientras baja el
+         bundle. React lo reemplaza al montar. Evita el flash blanco. -->
+    <style>
+      #boot{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#070708}
+      #boot .boot-logo{font-size:56px;line-height:1;animation:bootPulse 1.4s ease-in-out infinite}
+      #boot .boot-spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#ff1a6b;animation:bootSpin .8s linear infinite}
+      @keyframes bootSpin{to{transform:rotate(360deg)}}
+      @keyframes bootPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.12);opacity:1}}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot">
+        <div class="boot-logo">🍑</div>
+        <div class="boot-spin"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

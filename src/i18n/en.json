@@ -177,7 +177,10 @@
     "err_email": "Enter your email.",
     "err_pw_short": "Password needs at least 6 characters.",
     "err_pw": "Enter your password.",
-    "recap_hi": "Hi,"
+    "recap_hi": "Hi,",
+    "signup_sent_title": "CHECK YOUR EMAIL",
+    "signup_sent_sub_a": "We sent a link to",
+    "signup_sent_sub_b": "to confirm your account. Open it, then sign in."
   },
   "celebration": {
     "kick": "Challenge complete",

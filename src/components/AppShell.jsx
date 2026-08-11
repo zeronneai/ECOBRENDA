@@ -1,11 +1,15 @@
+import { Suspense, lazy } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useApp } from '../store'
 import TabBar from './TabBar'
 import Toast from './Toast'
 import SheetHost from './SheetHost'
 import AlarmRing from '../screens/AlarmRing'
-import CameraScan from '../screens/CameraScan'
 import Celebration from '../screens/Celebration'
+
+// MediaPipe (pose) pesa varios MB → se carga SOLO al abrir la cámara (scanning),
+// nunca en el primer paint. Se monta detrás de Suspense.
+const CameraScan = lazy(() => import('../screens/CameraScan'))
 import AchievementModal from './AchievementModal'
 import Onboarding from '../screens/Onboarding'
 import PermissionsPriming from '../screens/PermissionsPriming'
@@ -36,7 +40,11 @@ export default function AppShell() {
       {/* Overlays (z-index los apila: sheets 100 < onboarding 150 < ring 200 < toast 300) */}
       <SheetHost />
       {ringOpen && <AlarmRing />}
-      {scanning && <CameraScan />}
+      {scanning && (
+        <Suspense fallback={<div id="scan"><div className="scan-shade" /></div>}>
+          <CameraScan />
+        </Suspense>
+      )}
       {celebrating && <Celebration />}
       {/* Logro: aparece tras cerrar la felicitación de reto (no choca) */}
       {achievementQueue.length > 0 && !celebrating && <AchievementModal />}
