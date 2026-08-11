@@ -440,6 +440,36 @@ export function AppProvider({ children }) {
     return () => clearInterval(iv)
   }, [updateAlarm, showRing])
 
+  // DEBUG (web): en la consola del navegador ejecuta `window.__alarmDebug()` para
+  // ver EXACTAMENTE por qué una alarma dispara o no ahora mismo (guards, día,
+  // ventana de 90s, lastTriggered). Inofensivo; ayuda a diagnosticar en el link.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.__alarmDebug = () => {
+      const now = new Date()
+      const dow = (now.getDay() + 6) % 7 // Lun=0 … Dom=6
+      const today = dataStore.todayKey()
+      const st = schedRef.current
+      const guards = { ringOpen: st.ringOpen, scanning: st.scanning, celebrating: st.celebrating, onboarding: st.onboarding }
+      const alarms = (st.alarms || []).map((a) => {
+        const [hh, mm] = String(a.hour).split(':').map(Number)
+        const target = new Date(now); target.setHours(hh, mm, 0, 0)
+        const secSinceTarget = Math.round((now.getTime() - target.getTime()) / 1000)
+        return {
+          id: a.id, hour: a.hour, active: !!a.active, days: a.days,
+          dayMatches: (a.days || []).includes(dow),
+          firedToday: a.lastTriggered === today,
+          secSinceTarget,
+          inWindow90s: secSinceTarget >= 0 && secSinceTarget <= 90,
+          WOULD_FIRE: !!a.active && a.lastTriggered !== today && (a.days || []).includes(dow) && secSinceTarget >= 0 && secSinceTarget <= 90,
+        }
+      })
+      const info = { now: now.toString(), dow, today, guardsBlocking: Object.values(guards).some(Boolean), guards, alarms }
+      console.log('[alarmDebug]', info)
+      return info
+    }
+  }, [])
+
   // ── ALARMA NATIVA (Capacitor) ────────────────────────────────────────────
   // Punto de entrada ÚNICO para disparar una alarma por id (lo usa el tap de la
   // notificación nativa; el scheduler in-app usa showRing directo). Marca
