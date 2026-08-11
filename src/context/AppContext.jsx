@@ -248,6 +248,9 @@ export function AppProvider({ children }) {
   const showRing = useCallback((alarm = null) => {
     setRingAlarm(alarm)
     setRingOpen(true)
+    // Persistir "sonando" para restaurar el popup si se recarga la web con la
+    // alarma a medias (evita quedar con la canción sonando sin poder apagarla).
+    if (alarm?.id) { try { dataStore.setRinging(alarm.id) } catch { /* noop */ } }
   }, [])
   const hideRing = useCallback(() => setRingOpen(false), [])
   const startScan = useCallback(() => setScanning(true), [])
@@ -329,6 +332,7 @@ export function AppProvider({ children }) {
   // a el.load() — el pause() puede no surtir efecto si el media element está en
   // un estado raro tras un cambio de src/promesa async; load() lo resetea duro.
   const stopSong = useCallback(() => {
+    try { dataStore.setRinging(null) } catch { /* noop */ } // apagada → ya no está "sonando"
     disarmAudioFallback()
     stopAlarmTone()
     stopAndroidAlarm()
@@ -338,6 +342,15 @@ export function AppProvider({ children }) {
     try { el.currentTime = 0 } catch { /* noop */ }
     try { el.load() } catch { /* noop */ } // C: fuerza reset (clave en iOS)
   }, [disarmAudioFallback])
+
+  // Apagado de EMERGENCIA: siempre disponible para que la alarma nunca quede
+  // sonando sin poder apagarla (clave en web/desktop sin cámara). Detiene audio,
+  // limpia el marcador de "sonando" y cierra el ring/cámara.
+  const dismissAlarm = useCallback(() => {
+    stopSong()
+    setScanning(false)
+    setRingOpen(false)
+  }, [stopSong])
 
   // Desbloqueo de audio: en el PRIMER gesto del usuario (cualquier toque) hace
   // un play/pause SILENCIOSO para "bendecir" la política de autoplay.
@@ -468,6 +481,22 @@ export function AppProvider({ children }) {
       console.log('[alarmDebug]', info)
       return info
     }
+  }, [])
+
+  // Al MONTAR (recarga/reapertura web): si el navegador se cerró con una alarma
+  // SONANDO (sin apagarla), restaura el popup completo (AlarmRing → cámara/squats)
+  // para que SIEMPRE se pueda apagar. Si no hay ninguna sonando, corta cualquier
+  // audio residual (evita el estado "canción sí, popup no").
+  useEffect(() => {
+    const ringingId = dataStore.getRinging()
+    if (ringingId) {
+      const a = (dataStore.getAlarms() || []).find((x) => String(x.id) === String(ringingId))
+      if (a) showRing(a)
+      else dataStore.setRinging(null)
+    } else {
+      try { audioRef.current?.pause() } catch { /* noop */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── ALARMA NATIVA (Capacitor) ────────────────────────────────────────────
@@ -716,7 +745,7 @@ export function AppProvider({ children }) {
     plan,
     sheet, openSheet, closeSheet,
     editingAlarm, openAlarmEditor,
-    ringOpen, ringAlarm, showRing, hideRing,
+    ringOpen, ringAlarm, showRing, hideRing, dismissAlarm,
     scanning, startScan, stopScan, startWorkout,
     celebrating, showCelebration, hideCelebration,
     toastMsg, showToast,
