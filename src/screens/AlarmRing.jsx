@@ -6,7 +6,7 @@ import { isAndroid } from '../lib/androidAlarm'
 import { getBrendaMessage } from '../data/brendaMessages'
 
 export default function AlarmRing() {
-  const { profile, ringAlarm, playSong, startWorkout, t, language } = useApp()
+  const { profile, ringAlarm, playSong, startWorkout, dismissAlarm, t, language } = useApp()
 
   const exercise = ringAlarm?.exercise === 'lunges' ? 'lunges' : 'squats'
   const reps = ringAlarm?.reps ?? 10
@@ -39,6 +39,8 @@ export default function AlarmRing() {
         {t('alarmring.unstoppable_a')} <b style={{ color: '#fff' }}>{reps} {exercise}</b>{t('alarmring.unstoppable_b')}
       </div>
       <button className="ring-go" onClick={startCamera}>{t('alarmring.go')}</button>
+      {/* Apagado de emergencia: siempre disponible para no quedar atascado sonando. */}
+      <button type="button" className="ring-off" onClick={dismissAlarm}>{t('alarmring.turn_off')}</button>
       <div className="ring-note">
         {t('alarmring.note')}
       </div>

@@ -363,6 +363,15 @@ export function setAlarms(list) {
   save()
   return s.alarms
 }
+
+// Marcador "alarma SONANDO ahora" (id de la alarma). Persiste para poder
+// restaurar el popup si se recarga/reabre la web con la alarma a medias. Se
+// limpia al apagarla (completar squats o botón de emergencia).
+const RINGING_KEY = NS + 'ringing'
+export function getRinging() { try { return localStorage.getItem(RINGING_KEY) || null } catch { return null } }
+export function setRinging(id) {
+  try { if (id) localStorage.setItem(RINGING_KEY, String(id)); else localStorage.removeItem(RINGING_KEY) } catch { /* noop */ }
+}
 export function addAlarm(alarm = {}) {
   const s = load()
   const row = {
