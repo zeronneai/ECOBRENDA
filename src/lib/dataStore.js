@@ -356,6 +356,13 @@ export function getAlarms() {
   save()
   return s.alarms
 }
+// Reemplaza la lista completa de alarmas (lo usa cloudSync al bajar de la nube).
+export function setAlarms(list) {
+  const s = load()
+  s.alarms = Array.isArray(list) ? list : []
+  save()
+  return s.alarms
+}
 export function addAlarm(alarm = {}) {
   const s = load()
   const row = {
