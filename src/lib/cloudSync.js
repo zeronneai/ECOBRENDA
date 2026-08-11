@@ -221,12 +221,18 @@ function progressRows() {
 async function replaceCollection(table, rows) {
   const sig = JSON.stringify(rows)
   if (sig === lastSig[table]) return // sin cambios -> no reinsertar
+  // GUARDA ANTI-PÉRDIDA: nunca borres TODO en la nube por un push VACÍO. Un local
+  // vacío casi siempre es transitorio (transición de sesión, pull parcial, glitch),
+  // no una eliminación real de todos los datos. Preferimos conservar la nube. El
+  // borrado de un ítem individual SÍ propaga: rows llega con los N restantes (>0).
+  if (rows.length === 0) {
+    console.warn(`[cloudSync] push vacío a ${table} omitido (protección anti-borrado)`)
+    return
+  }
   const del = await supabase.from(table).delete().eq('user_id', currentUser.id)
   if (del.error) throw del.error
-  if (rows.length) {
-    const { error } = await supabase.from(table).insert(rows)
-    if (error) throw error
-  }
+  const { error } = await supabase.from(table).insert(rows)
+  if (error) throw error
   lastSig[table] = sig
 }
 async function pushWorkoutLogs() { await replaceCollection('workout_logs', workoutRows()) }
@@ -317,9 +323,13 @@ async function pullAll() {
   if (!isCloudOn()) return
   applyingRemote = true
   try {
+    // El PREMIUM primero: corrige el gate cuanto antes e hidrata de inmediato,
+    // para que quien ya pagó (p. ej. en otro dispositivo) NO vea "bloqueado" ni
+    // un instante mientras baja el resto de los datos.
+    await pullSubscription()
+    notifyHydrated()
     await pullProfile()
     await pullSettings()
-    await pullSubscription()
     await pullTotals()
     await pullStreak()
     await pullWorkoutLogs()
