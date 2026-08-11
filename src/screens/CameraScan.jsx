@@ -9,7 +9,7 @@ import { tauntTriggerRep, randomTaunt, TAUNT_DURATION_MS } from '../data/taunts'
 const R = 92
 const CIRC = 2 * Math.PI * R
 
-export default function CameraScan() {
+function Scanner({ autoStart, onReload }) {
   const { workout, stopSong, stopScan, showCelebration, recordRep, completeWakeWorkout, incrementChallenge, logWorkout, t } = useApp()
 
   // Traduce los CÓDIGOS de coaching que emite RepCounter (texto en i18n).
@@ -20,8 +20,9 @@ export default function CameraScan() {
   const exKind = exercise === 'lunges' ? 'lunge' : 'squat'
   const exLabel = exercise === 'lunges' ? 'LUNGES' : 'SQUATS'
 
-  // 'priming' | 'active' | 'denied'
-  const [stage, setStage] = useState('priming')
+  // 'priming' | 'active' | 'denied'. autoStart=true cuando venimos de una
+  // RECARGA (remontaje): saltamos el priming y reintentamos la cámara directo.
+  const [stage, setStage] = useState(autoStart ? 'active' : 'priming')
   const [ready, setReady] = useState(false) // cámara en vivo
   const [reps, setReps] = useState(0)
   const [hud, setHud] = useState({ phase: 'NOT_READY', depth: 0, msg: t('scan.cue_frame'), warn: true })
@@ -189,7 +190,10 @@ export default function CameraScan() {
           <p className="scan-lead">
             {t('scan.denied_lead')}
           </p>
-          <button className="scan-go" onClick={activate}>{t('scan.retry')}</button>
+          {/* NO apaga la alarma: RECARGA el módulo de cámara (remontaje completo,
+              modelo + getUserMedia desde cero) para reintentar. La alarma solo se
+              apaga completando los squats. */}
+          <button className="scan-go" onClick={onReload}>{t('scan.reload')}</button>
         </div>
       )}
 
@@ -246,5 +250,21 @@ export default function CameraScan() {
         </>
       )}
     </div>
+  )
+}
+
+/* Wrapper: si la cámara falla (permiso denegado, sin cámara, MediaPipe no carga),
+   el botón "RECARGAR CÁMARA" incrementa `reloadKey` → React DESMONTA y vuelve a
+   MONTAR <Scanner> desde cero (nuevo <video>, refs limpias, PoseTracker y modelo
+   nuevos). Es un reinicio del scanner, NO un modo de apagar la alarma: la única
+   forma de silenciarla sigue siendo completar los squats. */
+export default function CameraScan() {
+  const [reloadKey, setReloadKey] = useState(0)
+  return (
+    <Scanner
+      key={reloadKey}
+      autoStart={reloadKey > 0}
+      onReload={() => setReloadKey((k) => k + 1)}
+    />
   )
 }

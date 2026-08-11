@@ -206,6 +206,8 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .perms-go{margin-top:14px;width:100%;background:#fff;color:#0a0a0a;border:none;padding:16px;border-radius:50px;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px var(--magenta-glow)}
 .perms-go:disabled{opacity:.6}
 .perms-go:active{transform:scale(.98)}
+.perms-alt{margin-top:12px;width:100%;background:transparent;color:var(--txt-dim);border:none;padding:12px;font-family:'Archivo';font-weight:700;font-size:14px;letter-spacing:.02em;cursor:pointer;text-decoration:underline}
+.perms-alt:active{transform:scale(.98)}
 
 /* desbloqueo progresivo de la config de alarma (hora→ejercicio→días→canción) */
 .cfg-stage{animation:cfgIn .42s cubic-bezier(.2,1,.4,1) both}

@@ -198,8 +198,9 @@
     "priming_lead_d": ": todo se procesa en tu teléfono.",
     "activate": "ACTIVAR CÁMARA",
     "denied_title": "SIN ACCESO A LA CÁMARA",
-    "denied_lead": "Necesito tu cámara para contar tus reps (no hay forma de saltarlo). Activa el permiso en los ajustes de la app y reintenta.",
+    "denied_lead": "Necesito tu cámara para contar tus reps (no hay forma de saltarlo). Activa el permiso en los ajustes de la app y recarga la cámara.",
     "retry": "REINTENTAR",
+    "reload": "RECARGAR CÁMARA",
     "live": "EN VIVO",
     "preparing": "Preparando cámara…",
     "down": "ABAJO",
@@ -231,7 +232,10 @@
     "active_lead": "Brenda Fitness desbloqueado. Tu plan ya está listo.",
     "start": "EMPEZAR",
     "confirming_title": "CONFIRMANDO PAGO…",
-    "confirming_lead": "Estamos activando tu suscripción. Esto tarda unos segundos."
+    "confirming_lead": "Estamos activando tu suscripción. Esto tarda unos segundos.",
+    "confirming_retry": "VERIFICAR DE NUEVO",
+    "confirming_continue": "Continuar a la app",
+    "confirming_slow": "¿Tarda más de lo normal? Tu pago ya se registró. Puedes continuar y tu acceso se activará solo en un momento."
   },
   "onboarding": {
     "continue": "CONTINUAR",
@@ -413,6 +417,11 @@
     "gen_timeout": "La generación tardó demasiado. Intenta de nuevo.",
     "cloud_missing": "Falta configurar la nube.",
     "no_image": "Sin imagen."
+  },
+  "crash": {
+    "title": "Algo salió mal",
+    "lead": "Tuvimos un problema al cargar esta pantalla. Recarga para continuar; tus datos están a salvo.",
+    "reload": "RECARGAR"
   },
   "autherr": {
     "email_taken": "Ese email ya está registrado.",

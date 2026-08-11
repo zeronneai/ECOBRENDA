@@ -198,8 +198,9 @@
     "priming_lead_d": ": it's all processed on your phone.",
     "activate": "ENABLE CAMERA",
     "denied_title": "NO CAMERA ACCESS",
-    "denied_lead": "I need your camera to count your reps (there's no way around it). Enable the permission in the app settings and try again.",
+    "denied_lead": "I need your camera to count your reps (there's no way around it). Enable the permission in the app settings and reload the camera.",
     "retry": "RETRY",
+    "reload": "RELOAD CAMERA",
     "live": "LIVE",
     "preparing": "Getting the camera ready…",
     "down": "DOWN",
@@ -231,7 +232,10 @@
     "active_lead": "Brenda Fitness unlocked. Your plan is ready.",
     "start": "START",
     "confirming_title": "CONFIRMING PAYMENT…",
-    "confirming_lead": "We're activating your subscription. This takes a few seconds."
+    "confirming_lead": "We're activating your subscription. This takes a few seconds.",
+    "confirming_retry": "CHECK AGAIN",
+    "confirming_continue": "Continue to the app",
+    "confirming_slow": "Taking longer than usual? Your payment went through. You can continue and your access will activate shortly."
   },
   "onboarding": {
     "continue": "CONTINUE",
@@ -413,6 +417,11 @@
     "gen_timeout": "This took too long. Try again.",
     "cloud_missing": "Cloud isn't set up.",
     "no_image": "No image."
+  },
+  "crash": {
+    "title": "Something went wrong",
+    "lead": "We hit a problem loading this screen. Reload to continue; your data is safe.",
+    "reload": "RELOAD"
   },
   "autherr": {
     "email_taken": "That email is already registered.",

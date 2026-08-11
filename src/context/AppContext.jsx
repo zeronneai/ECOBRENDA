@@ -697,9 +697,16 @@ export function AppProvider({ children }) {
   const openAuth = useCallback((view = 'login') => { setAuthView(view); setAuthOpen(true) }, [])
   const closeAuth = useCallback(() => setAuthOpen(false), [])
   const signOutAccount = useCallback(async () => {
-    await authSignOut()
+    try { await authSignOut() } catch { /* la sesión ya pudo expirar */ }
     cloudSync.clearUser()
     setSession(null)
+    // CRÍTICO: borra TODO el dato local (bf:/bac:) para que el perfil, alarmas y
+    // suscripción del usuario anterior NO se filtren a la siguiente cuenta en el
+    // mismo navegador. Recarga a un estado limpio (idioma/onboarding).
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith('bf:') || k.startsWith('bac:'))
+      .forEach((k) => localStorage.removeItem(k))
+    window.location.reload()
   }, [])
 
   // Borra TODOS los datos locales (bf:/bac:) y reinicia al onboarding.
