@@ -162,6 +162,8 @@
     "login_title": "SIGN IN",
     "login_sub": "Sign in to pick up your plan.",
     "entering": "SIGNING IN…",
+    "signing_in": "Signing in…",
+    "preparing": "Setting up your account…",
     "login_btn": "SIGN IN",
     "forgot": "Forgot your password?",
     "no_account": "Don't have an account?",

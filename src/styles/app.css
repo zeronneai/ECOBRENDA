@@ -185,6 +185,9 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .auth-consent{margin:14px 4px 0;font-size:12px;line-height:1.45;color:var(--txt-faint);text-align:center}
 .auth-consent .auth-link{font-size:12px}
 .cta.full:disabled{opacity:.6}
+/* Spinner del botón de auth: aro blanco sobre el botón magenta, con la marca. */
+.btn-spinner{width:18px;height:18px;flex:none;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:btnSpin .7s linear infinite}
+@keyframes btnSpin{to{transform:rotate(360deg)}}
 .auth-links{margin-top:18px;text-align:center;font-size:14px;color:var(--txt-dim)}
 .auth-link{color:var(--magenta-soft);font-weight:800;cursor:pointer}
 .auth-link:active{opacity:.7}

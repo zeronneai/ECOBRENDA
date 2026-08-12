@@ -656,12 +656,19 @@ export function AppProvider({ children }) {
   }, [updateProfile])
 
   // Llamado por las pantallas de Auth al registrarse/iniciar sesión.
+  // ORDEN IMPORTANTE (UX de login): hacemos primero la carga pesada (setUser =
+  // pull/seed de la nube) y la rehidratación, y SOLO AL FINAL fijamos la sesión.
+  // Así la pantalla de Auth sigue montada mostrando su spinner hasta que la cuenta
+  // está lista; al fijar la sesión, el gate se desmonta y la app aparece ya
+  // hidratada (sin "congelado" ni parpadeo con datos viejos). setUser tiene
+  // try/catch interno → nunca lanza, así que la sesión SIEMPRE se fija (no hay
+  // carga infinita aunque falle la red: la app es local-first).
   const handleAuthed = useCallback(async (s, mode) => {
-    setSession(s)
-    setAuthOpen(false)
     await cloudSync.setUser(s, mode) // signup -> sube local; login -> baja nube
     rehydrate()
     flushPendingAvatar()
+    setAuthOpen(false)
+    setSession(s) // AL FINAL: desmonta el gate y revela la app ya lista
   }, [rehydrate, flushPendingAvatar])
 
   const openAuth = useCallback((view = 'login') => { setAuthView(view); setAuthOpen(true) }, [])

@@ -19,35 +19,45 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [stage, setStage] = useState(null) // clave i18n del mensaje de carga actual
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
 
-  const go = (v) => { setError(''); setSent(false); setView(v) }
+  const go = (v) => { setError(''); setSent(false); setBusy(false); setStage(null); setView(v) }
 
   const doSignup = async () => {
     setError('')
     if (!email.trim()) return setError(t('auth.err_email'))
     if (password.length < 6) return setError(t('auth.err_pw_short'))
-    setBusy(true)
-    const r = await signUp(email.trim(), password)
-    setBusy(false)
-    if (r.error) { setError(r.error); return }
-    // "Revisa tu correo" SOLO si Supabase pide confirmación (needsConfirm). Con la
-    // confirmación DESACTIVADA (nuestro caso), hay sesión → el usuario entra DIRECTO
-    // a la app, sin fricción.
-    if (r.needsConfirm) { setSent(true); return }
-    onAuthed?.(r.session, 'signup')
+    setBusy(true); setStage('auth.creating')
+    try {
+      const r = await signUp(email.trim(), password)
+      if (r.error) { setError(r.error); setBusy(false); setStage(null); return }
+      // "Revisa tu correo" SOLO si Supabase pide confirmación (needsConfirm). Con la
+      // confirmación DESACTIVADA (nuestro caso), hay sesión → entra DIRECTO.
+      if (r.needsConfirm) { setSent(true); setBusy(false); setStage(null); return }
+      setStage('auth.preparing') // 2ª etapa: pull/seed de la nube (onAuthed)
+      await onAuthed?.(r.session, 'signup')
+      // éxito → el gate se desmonta al fijar la sesión; NO reseteamos busy (sin parpadeo)
+    } catch {
+      setError(t('autherr.generic')); setBusy(false); setStage(null)
+    }
   }
 
   const doLogin = async () => {
     setError('')
     if (!email.trim()) return setError(t('auth.err_email'))
     if (!password) return setError(t('auth.err_pw'))
-    setBusy(true)
-    const r = await signIn(email.trim(), password)
-    setBusy(false)
-    if (r.error) { setError(r.error); return }
-    onAuthed?.(r.session, 'login')
+    setBusy(true); setStage('auth.signing_in')
+    try {
+      const r = await signIn(email.trim(), password)
+      if (r.error) { setError(r.error); setBusy(false); setStage(null); return }
+      setStage('auth.preparing') // 2ª etapa: verificar/cargar perfil + sync (onAuthed)
+      await onAuthed?.(r.session, 'login')
+      // éxito → el gate se desmonta al fijar la sesión; NO reseteamos busy (sin parpadeo)
+    } catch {
+      setError(t('autherr.generic')); setBusy(false); setStage(null)
+    }
   }
 
   const doRecover = async () => {
@@ -117,7 +127,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
           {error && <div className="auth-error">{error}</div>}
 
           <button className="cta full auth-cta" onClick={doSignup} disabled={busy}>
-            {busy ? t('auth.creating') : t('auth.create')}
+            {busy ? (<><span className="btn-spinner" />{t(stage || 'auth.creating')}</>) : t('auth.create')}
           </button>
 
           <div className="auth-consent">
@@ -170,7 +180,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
           {error && <div className="auth-error">{error}</div>}
 
           <button className="cta full auth-cta" onClick={doLogin} disabled={busy}>
-            {busy ? t('auth.entering') : t('auth.login_btn')}
+            {busy ? (<><span className="btn-spinner" />{t(stage || 'auth.signing_in')}</>) : t('auth.login_btn')}
           </button>
 
           <div className="auth-links">
@@ -209,7 +219,7 @@ export default function Auth({ initialView = 'signup', recap = '', onAuthed, onC
               {error && <div className="auth-error">{error}</div>}
 
               <button className="cta full auth-cta" onClick={doRecover} disabled={busy}>
-                {busy ? t('auth.sending') : t('auth.send_link')}
+                {busy ? (<><span className="btn-spinner" />{t('auth.sending')}</>) : t('auth.send_link')}
               </button>
             </>
           ) : (
