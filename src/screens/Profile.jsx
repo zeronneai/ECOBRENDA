@@ -146,13 +146,17 @@ export default function Profile() {
               <div className="pf-sub-t">{isPremium ? t('profile.sub_premium_t') : t('profile.sub_free_t')}</div>
               <div className="pf-sub-d">{isPremium ? t('profile.sub_premium_d', { plan: subscription.plan || t('profile.sub_premium_d_active') }) : t('profile.sub_free_d')}</div>
             </div>
-            {/* iOS sin premium: SIN botón (App Store Rule 3.1.1). Con premium:
-                "Gestionar" abre Customer Portal — Apple lo permite porque el
-                usuario ya es suscriptor, no es un flujo de compra nueva. */}
-            {isPremium ? (
-              <button onClick={() => openPortal()}>{t('profile.manage')}</button>
-            ) : (
-              !isIOSNative() && <button onClick={() => openSheet('paywall')}>{t('profile.go_premium')}</button>
+            {/* iOS (App Store Rule 3.1.1): NINGÚN botón que dirija a pago externo.
+                Ni "Hazte premium" (checkout) ni "Gestionar" (Customer Portal de
+                Stripe) — ambos son links a pago fuera de la App Store. En iOS solo
+                se muestra el ESTADO de la suscripción, sin acciones de pago. En
+                web/Android sí aparecen. */}
+            {!isIOSNative() && (
+              isPremium ? (
+                <button onClick={() => openPortal()}>{t('profile.manage')}</button>
+              ) : (
+                <button onClick={() => openSheet('paywall')}>{t('profile.go_premium')}</button>
+              )
             )}
           </div>
 
