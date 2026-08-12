@@ -1,8 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+/* Capacitor (iOS/Android) sirve el bundle desde el esquema capacitor://localhost,
+   que NO responde headers CORS. El atributo `crossorigin` que Vite pone en el
+   <script type="module"> y en los <link rel="modulepreload"> hace que la WKWebView
+   pida esos módulos como CORS → fallan → PANTALLA NEGRA + reintentos en bucle.
+   Este plugin quita `crossorigin` del index.html final (en web/Vercel no hace
+   falta porque el mismo origen resuelve sin problema). */
+function stripCrossorigin() {
+  return {
+    name: 'strip-crossorigin',
+    enforce: 'post',
+    transformIndexHtml(html) {
+      return html.replace(/\s+crossorigin(?=[\s>])/g, '')
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), stripCrossorigin()],
   server: {
     host: true,
     port: 5173
