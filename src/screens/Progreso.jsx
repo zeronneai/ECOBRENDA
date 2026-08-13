@@ -5,9 +5,6 @@ import {
   BarChart, Bar, Cell, PieChart, Pie,
 } from 'recharts'
 import { useApp } from '../store'
-import { useSubscription } from '../hooks/useSubscription'
-import { isIOSNative } from '../lib/platform'
-import PremiumLockedIOS from '../components/PremiumLockedIOS'
 import { ACHIEVEMENTS } from '../data/achievements'
 import { getWakeStreak } from '../lib/dataStore'
 import { weightSeries, workoutsByWeek, squatLungeSplit } from '../lib/progressStats'
@@ -59,47 +56,14 @@ function StreakRing({ current, best }) {
   )
 }
 
-function PremiumGate({ navigate, openSheet }) {
-  const { t } = useApp()
-  return (
-    <section className="screen active" id="s-progreso">
-      <div className="scroll">
-        <div className="topgap" />
-        <div className="hdr reveal d1" style={{ alignItems: 'center', justifyContent: 'flex-start' }}>
-          <button className="pg-back" onClick={() => navigate('/profile')}>‹</button>
-          <div><div className="hi">{t('progreso.premium_hi')}</div><div className="name">{t('progreso.header')}</div></div>
-        </div>
-        <div className="pad reveal d2">
-          {isIOSNative() ? (
-            <PremiumLockedIOS />
-          ) : (
-            <div className="brenda-promo" style={{ minHeight: 220 }}>
-              <div className="glow" /><div className="shimmer" />
-              <div className="lock-pill">🔒 PREMIUM</div>
-              <div className="inner">
-                <div className="kick">{t('progreso.gate_kick')}</div>
-                <h3>{t('progreso.gate_h')}</h3>
-                <p>{t('progreso.gate_p')}</p>
-                <button className="unlock" onClick={() => openSheet('paywall')}>{t('paywall.see_plans')}</button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  )
-}
 
 export default function Progreso() {
   const navigate = useNavigate()
   const { t, language, progressLog, addProgressEntry, deleteProgressEntry, streak, totals, workoutLog, openSheet } = useApp()
-  const { isPremium } = useSubscription()
 
   const [weight, setWeight] = useState('')
   const [note, setNote] = useState('')
   const [confirmId, setConfirmId] = useState(null)
-
-  if (!isPremium) return <PremiumGate navigate={navigate} openSheet={openSheet} />
 
   const submit = (e) => {
     e.preventDefault()

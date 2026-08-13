@@ -136,6 +136,8 @@ async function pullSubscription() {
       status: data.status || 'inactive',
       plan: data.plan ?? null,
       currentPeriodEnd: data.current_period_end ?? null,
+      accesoAlarma: data.acceso_alarma === true,
+      accesoPremium: data.acceso_premium === true,
     })
   }
 }

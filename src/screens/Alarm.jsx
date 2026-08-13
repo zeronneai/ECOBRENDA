@@ -1,13 +1,20 @@
 import { useApp } from '../store'
+import { useSubscription } from '../hooks/useSubscription'
 import { formatDays } from '../data/onboarding'
 import GlowButton from '../components/ui/GlowButton'
 
-/* Pantalla /alarm — LISTA de alarmas. La configuración (hora/ejercicio/reps/
-   días/canción + preview de audio) vive en AlarmSheet y NO se toca aquí:
-   este rediseño es solo visual sobre la lista. Toda la funcionalidad
-   (toggle, abrir editor, nueva alarma) se conserva igual. */
+/* Pantalla /alarm — LISTA de alarmas.
+   Modelo de 4 productos: sin ACCESO_ALARMA la lista se muestra GRIS, con el
+   switch apagado y NO togglable. Tocar la alarma o el candado abre el paywall
+   (web/Android → Stripe; iOS → card neutra "Contenido exclusivo", sin pagos).
+   Crear la alarma en el onboarding sigue permitido; el bloqueo es sobre
+   activarla/sonar. */
 export default function Alarm() {
-  const { alarms, toggleAlarm, openAlarmEditor, t } = useApp()
+  const { alarms, toggleAlarm, openAlarmEditor, openSheet, t } = useApp()
+  const { accesoAlarma } = useSubscription()
+
+  // Sin acceso: cualquier tap sobre una alarma → paywall (nunca activa la alarma).
+  const gate = () => openSheet('paywall')
 
   return (
     <section className="screen active" id="s-alarm">
@@ -23,23 +30,28 @@ export default function Alarm() {
         <div className="al-list">
           {alarms.map((a, i) => {
             const ex = a.exercise === 'lunges' ? 'lunges' : 'squats'
+            const on = accesoAlarma && a.active
             return (
               <div
-                className={'al-card reveal d' + Math.min(i + 2, 5) + (a.active ? ' on' : '')}
+                className={'al-card reveal d' + Math.min(i + 2, 5) + (on ? ' on' : '') + (accesoAlarma ? '' : ' locked')}
                 key={a.id}
-                onClick={() => openAlarmEditor(a)}
+                onClick={() => (accesoAlarma ? openAlarmEditor(a) : gate())}
               >
                 <div className="al-time">{a.hour}</div>
                 <div className="al-meta">
                   <div className="t">{i === 0 ? t('alarm.wake') : t('alarm.alarm')}</div>
                   <div className="d">{a.reps} {ex} · {formatDays(a.days, t)}</div>
                 </div>
-                <div
-                  className={'toggle' + (a.active ? ' on' : '')}
-                  onClick={(e) => { e.stopPropagation(); toggleAlarm(a.id) }}
-                >
-                  <div className="knob" />
-                </div>
+                {accesoAlarma ? (
+                  <div
+                    className={'toggle' + (a.active ? ' on' : '')}
+                    onClick={(e) => { e.stopPropagation(); toggleAlarm(a.id) }}
+                  >
+                    <div className="knob" />
+                  </div>
+                ) : (
+                  <div className="al-lock" onClick={(e) => { e.stopPropagation(); gate() }} aria-label={t('premium.locked_title')}>🔒</div>
+                )}
               </div>
             )
           })}

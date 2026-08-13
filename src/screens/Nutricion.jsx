@@ -12,7 +12,7 @@ import DietPlanView from '../components/DietPlanView'
    español sin traducir. */
 export default function Nutricion() {
   const { t, openSheet } = useApp()
-  const { isPremium } = useSubscription()
+  const { accesoPremium } = useSubscription()
 
   const INTRO = {
     kick: t('nutricion.intro_kick'),
@@ -22,7 +22,7 @@ export default function Nutricion() {
   }
 
   // Gate premium (PRODUCCIÓN). El bypass solo ocurre con USE_MOCK_PLANS (dev).
-  if (!isPremium && !USE_MOCK_PLANS) {
+  if (!accesoPremium && !USE_MOCK_PLANS) {
     return (
       <section className="screen active" id="s-nutricion">
         <div className="scroll">

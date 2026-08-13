@@ -11,7 +11,7 @@ import WorkoutPlanView from '../components/WorkoutPlanView'
    tras el rediseño IA y traía texto en español sin traducir. */
 export default function Entrena() {
   const { t, openSheet } = useApp()
-  const { isPremium } = useSubscription()
+  const { accesoPremium } = useSubscription()
 
   const INTRO = {
     kick: t('entrena.intro_kick'),
@@ -21,7 +21,7 @@ export default function Entrena() {
   }
 
   // Gate premium (PRODUCCIÓN). El bypass solo ocurre con USE_MOCK_PLANS (dev).
-  if (!isPremium && !USE_MOCK_PLANS) {
+  if (!accesoPremium && !USE_MOCK_PLANS) {
     return (
       <section className="screen active" id="s-entrena">
         <div className="scroll">

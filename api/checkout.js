@@ -32,15 +32,30 @@ export default async function handler(req, res) {
     const user = userData.user
 
     const { plan, successUrl, cancelUrl } = req.body || {}
-    const priceId = plan === 'annual' ? process.env.STRIPE_PRICE_ANNUAL
-                  : plan === 'monthly' ? process.env.STRIPE_PRICE_MONTHLY
-                  : null
+    // 4 productos: alarma ($9), upgrade ($49), todo mensual ($59), todo anual ($590).
+    const PRICE_BY_PLAN = {
+      alarm: process.env.STRIPE_PRICE_ALARM,
+      upgrade: process.env.STRIPE_PRICE_UPGRADE,
+      monthly: process.env.STRIPE_PRICE_MONTHLY,
+      annual: process.env.STRIPE_PRICE_ANNUAL,
+    }
+    const priceId = PRICE_BY_PLAN[plan] || null
     if (!priceId) return res.status(400).json({ error: 'invalid_plan' })
 
+    // Lee la fila para reusar el customer y aplicar el DOBLE CANDADO del upgrade.
+    const { data: subRow } = await supabase.from('subscriptions')
+      .select('stripe_customer_id, acceso_alarma, acceso_premium').eq('user_id', user.id).maybeSingle()
+
+    // DOBLE CANDADO del $49: solo se puede comprar si el usuario YA tiene alarma
+    // ($9 o superior) y aún NO tiene premium. La misma regla la reaplica el
+    // webhook al calcular los permisos (red de seguridad si alguien fuerza la API).
+    if (plan === 'upgrade') {
+      if (!subRow?.acceso_alarma) return res.status(409).json({ error: 'upgrade_requires_alarm' })
+      if (subRow?.acceso_premium) return res.status(409).json({ error: 'already_premium' })
+    }
+
     // Si ya tiene stripe_customer_id en su fila, reusarlo para no duplicar customers.
-    let customer = null
-    const { data: subRow } = await supabase.from('subscriptions').select('stripe_customer_id').eq('user_id', user.id).maybeSingle()
-    if (subRow?.stripe_customer_id) customer = subRow.stripe_customer_id
+    let customer = subRow?.stripe_customer_id || null
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
     const origin = req.headers.origin || ''

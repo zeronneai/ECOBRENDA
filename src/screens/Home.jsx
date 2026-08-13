@@ -23,7 +23,7 @@ const QUICK_CHALLENGES = [
 export default function Home() {
   const navigate = useNavigate()
   const { t, language, profile, streak, weekChart, challengesDone, totals, alarms, toggleAlarm, openAlarmEditor, openSheet, showRing, startWorkout } = useApp()
-  const { isPremium } = useSubscription()
+  const { accesoPremium } = useSubscription()
 
   const firstName = profile.name ? profile.name.split(' ')[0].toUpperCase() : t('home.hi')
   const avatarLetter = firstName[0] || 'B'
@@ -133,7 +133,7 @@ export default function Home() {
         {/* Brenda Fitness */}
         <div className="sec-h reveal d5"><h2>BRENDA FITNESS</h2></div>
 
-        {isPremium ? (
+        {accesoPremium ? (
           <div className="reveal d5">
             <DestelloCard glowColor="var(--magenta-glow)" glowPosition="top-right">
               <div className="hm-hero-t">{t('home.hero_kick')}</div>

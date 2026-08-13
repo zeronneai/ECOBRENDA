@@ -85,7 +85,7 @@ export function AppProvider({ children }) {
   const [authOpen, setAuthOpen] = useState(false)
   const [authView, setAuthView] = useState('login')
 
-  const unlocked = subscription.status === 'active' // gate premium
+  const unlocked = subscription.accesoPremium === true // gate premium (nutrición+entrena)
 
   // ── Estado efímero de UI ──
   const [sheet, setSheet] = useState(null)          // 'paywall' | 'alarmSheet' | 'mealsSheet' | null
@@ -138,7 +138,7 @@ export function AppProvider({ children }) {
   // será el ÚNICO que escriba public.subscriptions. Útil aún en modo offline (sin
   // Supabase) y para pruebas locales rápidas.
   const unlock = useCallback(() => {
-    setSubscriptionState(dataStore.setSubscription({ status: 'active', plan: selectedPlan }))
+    setSubscriptionState(dataStore.setSubscription({ status: 'active', plan: selectedPlan, accesoAlarma: true, accesoPremium: true }))
   }, [selectedPlan])
 
   // Detecta el momento EXACTO en que se cruza el umbral de un logro.
@@ -429,7 +429,7 @@ export function AppProvider({ children }) {
   // al primer toque). La fiabilidad TOTAL (pantalla bloqueada, app cerrada y
   // sonido automático) requiere la capa NATIVA con Capacitor.
   const schedRef = useRef({})
-  schedRef.current = { alarms, ringOpen, scanning, celebrating, onboarding }
+  schedRef.current = { alarms, ringOpen, scanning, celebrating, onboarding, accesoAlarma: subscription.accesoAlarma === true }
   const activeAlarmIdRef = useRef(null) // AlarmKit: id de la alarma que suena (para complete)
   const lastSchedSigRef = useRef('')    // firma de scheduling (evita reagendar por lastTriggered)
   const didInitSchedRef = useRef(false) // ¿ya corrió la reagenda de arranque?
@@ -439,6 +439,7 @@ export function AppProvider({ children }) {
     const TOLERANCE_MS = 90 * 1000
     const tick = () => {
       const st = schedRef.current
+      if (!st.accesoAlarma) return // sin ACCESO_ALARMA la alarma NO suena (gate del modelo)
       if (st.ringOpen || st.scanning || st.celebrating || st.onboarding) return // no interrumpir
       const now = new Date()
       const dow = (now.getDay() + 6) % 7 // Lun=0 … Dom=6
