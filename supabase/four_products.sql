@@ -17,17 +17,19 @@ alter table public.subscriptions add column if not exists acceso_alarma  boolean
 alter table public.subscriptions add column if not exists acceso_premium boolean not null default false;
 alter table public.subscriptions add column if not exists is_founder     boolean not null default false;
 
--- 2) FUNDADORES: TODOS los usuarios que existen AL MOMENTO de correr esta
---    migración conservan acceso TOTAL (alarma + premium) para siempre. Se
---    crea/actualiza su fila con los 3 flags en true. Aunque nunca hayan tenido
---    fila de suscripción, quedan cubiertos.
+-- 2) FUNDADORES: los usuarios registrados ANTES del corte conservan acceso TOTAL
+--    (alarma + premium) para siempre. Se crea/actualiza su fila con los 3 flags
+--    en true. Aunque nunca hayan tenido fila de suscripción, quedan cubiertos.
 --
---    Corre esto EN EL DEPLOY de este cambio: el snapshot de auth.users = todos
---    los usuarios actuales = fundadores. Quienes se registren DESPUÉS ya entran
---    al modelo nuevo de bloqueo (no están en este snapshot).
+--    ⚠️ ACOTADO POR FECHA (a propósito): así re-correr esta migración NUNCA marca
+--    como fundador a un usuario nuevo. Pon en FOUNDER_CUTOFF el momento del deploy
+--    (justo después de tu último usuario real y ANTES de cualquier registro nuevo).
+--    Quienes se registren DESPUÉS del corte entran al modelo de bloqueo (sin fila
+--    = sin acceso). Es idempotente y seguro de re-ejecutar.
 insert into public.subscriptions (user_id, status, is_founder, acceso_alarma, acceso_premium)
 select id, 'active', true, true, true
 from auth.users
+where created_at < '2026-08-13 00:00:00+00'   -- ← FOUNDER_CUTOFF: momento del deploy
 on conflict (user_id) do update
   set is_founder     = true,
       acceso_alarma  = true,
