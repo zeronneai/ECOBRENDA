@@ -721,6 +721,7 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .ai-gen-title{font-family:'Archivo';font-weight:800;font-size:20px;margin-bottom:10px}
 .ai-gen-sub{color:var(--txt-dim);font-size:14px;line-height:1.5;max-width:300px;margin-bottom:26px}
 .ai-gen-bar{width:100%;max-width:260px;height:6px;border-radius:50px;background:var(--surface-2);overflow:hidden}
+.ai-prep-eta{margin-top:16px;font-size:13px;font-weight:600;color:var(--txt-dim);text-transform:capitalize}
 .ai-gen-bar i{display:block;width:40%;height:100%;border-radius:50px;background:linear-gradient(90deg,var(--magenta),var(--lime));
   animation:aiBar 1.4s ease-in-out infinite}
 @keyframes aiBar{0%{margin-left:-40%}100%{margin-left:100%}}

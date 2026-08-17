@@ -15,17 +15,27 @@ import { useApp } from '../store'
 import { getLatestPlan, USE_MOCK_PLANS } from '../lib/aiPlans'
 import AiPlanIntro from './AiPlanIntro'
 import AiGenerating from './AiGenerating'
+import AiPreparing from './AiPreparing'
 import AiCheckIn from './AiCheckIn'
 import AiConsentModal from './AiConsentModal'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+const RELEASE_MS = 48 * 60 * 60 * 1000 // el plan se libera 48h después de pedirlo
+
+// Un plan solo se muestra si Brenda lo aprobó Y ya pasaron 48h desde que se pidió.
+function isReleased(p) {
+  if (!p?.approved) return false
+  const req = p.requestedAt ? new Date(p.requestedAt).getTime() : 0
+  return req > 0 && Date.now() - req >= RELEASE_MS
+}
 
 export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
   const { profile, updateProfile, t } = useApp()
   const hasConsent = !!profile?.aiConsent?.accepted
 
-  const [status, setStatus] = useState('loading') // loading|invite|generating|ready|checkin|error
-  const [plan, setPlan] = useState(null)          // { content, lockedUntil }
+  const [status, setStatus] = useState('loading') // loading|invite|generating|pending|ready|checkin|error
+  const [plan, setPlan] = useState(null)          // { content, lockedUntil, approved, requestedAt }
+  const [pendingSince, setPendingSince] = useState(null) // requestedAt del plan en preparación
   const [forced, setForced] = useState(false)     // override dev "simular +30 días"
   const [errMsg, setErrMsg] = useState('')
   const [consent, setConsent] = useState(null)    // null | { checkin } mientras se pide consentimiento
@@ -35,7 +45,9 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
     getLatestPlan(kind)
       .then((r) => {
         if (!alive) return
-        if (r?.content) { setPlan(r); setStatus('ready') } else setStatus('invite')
+        if (r?.content && isReleased(r)) { setPlan(r); setStatus('ready') }
+        else if (r?.content) { setPendingSince(r.requestedAt); setStatus('pending') } // pedido, aún no liberado
+        else setStatus('invite')
       })
       .catch(() => { if (alive) setStatus('invite') })
     return () => { alive = false }
@@ -45,8 +57,11 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
   const doGenerate = async (checkin) => {
     setStatus('generating'); setErrMsg('')
     try {
-      const r = await generate(checkin)
-      setPlan(r); setForced(false); setStatus('ready')
+      await generate(checkin)
+      // El plan se genera y guarda, pero NO se muestra al instante: pasa a
+      // "preparación" (se libera a las 48h + aprobación de Brenda). El plan
+      // recién creado nace approved=false, así que aún no se libera.
+      setForced(false); setPendingSince(new Date().toISOString()); setStatus('pending')
     } catch (e) {
       setErrMsg(e?.message || t('errors.plan_generate')); setStatus('error')
     }
@@ -71,6 +86,8 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
     content = <div className="ai-loading-min" />
   } else if (status === 'generating') {
     content = <AiGenerating kind={kind} />
+  } else if (status === 'pending') {
+    content = <AiPreparing requestedAt={pendingSince} />
   } else if (status === 'checkin') {
     content = <AiCheckIn kind={kind} onSubmit={runGenerate} onCancel={() => setStatus('ready')} />
   } else if (status === 'ready' && plan?.content) {
