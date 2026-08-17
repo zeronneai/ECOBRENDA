@@ -22,6 +22,14 @@ export default function Profile() {
           cloudEnabled, session, openAuth, signOutAccount, openPortal, deleteAccount, language, setLanguage } = useApp()
   const { isPremium } = useSubscription()
 
+  // Free trial (plan alarma): si trial_end está en el futuro, mostramos que están
+  // en periodo de prueba y cuándo termina.
+  const trialEndDate = subscription?.trialEnd ? new Date(subscription.trialEnd) : null
+  const trialing = !!trialEndDate && trialEndDate.getTime() > Date.now()
+  const trialDateStr = trialing
+    ? trialEndDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })
+    : ''
+
   // Medidas con estado local (para escribir decimales / pies+pulgadas).
   const [wUnit, setWUnit] = useState(profile.weightUnit || 'kg')
   const [wVal, setWVal] = useState(String((profile.weightUnit === 'lb' ? kgToLb(profile.weight) : profile.weight)))
@@ -141,10 +149,10 @@ export default function Profile() {
           </DestelloCard>
 
           {/* Suscripción */}
-          <div className={'pf-sub reveal d2' + (isPremium ? ' prem' : '') + (isIOSNative() && !isPremium ? ' info-only' : '')}>
+          <div className={'pf-sub reveal d2' + (isPremium || trialing ? ' prem' : '') + (isIOSNative() && !isPremium && !trialing ? ' info-only' : '')}>
             <div>
-              <div className="pf-sub-t">{isPremium ? t('profile.sub_premium_t') : t('profile.sub_free_t')}</div>
-              <div className="pf-sub-d">{isPremium ? t('profile.sub_premium_d', { plan: subscription.plan || t('profile.sub_premium_d_active') }) : t('profile.sub_free_d')}</div>
+              <div className="pf-sub-t">{trialing ? t('profile.sub_trial_t') : isPremium ? t('profile.sub_premium_t') : t('profile.sub_free_t')}</div>
+              <div className="pf-sub-d">{trialing ? t('profile.sub_trial_d', { date: trialDateStr }) : isPremium ? t('profile.sub_premium_d', { plan: subscription.plan || t('profile.sub_premium_d_active') }) : t('profile.sub_free_d')}</div>
             </div>
             {/* iOS (App Store Rule 3.1.1): NINGÚN botón que dirija a pago externo.
                 Ni "Hazte premium" (checkout) ni "Gestionar" (Customer Portal de

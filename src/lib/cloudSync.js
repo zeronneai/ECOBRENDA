@@ -138,6 +138,7 @@ async function pullSubscription() {
       currentPeriodEnd: data.current_period_end ?? null,
       accesoAlarma: data.acceso_alarma === true,
       accesoPremium: data.acceso_premium === true,
+      trialEnd: data.trial_end ?? null,
     })
   }
 }

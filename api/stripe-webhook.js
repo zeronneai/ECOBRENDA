@@ -38,10 +38,20 @@ function entitlementsFrom(subs) {
   const activePrices = new Set()
   let anyActive = false
   let periodEnd = null
+  let trialing = false   // ¿alguna suscripción en periodo de prueba?
+  let trialEnd = null    // fin del trial (unix) para mostrarlo en el Perfil
   for (const sub of subs) {
+    // 'trialing' cuenta como válida (el free trial de 3 días otorga acceso aunque
+    // aún no se cobre). ACTIVE_STATUSES = {active, trialing}. 'canceled'/'past_due'
+    // quedan fuera → NO dan acceso.
     if (!ACTIVE_STATUSES.has(sub.status)) continue
     anyActive = true
     if (sub.current_period_end && (!periodEnd || sub.current_period_end > periodEnd)) periodEnd = sub.current_period_end
+    if (sub.status === 'trialing') {
+      trialing = true
+      const te = sub.trial_end || sub.current_period_end
+      if (te && (!trialEnd || te > trialEnd)) trialEnd = te
+    }
     for (const item of sub.items?.data || []) {
       const pid = item.price?.id
       if (pid) activePrices.add(pid)
@@ -63,7 +73,7 @@ function entitlementsFrom(subs) {
   else if (hasUpgrade49) plan = 'upgrade_pending' // $49 sin $9: premium NO otorgado
   else if (hasAlarm9) plan = 'alarm'
 
-  return { acceso_alarma, acceso_premium, anyActive, periodEnd, plan }
+  return { acceso_alarma, acceso_premium, anyActive, periodEnd, plan, trialing, trialEnd }
 }
 
 // Núcleo: resuelve el cliente, lista sus suscripciones, recalcula y hace upsert.
@@ -100,6 +110,7 @@ async function recomputeAndUpsert(stripe, supabase, { userId, customerId }) {
     acceso_alarma: ent.acceso_alarma || isFounder,
     acceso_premium: ent.acceso_premium || isFounder,
     current_period_end: ent.periodEnd ? new Date(ent.periodEnd * 1000).toISOString() : null,
+    trial_end: ent.trialing && ent.trialEnd ? new Date(ent.trialEnd * 1000).toISOString() : null,
     stripe_customer_id: cust || null,
   }
   const { error } = await supabase.from('subscriptions').upsert(row, { onConflict: 'user_id' })

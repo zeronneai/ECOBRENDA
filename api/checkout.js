@@ -57,6 +57,13 @@ export default async function handler(req, res) {
     // Si ya tiene stripe_customer_id en su fila, reusarlo para no duplicar customers.
     let customer = subRow?.stripe_customer_id || null
 
+    // subscription_data: metadata.user_id para que TODOS los eventos posteriores
+    // (updated/deleted) la traigan sin mapear. FREE TRIAL de 3 días SOLO en el
+    // plan de alarma ($9): se pide la tarjeta, no se cobra 3 días, al día 4 cobra
+    // solo si no cancelaron. Los demás planes ($49/$59/$590) NO llevan trial.
+    const subscriptionData = { metadata: { user_id: user.id } }
+    if (plan === 'alarm') subscriptionData.trial_period_days = 3
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
     const origin = req.headers.origin || ''
     const session = await stripe.checkout.sessions.create({
@@ -67,9 +74,7 @@ export default async function handler(req, res) {
       customer_email: customer ? undefined : (user.email || undefined),
       success_url: successUrl || `${origin}/premium-return?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${origin}/?paywall=1`,
-      // Mete metadata.user_id en la suscripción para que TODOS los eventos
-      // posteriores (updated/deleted) la traigan sin tener que mapear.
-      subscription_data: { metadata: { user_id: user.id } },
+      subscription_data: subscriptionData,
       metadata: { user_id: user.id },
       allow_promotion_codes: true,
     })

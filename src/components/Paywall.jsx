@@ -13,7 +13,7 @@ import { isIOSNative } from '../lib/platform'
    Los precios son visuales; el cobro real lo define el Price ID en Stripe.
    iOS: card neutra sin precios/pagos (App Store 3.1.1). */
 const ALL_PLANS = {
-  alarm: { id: 'alarm', nameKey: 'paywall.alarm', badgeKey: null, price: '$9', unitKey: 'paywall.monthly_unit', subKey: 'paywall.alarm_sub' },
+  alarm: { id: 'alarm', nameKey: 'paywall.alarm', badgeKey: 'paywall.alarm_badge', price: '$9', unitKey: 'paywall.monthly_unit', subKey: 'paywall.alarm_sub' },
   upgrade: { id: 'upgrade', nameKey: 'paywall.upgrade', badgeKey: null, price: '$49', unitKey: 'paywall.monthly_unit', subKey: 'paywall.upgrade_sub' },
   monthly: { id: 'monthly', nameKey: 'paywall.monthly', badgeKey: null, price: '$59', unitKey: 'paywall.monthly_unit', subKey: 'paywall.monthly_sub' },
   annual: { id: 'annual', nameKey: 'paywall.annual', badgeKey: 'paywall.annual_badge', price: '$590', unitKey: 'paywall.annual_unit', subKey: 'paywall.annual_sub' },

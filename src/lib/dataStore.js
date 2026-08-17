@@ -28,7 +28,7 @@ const DEFAULT_STATE = {
   //   exercise, reps, allergies:[], dietPref, dislikes, createdAt,
   //   aiConsent:{ accepted:true, date:ISO }, avatarUrl, language:'es'|'en' }
   profile: null,
-  subscription: { status: 'inactive', plan: null, currentPeriodEnd: null, accesoAlarma: false, accesoPremium: false },
+  subscription: { status: 'inactive', plan: null, currentPeriodEnd: null, accesoAlarma: false, accesoPremium: false, trialEnd: null },
   wakeStreak: { current: 0, best: 0, lastCompleted: '' }, // racha de la alarma diaria
   workoutLog: [],   // [{ id, ts, date, source:'alarm'|'challenge', exercise:'squat'|'lunge', reps }]
   progressLog: [],  // [{ id, ts, date, weight, note }]
