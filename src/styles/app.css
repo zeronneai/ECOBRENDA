@@ -114,6 +114,30 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pwcard{position:relative;background:var(--surface);border:1px solid var(--line-strong);border-radius:18px;padding:18px 12px;text-align:center;transition:.2s}
 .pwcard.best{border-color:var(--magenta);background:linear-gradient(160deg,rgba(255,31,107,.14),var(--surface));box-shadow:0 0 22px var(--magenta-glow)}
 .pwbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--magenta);color:#fff;font-size:10px;font-weight:900;letter-spacing:.06em;padding:4px 10px;border-radius:30px;white-space:nowrap;box-shadow:0 4px 14px var(--magenta-glow)}
+/* Badge de FREE TRIAL — imposible de ignorar: más grande, contraste alto, pulso
+   con glow y un destello que lo recorre cada pocos segundos. Comparte posición
+   con .pwbadge (se usan ambas clases). */
+.pwbadge-trial{top:-13px;z-index:3;font-size:13px;padding:7px 15px;letter-spacing:.05em;
+  background:linear-gradient(180deg,#ff2b78,#e6004f);overflow:hidden;
+  box-shadow:0 8px 22px rgba(255,31,107,.65),inset 0 1px 0 rgba(255,255,255,.45);
+  animation:trialPulse 1.7s ease-in-out infinite}
+.pwbadge-trial::after{content:'';position:absolute;top:0;left:0;height:100%;width:55%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);
+  transform:translateX(-180%) skewX(-18deg);animation:trialShimmer 3s ease-in-out infinite}
+/* La card de la alarma también resalta para que el ojo caiga ahí primero. */
+.pwcard.trial{border-color:#ff2b78;box-shadow:0 0 24px rgba(255,43,120,.5)}
+@keyframes trialPulse{
+  0%,100%{transform:translateX(-50%) scale(1);box-shadow:0 6px 18px rgba(255,31,107,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+  50%{transform:translateX(-50%) scale(1.09);box-shadow:0 12px 30px rgba(255,31,107,.95),inset 0 1px 0 rgba(255,255,255,.55)}
+}
+@keyframes trialShimmer{
+  0%{transform:translateX(-180%) skewX(-18deg)}
+  55%,100%{transform:translateX(330%) skewX(-18deg)}
+}
+@media (prefers-reduced-motion:reduce){
+  .pwbadge-trial{animation:none}
+  .pwbadge-trial::after{display:none}
+}
 .pwname{font-family:'Bebas Neue';font-size:22px;letter-spacing:.06em;margin-top:4px;color:#fff}
 .pwold{font-size:13px;color:var(--txt-faint);text-decoration:line-through;margin-top:4px;letter-spacing:.02em}
 .pwprice{font-family:'Bebas Neue';font-size:44px;line-height:.95;color:#fff;margin-top:2px}
