@@ -21,7 +21,7 @@ export default function AiConsentModal({ variant = 'gate', consentDate, onAccept
   return (
     <div className="ai-consent-overlay" role="dialog" aria-modal="true">
       <div className="ai-consent">
-        <div className="ai-consent-badge">✦ BRENDA IA</div>
+        <div className="ai-consent-badge">✦ BRENDA FITNESS</div>
         <h2 className="destello-title ai-consent-title">{t('consent.title')}</h2>
 
         <div className="ai-consent-body">

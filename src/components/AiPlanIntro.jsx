@@ -8,7 +8,7 @@ export default function AiPlanIntro({ intro, onGenerate, error }) {
   return (
     <div className="ai-intro reveal d2">
       <div className="ai-intro-glow" />
-      <div className="ai-intro-badge">✦ BRENDA IA</div>
+      <div className="ai-intro-badge">✦ BRENDA FITNESS</div>
       <div className="ai-intro-kick">{intro.kick}</div>
       <h2 className="ai-intro-title">{intro.title}</h2>
       <p className="ai-intro-sub">{intro.sub}</p>
