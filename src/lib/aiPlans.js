@@ -103,9 +103,9 @@ export async function generateDiet(checkin) {
 }
 
 // Trae el plan más reciente 'ready' de un tipo ('workout' | 'diet').
-// Devuelve { content, lockedUntil, id, createdAt, approved, requestedAt } o null.
-// approved + requestedAt permiten al cliente decidir si el plan ya se puede
-// LIBERAR (approved && ≥48h desde requested_at) o si sigue "en preparación".
+// Devuelve { content, lockedUntil, id, createdAt, requestedAt } o null.
+// requestedAt permite al cliente decidir si el plan ya se puede LIBERAR
+// (≥48h desde requested_at) o si sigue "en preparación".
 export async function getLatestPlan(kind) {
   if (USE_MOCK_PLANS) return null // en dev siempre arranca en la invitación
   if (!supabase) return null
@@ -114,7 +114,7 @@ export async function getLatestPlan(kind) {
   if (!uid) return null
   const { data: rows, error } = await supabase
     .from('ai_plans')
-    .select('id, content, locked_until, created_at, approved, requested_at')
+    .select('id, content, locked_until, created_at, requested_at')
     .eq('user_id', uid)
     .eq('kind', kind)
     .eq('status', 'ready')
@@ -127,7 +127,6 @@ export async function getLatestPlan(kind) {
     lockedUntil: r.locked_until,
     id: r.id,
     createdAt: r.created_at,
-    approved: r.approved === true,
     requestedAt: r.requested_at || r.created_at,
   }
 }

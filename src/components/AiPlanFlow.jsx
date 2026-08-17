@@ -22,10 +22,10 @@ import AiConsentModal from './AiConsentModal'
 const DAY_MS = 24 * 60 * 60 * 1000
 const RELEASE_MS = 48 * 60 * 60 * 1000 // el plan se libera 48h después de pedirlo
 
-// Un plan solo se muestra si Brenda lo aprobó Y ya pasaron 48h desde que se pidió.
+// Liberación AUTOMÁTICA: el plan se muestra en cuanto pasan 48h desde que se
+// pidió (requested_at). Ya NO requiere aprobación manual.
 function isReleased(p) {
-  if (!p?.approved) return false
-  const req = p.requestedAt ? new Date(p.requestedAt).getTime() : 0
+  const req = p?.requestedAt ? new Date(p.requestedAt).getTime() : 0
   return req > 0 && Date.now() - req >= RELEASE_MS
 }
 
