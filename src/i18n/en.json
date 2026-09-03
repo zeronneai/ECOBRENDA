@@ -423,6 +423,7 @@
     "plan_generate": "Couldn't generate the plan.",
     "login_first": "Sign in first.",
     "gen_timeout": "This took too long. Try again.",
+    "plan_locked": "Your current plan is still active. You can generate a new one when the cycle ends.",
     "cloud_missing": "Cloud isn't set up.",
     "no_image": "No image."
   },

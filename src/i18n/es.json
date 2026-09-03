@@ -423,6 +423,7 @@
     "plan_generate": "No se pudo generar el plan.",
     "login_first": "Inicia sesión primero.",
     "gen_timeout": "La generación tardó demasiado. Intenta de nuevo.",
+    "plan_locked": "Tu plan actual sigue vigente. Podrás generar uno nuevo cuando termine el ciclo.",
     "cloud_missing": "Falta configurar la nube.",
     "no_image": "Sin imagen."
   },

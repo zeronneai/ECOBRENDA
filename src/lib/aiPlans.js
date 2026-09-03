@@ -53,6 +53,9 @@ async function authedPost(path, body) {
     if (err.error === 'timeout' || err.error === 'truncated') {
       throw new Error(translate(getInitialLang(), 'errors.gen_timeout'))
     }
+    if (err.error === 'plan_locked') {
+      throw new Error(translate(getInitialLang(), 'errors.plan_locked'))
+    }
     throw new Error(err.message || err.error || 'No se pudo generar el plan.')
   }
   return resp.json() // { ok, id, plan, lockedUntil }
