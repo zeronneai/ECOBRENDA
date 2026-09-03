@@ -23,15 +23,19 @@ const DAY_MS = 24 * 60 * 60 * 1000
 const RELEASE_MS = 48 * 60 * 60 * 1000 // el plan se libera 48h después de pedirlo
 
 // Liberación AUTOMÁTICA: el plan se muestra en cuanto pasan 48h desde que se
-// pidió (requested_at). Ya NO requiere aprobación manual.
-function isReleased(p) {
+// pidió (requested_at). Cuentas internas (unlimited) se liberan de inmediato.
+function isReleased(p, unlimited) {
+  if (unlimited) return true
   const req = p?.requestedAt ? new Date(p.requestedAt).getTime() : 0
   return req > 0 && Date.now() - req >= RELEASE_MS
 }
 
 export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
-  const { profile, updateProfile, t } = useApp()
+  const { profile, updateProfile, t, subscription } = useApp()
   const hasConsent = !!profile?.aiConsent?.accepted
+  // Cuentas internas: regeneración ilimitada (ignora el ciclo de 30 días y la
+  // espera de 48h). Solo se activa por SQL manual; el cliente jamás la escribe.
+  const unlimited = subscription?.unlimitedPlans === true
 
   const [status, setStatus] = useState('loading') // loading|invite|generating|pending|ready|checkin|error
   const [plan, setPlan] = useState(null)          // { content, lockedUntil, approved, requestedAt }
@@ -45,23 +49,28 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
     getLatestPlan(kind)
       .then((r) => {
         if (!alive) return
-        if (r?.content && isReleased(r)) { setPlan(r); setStatus('ready') }
+        if (r?.content && isReleased(r, unlimited)) { setPlan(r); setStatus('ready') }
         else if (r?.content) { setPendingSince(r.requestedAt); setStatus('pending') } // pedido, aún no liberado
         else setStatus('invite')
       })
       .catch(() => { if (alive) setStatus('invite') })
     return () => { alive = false }
-  }, [kind])
+  }, [kind, unlimited])
 
   // Generación real (tras consentimiento).
   const doGenerate = async (checkin) => {
     setStatus('generating'); setErrMsg('')
     try {
-      await generate(checkin)
-      // El plan se genera y guarda, pero NO se muestra al instante: pasa a
-      // "preparación" (se libera a las 48h + aprobación de Brenda). El plan
-      // recién creado nace approved=false, así que aún no se libera.
-      setForced(false); setPendingSince(new Date().toISOString()); setStatus('pending')
+      const r = await generate(checkin)
+      setForced(false)
+      if (unlimited) {
+        // Cuentas internas: SIN espera de 48h → el plan se muestra de inmediato.
+        setPlan(r); setStatus('ready')
+      } else {
+        // Normal: el plan se genera y guarda, pero NO se muestra al instante —
+        // pasa a "preparación" y se libera 48h después de pedirlo.
+        setPendingSince(new Date().toISOString()); setStatus('pending')
+      }
     } catch (e) {
       setErrMsg(e?.message || t('errors.plan_generate')); setStatus('error')
     }
@@ -93,7 +102,7 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
   } else if (status === 'ready' && plan?.content) {
     const lu = plan.lockedUntil ? new Date(plan.lockedUntil).getTime() : 0
     const now = Date.now()
-    const locked = lu > now && !forced
+    const locked = lu > now && !forced && !unlimited // internas: renovar siempre disponible
     const daysLeft = locked ? Math.max(1, Math.ceil((lu - now) / DAY_MS)) : 0
     content = renderPlan(plan.content, {
       locked,

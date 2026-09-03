@@ -139,6 +139,7 @@ async function pullSubscription() {
       accesoAlarma: data.acceso_alarma === true,
       accesoPremium: data.acceso_premium === true,
       trialEnd: data.trial_end ?? null,
+      unlimitedPlans: data.unlimited_plans === true,
     })
   }
 }
