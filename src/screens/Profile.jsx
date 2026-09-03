@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 import { useSubscription } from '../hooks/useSubscription'
-import { GOALS, LEVELS, DAYS_OPTIONS } from '../data/onboarding'
+import { GOALS, LEVELS, DAYS_OPTIONS, DIET_PREFS, ALLERGIES } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
 import { isIOSNative } from '../lib/platform'
 import { pickAndUploadAvatar } from '../lib/avatar'
@@ -97,6 +97,15 @@ export default function Profile() {
 
   // ── Zona de peligro ──
   const doReset = () => { resetProgress(); setConfirm(null); showToast(t('profile.toast_reset')) }
+
+  // Alergias multi-select con 'ninguna' exclusiva (igual que el onboarding).
+  const toggleAllergy = (id) => {
+    const cur = Array.isArray(profile.allergies) ? profile.allergies : []
+    let next
+    if (id === 'ninguna') next = cur.includes('ninguna') ? [] : ['ninguna']
+    else next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur.filter((x) => x !== 'ninguna'), id]
+    updateProfile({ allergies: next })
+  }
   const doStartOver = () => {
     Object.keys(localStorage).filter((k) => k.startsWith('bf:') || k.startsWith('bac:')).forEach((k) => localStorage.removeItem(k))
     window.location.reload()
@@ -219,6 +228,48 @@ export default function Profile() {
               <select className="pf-select" value={profile.daysPerWeek || 4} onChange={(e) => updateProfile({ daysPerWeek: parseInt(e.target.value, 10) })}>
                 {DAYS_OPTIONS.map((d) => <option key={d} value={d}>{t('profile.days_unit', { n: d })}</option>)}
               </select>
+            </div>
+          </div>
+
+          {/* Preferencias del plan (alimentan la próxima generación) */}
+          <div className="pf-sec reveal d3">
+            <h3>{t('profile.prefs_h')}</h3>
+            <div className="pf-note-soft">{t('profile.prefs_note')}</div>
+            <div className="pf-field">
+              <label>{t('profile.train_location')}</label>
+              <select className="pf-select" value={profile.trainLocation || 'gym'} onChange={(e) => updateProfile({ trainLocation: e.target.value })}>
+                <option value="gym">{t('onboarding.train.gym')}</option>
+                <option value="home">{t('onboarding.train.home')}</option>
+              </select>
+            </div>
+            <div className="pf-field">
+              <label>{t('profile.equipment')}</label>
+              <input className="pf-input" placeholder={t('onboarding.equip.placeholder')} value={profile.equipment || ''} onChange={(e) => updateProfile({ equipment: e.target.value })} />
+            </div>
+            <div className="pf-field">
+              <label>{t('profile.diet_pref')}</label>
+              <select className="pf-select" value={profile.dietPref || 'todo'} onChange={(e) => updateProfile({ dietPref: e.target.value })}>
+                {DIET_PREFS.map((d) => <option key={d.id} value={d.id}>{t('onboarding.diet_prefs.' + d.id + '.label')}</option>)}
+              </select>
+            </div>
+            <div className="pf-field">
+              <label>{t('profile.allergies_label')}</label>
+              <div className="pf-chips">
+                {ALLERGIES.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    className={'pf-chip' + ((Array.isArray(profile.allergies) ? profile.allergies : []).includes(a.id) ? ' sel' : '')}
+                    onClick={() => toggleAllergy(a.id)}
+                  >
+                    <span className="e">{a.emoji}</span>{t('onboarding.allergies.' + a.id)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="pf-field">
+              <label>{t('profile.dislikes_label')}</label>
+              <input className="pf-input" placeholder={t('onboarding.dislikes.placeholder')} value={profile.dislikes || ''} onChange={(e) => updateProfile({ dislikes: e.target.value })} />
             </div>
           </div>
 

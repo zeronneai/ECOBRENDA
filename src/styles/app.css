@@ -448,6 +448,11 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pf-sec{margin-bottom:24px}
 .pf-sec h3{font-family:'Bebas Neue';font-size:22px;letter-spacing:.02em;margin-bottom:12px}
 .pf-field{margin-bottom:12px}
+.pf-note-soft{font-size:12.5px;line-height:1.45;color:var(--txt-dim);background:var(--bg-soft);border-radius:10px;padding:9px 12px;margin-bottom:14px}
+.pf-chips{display:flex;flex-wrap:wrap;gap:8px}
+.pf-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:30px;border:1px solid var(--line-strong);background:var(--surface);color:var(--txt-dim);font-family:'Archivo';font-weight:700;font-size:13px;cursor:pointer}
+.pf-chip .e{font-size:14px}
+.pf-chip.sel{border-color:var(--magenta);background:rgba(255,31,107,.12);color:#fff}
 .pf-field label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint);font-weight:700;margin-bottom:6px}
 .pf-input,.pf-select{width:100%;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:13px 14px;color:var(--txt);font-family:'Archivo';font-size:15px;font-weight:600;outline:none}
 .pf-input:focus,.pf-select:focus{border-color:var(--magenta)}
