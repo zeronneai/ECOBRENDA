@@ -38,7 +38,7 @@ const DEFAULT_STATE = {
   alarms: [],
   // Logros ya anunciados (null = aún sin inicializar/seed).
   announcedAchievements: null,
-  settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false, permsPrimed: false },
+  settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false, permsPrimed: false, trainPromptDismissed: false },
   // Ejercicios de la rutina IA marcados como hechos (checklist, solo local).
   //   completions: { [planKey]: { [dayIdx]: { [exIdx]: true } } }
   //   loggedDays:   { [planKey]: { [dayIdx]: true } }  (guard anti-doble-conteo)

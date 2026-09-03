@@ -586,6 +586,9 @@
   },
   "entrena": {
     "header": "TRAIN",
+    "setup_title": "Tailor your plan",
+    "setup_sub": "Tell us where you train to tailor your next plan.",
+    "setup_done": "Done! Your next plan will adapt. Fine-tune equipment in your Profile.",
     "promo_kick": "Workout library",
     "promo_h": "WORKOUTS & PROGRAMS MADE FOR YOU",
     "promo_p": "Dozens of guided workouts and multi-week programs. Unlock it with Brenda.",

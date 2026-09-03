@@ -586,6 +586,9 @@
   },
   "entrena": {
     "header": "ENTRENA",
+    "setup_title": "Adapta tu plan",
+    "setup_sub": "Dinos dónde entrenas para adaptar tu próximo plan.",
+    "setup_done": "¡Listo! Tu próximo plan se adaptará. Afina el equipo en tu Perfil.",
     "promo_kick": "Biblioteca de entrenamientos",
     "promo_h": "RUTINAS Y PROGRAMAS HECHOS PARA TI",
     "promo_p": "Decenas de rutinas guiadas y programas de varias semanas. Desbloquéalo con Brenda.",

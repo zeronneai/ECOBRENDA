@@ -5,6 +5,7 @@ import PremiumLockedIOS from '../components/PremiumLockedIOS'
 import { USE_MOCK_PLANS, generateWorkout } from '../lib/aiPlans'
 import AiPlanFlow from '../components/AiPlanFlow'
 import WorkoutPlanView from '../components/WorkoutPlanView'
+import TrainSetupCard from '../components/TrainSetupCard'
 
 /* Entrena muestra la rutina generada por IA (AiPlanFlow). El contenido
    hardcodeado viejo (ROUTINES/PROGRAMS + RoutineCard) se eliminó: quedó huérfano
@@ -54,6 +55,7 @@ export default function Entrena() {
         <div className="topgap" />
         <div className="hdr reveal d1"><div><div className="hi">{t('common.premium')}</div><div className="name">{t('entrena.header')}</div></div></div>
         <div className="pad">
+          <TrainSetupCard />
           <AiPlanFlow
             kind="workout"
             intro={INTRO}

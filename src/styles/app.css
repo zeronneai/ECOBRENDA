@@ -453,6 +453,15 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .pf-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:30px;border:1px solid var(--line-strong);background:var(--surface);color:var(--txt-dim);font-family:'Archivo';font-weight:700;font-size:13px;cursor:pointer}
 .pf-chip .e{font-size:14px}
 .pf-chip.sel{border-color:var(--magenta);background:rgba(255,31,107,.12);color:#fff}
+/* Tarjeta de captura "dónde entrenas" (Entrena, usuarios existentes) */
+.train-setup{position:relative;background:linear-gradient(160deg,rgba(255,31,107,.12),var(--surface));border:1px solid var(--line-strong);border-radius:18px;padding:18px 16px;margin-bottom:16px;text-align:center}
+.train-setup-x{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--txt-faint);font-size:16px;cursor:pointer;line-height:1;padding:4px}
+.train-setup-emoji{font-size:26px;line-height:1;margin-bottom:8px}
+.train-setup-t{font-family:'Archivo';font-weight:900;font-size:16px;color:#fff;margin-bottom:4px}
+.train-setup-sub{font-size:13px;line-height:1.4;color:var(--txt-dim);margin-bottom:14px}
+.train-setup-btns{display:flex;gap:10px}
+.train-setup-btns button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);color:#fff;font-family:'Archivo';font-weight:800;font-size:14px;cursor:pointer}
+.train-setup-btns button:active{transform:scale(.98)}
 .pf-field label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint);font-weight:700;margin-bottom:6px}
 .pf-input,.pf-select{width:100%;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:13px 14px;color:var(--txt);font-family:'Archivo';font-size:15px;font-weight:600;outline:none}
 .pf-input:focus,.pf-select:focus{border-color:var(--magenta)}
