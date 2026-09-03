@@ -107,6 +107,7 @@ export default function AiPlanFlow({ kind, intro, generate, renderPlan }) {
     content = renderPlan(plan.content, {
       locked,
       daysLeft,
+      planId: plan.id || null, // source_plan_id para el switch gym<->casa por día
       onRenew: () => setStatus('checkin'),
       onDevForce: USE_MOCK_PLANS && locked ? () => setForced(true) : null,
     })

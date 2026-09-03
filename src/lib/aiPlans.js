@@ -90,8 +90,8 @@ export async function generateWorkout(checkin) {
     mockPersistCheckin(checkin)
     return { content: MOCK_WORKOUT, lockedUntil: lockISO() }
   }
-  const { plan, lockedUntil } = await authedPost('/api/generate-workout', { checkin, lang: getInitialLang() })
-  return { content: plan, lockedUntil }
+  const { plan, lockedUntil, id } = await authedPost('/api/generate-workout', { checkin, lang: getInitialLang() })
+  return { content: plan, lockedUntil, id }
 }
 
 // Genera una dieta nueva. `checkin` opcional (renovación mensual).
@@ -101,11 +101,21 @@ export async function generateDiet(checkin) {
     mockPersistCheckin(checkin)
     return { content: MOCK_DIET, lockedUntil: lockISO() }
   }
-  const { plan, lockedUntil } = await authedPost('/api/generate-diet', { checkin, lang: getInitialLang() })
-  return { content: plan, lockedUntil }
+  const { plan, lockedUntil, id } = await authedPost('/api/generate-diet', { checkin, lang: getInitialLang() })
+  return { content: plan, lockedUntil, id }
 }
 
 // Trae el plan más reciente 'ready' de un tipo ('workout' | 'diet').
+// Switch gym<->casa: genera (o reusa) la versión del día para el lugar CONTRARIO.
+// Devuelve { location, day, cached }. El servidor deduplica: una sola generación
+// por día+lugar; llamarlo de nuevo reusa la fila (no gasta créditos).
+export async function generateWorkoutDay(sourcePlanId, dayIndex) {
+  const r = await authedPost('/api/generate-workout-day', {
+    source_plan_id: sourcePlanId, day_index: dayIndex, lang: getInitialLang(),
+  })
+  return { location: r.location, day: r.day, cached: !!r.cached }
+}
+
 // Devuelve { content, lockedUntil, id, createdAt, requestedAt } o null.
 // requestedAt permite al cliente decidir si el plan ya se puede LIBERAR
 // (≥48h desde requested_at) o si sigue "en preparación".
