@@ -49,6 +49,8 @@ function profileRowFromLocal(p) {
     allergies: Array.isArray(p.allergies) ? p.allergies : null,
     diet_pref: p.dietPref ?? null,
     dislikes: dislikesToArray(p.dislikes),
+    train_location: p.trainLocation ?? null,
+    equipment: p.equipment ?? null,
     ai_consent_at: p.aiConsent?.date ?? null,
     avatar_url: p.avatarUrl ?? null,
     language: p.language ?? null,
@@ -82,6 +84,8 @@ function applyProfileRow(r) {
     allergies: r.allergies ?? [],
     dietPref: r.diet_pref ?? null,
     dislikes: Array.isArray(r.dislikes) ? r.dislikes.join(', ') : (r.dislikes ?? ''),
+    trainLocation: r.train_location ?? null,
+    equipment: r.equipment ?? '',
     // Consentimiento de IA: reconstruye el flag desde la columna (sobrevive
     // reinstalación si inició sesión).
     ...(r.ai_consent_at ? { aiConsent: { accepted: true, date: r.ai_consent_at } } : {}),

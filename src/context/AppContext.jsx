@@ -57,6 +57,8 @@ const DEFAULT_PROFILE = {
   height: 165,
   exercise: 'squats',
   wakeTime: '06:30',
+  trainLocation: null, // 'gym' | 'home' — null = existente sin responder (→ gym)
+  equipment: '',       // texto libre: equipo disponible en casa
 }
 
 export function AppProvider({ children }) {
