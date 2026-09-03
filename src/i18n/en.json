@@ -390,7 +390,7 @@
     "train": {
       "kick": "YOUR TRAINING",
       "q": "WHERE DO YOU TRAIN?",
-      "sub": "So we build your routine for your setup.",
+      "sub": "So we build your routine for your setup. You can skip it.",
       "gym": "Gym",
       "gym_desc": "I have access to full equipment",
       "home": "At home",

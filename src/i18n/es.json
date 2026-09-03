@@ -390,7 +390,7 @@
     "train": {
       "kick": "TU ENTRENAMIENTO",
       "q": "¿DÓNDE ENTRENAS?",
-      "sub": "Para armar tu rutina según tu lugar.",
+      "sub": "Para armar tu rutina según tu lugar. Puedes saltarlo.",
       "gym": "Gimnasio",
       "gym_desc": "Tengo acceso a equipo completo",
       "home": "En casa",

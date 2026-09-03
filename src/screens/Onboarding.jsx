@@ -42,7 +42,7 @@ export default function Onboarding() {
   const [allergies, setAllergies] = useState([])
   const [dietPref, setDietPref] = useState('todo')
   const [dislikes, setDislikes] = useState('')
-  const [trainLocation, setTrainLocation] = useState('gym')
+  const [trainLocation, setTrainLocation] = useState(null) // null = omitido → se trata como gym
   const [equipment, setEquipment] = useState('')
   const [hour, setHour] = useState('6')
   const [minute, setMinute] = useState('30')
@@ -464,7 +464,7 @@ export default function Onboarding() {
         <button className="cta full" onClick={next}>
           {step === OB_TOTAL - 1
             ? (unlocked < 4 ? t('onboarding.continue') : t('onboarding.start'))
-            : step === 1 && !avatarPreview ? t('onboarding.skip')
+            : (step === 1 && !avatarPreview) || (step === 8 && !trainLocation) ? t('onboarding.skip')
             : t('onboarding.continue')}
         </button>
       </div>
