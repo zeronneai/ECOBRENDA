@@ -20,9 +20,17 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, planId, onRene
   // Lugar objetivo del switch = el CONTRARIO al del perfil (home→gym, si no →home).
   const target = profile?.trainLocation === 'home' ? 'gym' : 'home'
 
+  const baseKey = planKey
+  const altKey = `${baseKey}#${target}` // namespace de completado de la versión alterna
   const [open, setOpen] = useState(0)
-  const [comp, setComp] = useState(() => getPlanCompletions(planKey))
+  // Completado POR VERSIÓN del día: original bajo baseKey, alterna bajo altKey.
+  // Así marcar en la versión gym NO afecta la de casa (y viceversa).
+  const [compMap, setCompMap] = useState(() => ({ [baseKey]: getPlanCompletions(baseKey) }))
   const [flash, setFlash] = useState('')
+
+  const viewKey = (di) => (showAlt[di] && alts[di]) ? altKey : baseKey
+  const compAt = (di) => compMap[viewKey(di)] || {}
+  const ensureComp = (key) => setCompMap((m) => (key in m ? m : { ...m, [key]: getPlanCompletions(key) }))
 
   // Switch por día.
   const [alts, setAlts] = useState({})         // { di: dayContent }
@@ -41,16 +49,17 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, planId, onRene
     return { days: days.length, ex, sets }
   }, [days])
 
-  const doneCount = (di) => Object.keys(comp[di] || {}).length
-  const isDone = (di, ei) => !!(comp[di] && comp[di][ei])
+  const doneCount = (di) => Object.keys(compAt(di)[di] || {}).length
+  const isDone = (di, ei) => !!(compAt(di)[di] && compAt(di)[di][ei])
   const dayCount = (di) => ((showAlt[di] && alts[di] ? alts[di] : days[di])?.exercises?.length || 0)
   const dayComplete = (di) => dayCount(di) > 0 && doneCount(di) >= dayCount(di)
 
   const toggle = (di, ei, exCount, focus) => {
+    const key = viewKey(di)
     const next = !isDone(di, ei)
     const wasComplete = dayComplete(di)
-    const updated = toggleExerciseDone(planKey, di, ei, next, exCount, focus)
-    setComp(updated)
+    const updated = toggleExerciseDone(key, di, ei, next, exCount, focus)
+    setCompMap((m) => ({ ...m, [key]: updated }))
     if (next) {
       const nowDone = Object.keys(updated[di] || {}).length
       const nowComplete = exCount > 0 && nowDone >= exCount
@@ -67,7 +76,7 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, planId, onRene
   // Tap en el switch: si ya existe la alterna → alterna vista; si no → confirmar.
   const onSwitchTap = (di) => {
     setErrDay(null)
-    if (alts[di]) { setShowAlt((s) => ({ ...s, [di]: !s[di] })); return }
+    if (alts[di]) { ensureComp(altKey); setShowAlt((s) => ({ ...s, [di]: !s[di] })); return }
     setConfirmDay(di)
   }
   const onConfirm = async (di) => {
@@ -75,6 +84,7 @@ export default function WorkoutPlanView({ plan, locked, daysLeft, planId, onRene
     try {
       const { day } = await generateWorkoutDay(planId, di)
       setAlts((a) => ({ ...a, [di]: day }))
+      ensureComp(altKey)
       setShowAlt((s) => ({ ...s, [di]: true }))
     } catch {
       setErrDay(di)
