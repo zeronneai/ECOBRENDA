@@ -8,7 +8,7 @@ import RulerPicker from '../components/RulerPicker'
 import WheelPicker from '../components/WheelPicker'
 import LanguageSelect from '../components/LanguageSelect'
 
-const OB_TOTAL = 12
+const OB_TOTAL = 13
 
 const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1))
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
@@ -42,6 +42,8 @@ export default function Onboarding() {
   const [allergies, setAllergies] = useState([])
   const [dietPref, setDietPref] = useState('todo')
   const [dislikes, setDislikes] = useState('')
+  const [trainLocation, setTrainLocation] = useState('gym')
+  const [equipment, setEquipment] = useState('')
   const [hour, setHour] = useState('6')
   const [minute, setMinute] = useState('30')
   const [ampm, setAmpm] = useState('AM')
@@ -108,6 +110,8 @@ export default function Onboarding() {
       allergies,
       dietPref,
       dislikes: dislikes.trim(),
+      trainLocation,
+      equipment: equipment.trim(),
       ...(avatarPreview ? { avatarPendingDataUrl: avatarPreview } : {}),
       wakeTime,
       exercise,
@@ -300,8 +304,37 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* 7 — ALERGIAS (multi-select) */}
+        {/* 8 — DÓNDE ENTRENA + EQUIPO (alimenta la generación de la rutina) */}
         {step === 8 && (
+          <div className="ob-step active">
+            <div className="ob-kick">{t('onboarding.train.kick')}</div>
+            <div className="ob-q">{t('onboarding.train.q')}</div>
+            <div className="ob-sub">{t('onboarding.train.sub')}</div>
+            <div>
+              <div className={'opt' + (trainLocation === 'gym' ? ' sel' : '')} onClick={() => setTrainLocation('gym')}>
+                <div className="oe">🏋️</div>
+                <div className="ol"><b>{t('onboarding.train.gym')}</b><span>{t('onboarding.train.gym_desc')}</span></div>
+              </div>
+              <div className={'opt' + (trainLocation === 'home' ? ' sel' : '')} onClick={() => setTrainLocation('home')}>
+                <div className="oe">🏠</div>
+                <div className="ol"><b>{t('onboarding.train.home')}</b><span>{t('onboarding.train.home_desc')}</span></div>
+              </div>
+            </div>
+            <div className="ob-q" style={{ marginTop: 18 }}>{t('onboarding.equip.q')}</div>
+            <div className="ob-sub">{t('onboarding.equip.sub')}</div>
+            <input
+              className="ob-name-input"
+              placeholder={t('onboarding.equip.placeholder')}
+              autoComplete="off"
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') next() }}
+            />
+          </div>
+        )}
+
+        {/* 9 — ALERGIAS (multi-select) */}
+        {step === 9 && (
           <div className="ob-step active">
             <div className="ob-kick">{t('onboarding.food_kick')}</div>
             <div className="ob-q">{t('onboarding.allergy.q')}</div>
@@ -323,7 +356,7 @@ export default function Onboarding() {
         )}
 
         {/* 8 — PREFERENCIA DIETÉTICA (single-select) */}
-        {step === 9 && (
+        {step === 10 && (
           <div className="ob-step active">
             <div className="ob-kick">{t('onboarding.food_kick')}</div>
             <div className="ob-q">{t('onboarding.diet.q')}</div>
@@ -340,7 +373,7 @@ export default function Onboarding() {
         )}
 
         {/* 9 — ALIMENTOS QUE NO TE GUSTAN (texto libre, opcional) */}
-        {step === 10 && (
+        {step === 11 && (
           <div className="ob-step active">
             <div className="ob-kick">{t('onboarding.food_kick')}</div>
             <div className="ob-q">{t('onboarding.dislikes.q')}</div>
@@ -357,7 +390,7 @@ export default function Onboarding() {
         )}
 
         {/* 10 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
-        {step === 11 && (
+        {step === 12 && (
           <div className="ob-step active">
             <div className="ob-kick">{t('onboarding.alarm.kick')}</div>
             <div className="ob-q">{t('onboarding.alarm.q')}</div>

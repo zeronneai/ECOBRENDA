@@ -387,6 +387,20 @@
       "sub": "Optional. List foods you'd rather avoid (e.g., broccoli, tuna). You can skip this.",
       "placeholder": "e.g., broccoli, liver, cilantro…"
     },
+    "train": {
+      "kick": "YOUR TRAINING",
+      "q": "WHERE DO YOU TRAIN?",
+      "sub": "So we build your routine for your setup.",
+      "gym": "Gym",
+      "gym_desc": "I have access to full equipment",
+      "home": "At home",
+      "home_desc": "I train at home"
+    },
+    "equip": {
+      "q": "WHAT EQUIPMENT DO YOU HAVE AT HOME?",
+      "sub": "Optional. We use it to adapt your home routine. You can leave it empty.",
+      "placeholder": "e.g., bands, dumbbells, a chair, nothing…"
+    },
     "alarm": {
       "kick": "Active Wake-Up",
       "q": "SET UP YOUR ALARM",

@@ -387,6 +387,20 @@
       "sub": "Opcional. Escribe alimentos que prefieres evitar (ej. brócoli, atún). Puedes saltarlo.",
       "placeholder": "Ej. brócoli, hígado, cilantro…"
     },
+    "train": {
+      "kick": "TU ENTRENAMIENTO",
+      "q": "¿DÓNDE ENTRENAS?",
+      "sub": "Para armar tu rutina según tu lugar.",
+      "gym": "Gimnasio",
+      "gym_desc": "Tengo acceso a equipo completo",
+      "home": "En casa",
+      "home_desc": "Entreno en casa"
+    },
+    "equip": {
+      "q": "¿QUÉ EQUIPO TIENES DISPONIBLE EN CASA?",
+      "sub": "Opcional. Lo usamos para adaptar tu rutina en casa. Puedes dejarlo vacío.",
+      "placeholder": "Ej. bandas, mancuernas, una silla, nada…"
+    },
     "alarm": {
       "kick": "Despertar Activo",
       "q": "CONFIGURA TU ALARMA",

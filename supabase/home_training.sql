@@ -15,7 +15,9 @@ alter table public.profiles add column if not exists equipment      text;   -- t
 create table if not exists public.workout_day_alts (
   id             uuid primary key default gen_random_uuid(),
   user_id        uuid not null references auth.users(id) on delete cascade,
-  source_plan_id uuid not null,          -- ai_plans.id de la rutina base
+  -- FK a la rutina base: si el plan se borra, sus alternas se borran solas
+  -- (evita filas huérfanas apuntando a un plan inexistente).
+  source_plan_id uuid not null references public.ai_plans(id) on delete cascade,
   day_index      int  not null,          -- qué día (0-based)
   location       text not null,          -- 'gym' | 'home' (la versión CONTRARIA)
   content        jsonb,                  -- el día alterno { focus, warmup, exercises }
