@@ -1225,3 +1225,25 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .lang-select.compact .lang-code{width:38px;height:38px;font-size:15px}
 .lang-name{font-family:'Archivo';font-weight:800;font-size:18px}
 .lang-select.compact .lang-name{font-size:14px}
+
+/* ── Ruleta Brenda Coins ─────────────────────────────────────────────────── */
+.rlt-backdrop{position:fixed;inset:0;z-index:320;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.72);backdrop-filter:blur(4px)}
+.rlt-card{width:100%;max-width:360px;background:linear-gradient(170deg,rgba(255,31,107,.14),var(--surface));border:1px solid var(--line-strong);border-radius:22px;padding:22px 20px 24px;text-align:center}
+.rlt-kick{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-faint);font-weight:800;margin-bottom:4px}
+.rlt-title{font-family:'Archivo';font-weight:900;font-size:22px;color:#fff;margin:0 0 16px}
+.rlt-wheel-wrap{position:relative;width:240px;height:240px;margin:0 auto 20px}
+.rlt-pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;font-size:30px;line-height:1;color:#fff;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.rlt-wheel{position:absolute;inset:0;border-radius:50%;border:4px solid rgba(255,255,255,.85);box-shadow:0 8px 26px rgba(0,0,0,.45),inset 0 0 0 6px rgba(0,0,0,.18);transition:transform 3.3s cubic-bezier(.17,.67,.16,1)}
+.rlt-label{position:absolute;top:50%;left:50%;width:0;height:0;transform-origin:0 0}
+.rlt-label span{position:absolute;transform-origin:center;display:inline-block;transform:translate(-50%,-50%);font-family:'Archivo';font-weight:900;font-size:15px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.55);white-space:nowrap}
+.rlt-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:var(--surface);border:3px solid rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:24px;z-index:2}
+.rlt-spin{width:100%;padding:15px;border:none;border-radius:14px;background:var(--magenta,#ff1f6b);color:#fff;font-family:'Archivo';font-weight:900;font-size:16px;letter-spacing:.04em;cursor:pointer}
+.rlt-spin:disabled{opacity:.6;cursor:default}
+.rlt-spin:active{transform:scale(.98)}
+.rlt-result{margin-top:4px}
+.rlt-won-n{font-family:'Archivo';font-weight:900;font-size:44px;line-height:1;color:var(--gold,#f5c542);text-shadow:0 2px 6px rgba(0,0,0,.4)}
+.rlt-won-l{font-size:14px;color:var(--txt-dim);margin:6px 0 16px}
+.rlt-zero-t{font-family:'Archivo';font-weight:900;font-size:24px;color:#fff;margin-bottom:4px}
+.rlt-zero-m{font-size:14px;line-height:1.4;color:var(--txt-dim);margin:0 0 16px}
+.rlt-close{width:100%;padding:14px;border:1px solid var(--line-strong);border-radius:14px;background:var(--surface);color:#fff;font-family:'Archivo';font-weight:800;font-size:15px;cursor:pointer}
+.rlt-close:active{transform:scale(.98)}

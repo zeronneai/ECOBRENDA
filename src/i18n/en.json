@@ -513,6 +513,22 @@
     "number_updated": "Number updated.",
     "revoked": "You unsubscribed from WhatsApp."
   },
+  "bc": {
+    "roulette": {
+      "title": "Spin the wheel!",
+      "sub_alarm": "For completing your alarm",
+      "sub_challenge": "For your first challenge of the day",
+      "spin_btn": "SPIN",
+      "spinning": "Spinning…",
+      "won": "You won {{n}} Brenda Coins!",
+      "zero_title": "So close!",
+      "zero1": "No luck today, but don't give up. Tomorrow is your day!",
+      "zero2": "No prize this time, but your consistency is worth gold.",
+      "zero3": "Luck gets trained just like glutes. Keep it up!",
+      "zero4": "Zero coins, zero excuses. You're doing amazing!",
+      "close": "Continue"
+    }
+  },
   "legal": {
     "back": "‹ Back",
     "back_aria": "Back to home",

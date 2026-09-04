@@ -9,7 +9,7 @@ import { rescheduleAppleAlarms, requestAlarmKitAuthIfSupported, engageAlarmKit, 
 import { primeNativePermissions } from '../lib/nativePerms'
 import { rescheduleMotivational } from '../lib/motivationNotifs'
 import { scheduleStreakBreakWarning } from '../lib/streakNotifs'
-import { awardAlarm } from '../lib/bc'
+import { awardAlarm, spin as bcSpin } from '../lib/bc'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -75,6 +75,7 @@ export function AppProvider({ children }) {
   const [subscription, setSubscriptionState] = useState(() => dataStore.getSubscription())
   const [streak, setStreak] = useState(() => dataStore.getStreak())
   const [challengesDone, setChallengesDone] = useState(() => dataStore.getChallengeCount())
+  const [roulette, setRoulette] = useState(null) // { prize, source } cuando hay giro disponible
   const [totals, setTotals] = useState(() => dataStore.getTotals())
   const [workoutLog, setWorkoutLogState] = useState(() => dataStore.getWorkoutLog())
   const [progressLog, setProgressLogState] = useState(() => dataStore.getProgressLog())
@@ -198,13 +199,26 @@ export function AppProvider({ children }) {
       if (r?.ok) {
         if (typeof r.streak === 'number') setStreak(r.streak)
         if (r.deadline_at) scheduleStreakBreakWarning(r.deadline_at, language)
+        // Giro de ruleta de la alarma (el servidor exige alarm_awarded y lo limita
+        // a 1/día). Si procede, abre la ruleta; el cliente solo anima y revela.
+        const sp = await bcSpin('alarm')
+        if (sp?.ok) setRoulette({ prize: sp.prize, source: 'alarm' })
       }
     })()
   }, [syncAchievements, language])
 
+  const closeRoulette = useCallback(() => setRoulette(null), [])
+
   // Reto rápido completado → su contador propio (no toca la racha).
   const incrementChallenge = useCallback(() => {
     setChallengesDone(dataStore.incrementChallenge())
+    // Giro de ruleta del PRIMER reto del día: el servidor decide si es el primero
+    // (bc_spin limita a 1/día por fuente). Los retos siguientes → already_spun →
+    // no abre nada. Detrás de BC_ENABLED. Best-effort.
+    ;(async () => {
+      const sp = await bcSpin('challenge')
+      if (sp?.ok) setRoulette({ prize: sp.prize, source: 'challenge' })
+    })()
   }, [])
 
   // Rep válida → suma a totales reales (persistente). Sin re-render por frame.
@@ -793,6 +807,7 @@ export function AppProvider({ children }) {
     onboarding, finishOnboarding,
     streak, completeWakeWorkout,
     challengesDone, incrementChallenge,
+    roulette, closeRoulette,
     totals, recordRep, logWorkout, workoutLog,
     getPlanCompletions, toggleExerciseDone,
     progressLog, addProgressEntry, deleteProgressEntry,

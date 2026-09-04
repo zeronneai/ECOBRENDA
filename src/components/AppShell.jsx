@@ -11,6 +11,7 @@ import Celebration from '../screens/Celebration'
 // nunca en el primer paint. Se monta detrás de Suspense.
 const CameraScan = lazy(() => import('../screens/CameraScan'))
 import AchievementModal from './AchievementModal'
+import RouletteModal from './RouletteModal'
 import Onboarding from '../screens/Onboarding'
 import PermissionsPriming from '../screens/PermissionsPriming'
 import Auth from '../screens/Auth'
@@ -18,7 +19,7 @@ import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
 
 export default function AppShell() {
   const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef, needsPriming,
-          authOpen, authView, handleAuthed, closeAuth, needsAccount, accountRecap } = useApp()
+          authOpen, authView, handleAuthed, closeAuth, needsAccount, accountRecap, roulette } = useApp()
   return (
     <div className="app" ref={appRef}>
       {/* Audio único (alarma o reto): vive a nivel app para sobrevivir al
@@ -48,6 +49,8 @@ export default function AppShell() {
       {celebrating && <Celebration />}
       {/* Logro: aparece tras cerrar la felicitación de reto (no choca) */}
       {achievementQueue.length > 0 && !celebrating && <AchievementModal />}
+      {/* Ruleta Brenda Coins: aparece tras la felicitación cuando hay giro */}
+      {roulette && !celebrating && <RouletteModal />}
       <Toast />
 
       {onboarding && <Onboarding />}

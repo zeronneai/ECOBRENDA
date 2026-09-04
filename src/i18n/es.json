@@ -513,6 +513,22 @@
     "number_updated": "Número actualizado.",
     "revoked": "Te diste de baja de WhatsApp."
   },
+  "bc": {
+    "roulette": {
+      "title": "¡Gira la ruleta!",
+      "sub_alarm": "Por completar tu alarma",
+      "sub_challenge": "Por tu primer reto del día",
+      "spin_btn": "GIRAR",
+      "spinning": "Girando…",
+      "won": "¡Ganaste {{n}} Brenda Coins!",
+      "zero_title": "¡Casi!",
+      "zero1": "Hoy no cayó, pero no te rindas. ¡Mañana es tu día!",
+      "zero2": "Sin premio esta vez, pero tu constancia vale oro.",
+      "zero3": "La suerte se entrena igual que los glúteos. ¡Sigue así!",
+      "zero4": "Cero monedas, cero excusas. ¡Vas increíble!",
+      "close": "Continuar"
+    }
+  },
   "legal": {
     "back": "‹ Volver",
     "back_aria": "Volver al inicio",

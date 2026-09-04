@@ -35,3 +35,18 @@ export async function awardAlarm() {
     return null
   }
 }
+
+/* Intenta un giro de ruleta para la fuente ('alarm' | 'challenge'). El servidor
+   decide el premio y el cupo (máx 1/día por fuente). Devuelve { ok, prize, ... }
+   solo cuando el giro procede; null si no hay giro (ya giró, no elegible, error,
+   flag OFF). Best-effort: nunca rompe el flujo de completar. */
+export async function spin(source) {
+  if (!BC_ENABLED || !supabase) return null
+  try {
+    const r = await authedPost('/api/bc/spin', { source })
+    return r?.ok ? r : null
+  } catch (e) {
+    console.warn('[bc] spin', e?.message || e)
+    return null
+  }
+}
