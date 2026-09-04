@@ -10,6 +10,7 @@ import { primeNativePermissions } from '../lib/nativePerms'
 import { rescheduleMotivational } from '../lib/motivationNotifs'
 import { scheduleStreakBreakWarning } from '../lib/streakNotifs'
 import { awardAlarm, spin as bcSpin } from '../lib/bc'
+import { fetchBalance } from '../lib/bcData'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -78,6 +79,9 @@ export function AppProvider({ children }) {
   // Giro de ruleta por revelar. Se inicializa desde la cola persistida: si
   // cerraron la app con un giro sin ver, aparece al abrir. { prize, source }.
   const [roulette, setRoulette] = useState(() => dataStore.getPendingSpins()[0] || null)
+  // Brenda Coins: saldo para la píldora + apertura de la sección Recompensas.
+  const [bcBalance, setBcBalance] = useState(null)
+  const [rewardsOpen, setRewardsOpen] = useState(false)
   const [totals, setTotals] = useState(() => dataStore.getTotals())
   const [workoutLog, setWorkoutLogState] = useState(() => dataStore.getWorkoutLog())
   const [progressLog, setProgressLogState] = useState(() => dataStore.getProgressLog())
@@ -210,15 +214,26 @@ export function AppProvider({ children }) {
           dataStore.pushPendingSpin({ prize: sp.prize, source: 'alarm', ts: Date.now() })
           setRoulette((cur) => cur || dataStore.getPendingSpins()[0] || null)
         }
+        fetchBalance().then((b) => { if (typeof b === 'number') setBcBalance(b) })
       }
     })()
   }, [syncAchievements, language])
 
-  // Cierra el giro actual: lo saca de la cola y avanza al siguiente pendiente.
+  // Refresca el saldo de Brenda Coins (píldora). Best-effort.
+  const refreshBcBalance = useCallback(async () => {
+    const b = await fetchBalance()
+    if (typeof b === 'number') setBcBalance(b)
+  }, [])
+
+  // Cierra el giro actual: lo saca de la cola, avanza al siguiente y refresca saldo.
   const closeRoulette = useCallback(() => {
     dataStore.shiftPendingSpin()
     setRoulette(dataStore.getPendingSpins()[0] || null)
-  }, [])
+    refreshBcBalance()
+  }, [refreshBcBalance])
+
+  const openRewards = useCallback(() => { setRewardsOpen(true); refreshBcBalance() }, [refreshBcBalance])
+  const closeRewards = useCallback(() => { setRewardsOpen(false); refreshBcBalance() }, [refreshBcBalance])
 
   // Reto rápido completado → su contador propio (no toca la racha).
   const incrementChallenge = useCallback(() => {
@@ -669,6 +684,8 @@ export function AppProvider({ children }) {
     setAlarmsState([...dataStore.getAlarms()])
     setWeekChart(dataStore.getWeekChartData())
     setOnboarding(!dataStore.getProfile()?.onboarded)
+    // Brenda Coins: carga el saldo para la píldora (best-effort, detrás del flag).
+    fetchBalance().then((b) => { if (typeof b === 'number') setBcBalance(b) })
     // Tras un pull: marca como YA anunciados los logros que correspondan al
     // progreso de la nube, para NO celebrar logros ganados en otro dispositivo.
     const unlocked = ACHIEVEMENTS.filter((a) => a.check(dataStore.getStreak(), dataStore.getTotals().workouts)).map((a) => a.id)
@@ -822,6 +839,7 @@ export function AppProvider({ children }) {
     streak, completeWakeWorkout,
     challengesDone, incrementChallenge,
     roulette, closeRoulette,
+    bcBalance, refreshBcBalance, rewardsOpen, openRewards, closeRewards,
     totals, recordRep, logWorkout, workoutLog,
     getPlanCompletions, toggleExerciseDone,
     progressLog, addProgressEntry, deleteProgressEntry,

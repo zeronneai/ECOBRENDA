@@ -527,6 +527,39 @@
       "zero3": "Luck gets trained just like glutes. Keep it up!",
       "zero4": "Zero coins, zero excuses. You're doing amazing!",
       "close": "Continue"
+    },
+    "reward": {
+      "shaker": "Shaker",
+      "termo": "Tumbler",
+      "colageno": "Collagen",
+      "creatina": "Creatine",
+      "proteina": "Protein",
+      "outfit": "Gym outfit"
+    },
+    "rewards": {
+      "balance_label": "Your Brenda Coins",
+      "streak": "{{n}}-day streak",
+      "loading": "Loading…",
+      "expiring": "{{n}} BC expire on {{date}}",
+      "locked_plan": "Redeeming is exclusive to the full plan",
+      "locked_plan_sub": "Keep earning: your points are waiting for when you subscribe.",
+      "catalog_h": "Catalog",
+      "available": "Available!",
+      "reached": "You reached it!",
+      "missing": "{{n}} BC to go",
+      "history_h": "Activity",
+      "no_history": "No activity yet",
+      "close": "Close",
+      "days_suffix": " days",
+      "tx": {
+        "earn_alarm": "Alarm completed",
+        "earn_milestone": "Streak milestone",
+        "earn_roulette": "Wheel",
+        "earn_founder": "Founder bonus",
+        "redeem": "Redemption",
+        "expire": "Expired points",
+        "adjust": "Adjustment"
+      }
     }
   },
   "legal": {

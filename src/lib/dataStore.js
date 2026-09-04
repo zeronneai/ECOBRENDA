@@ -29,7 +29,7 @@ const DEFAULT_STATE = {
   //   aiConsent:{ accepted:true, date:ISO }, avatarUrl, language:'es'|'en',
   //   waPhone:'+52...', waConsent:{ accepted, date:ISO, version } }
   profile: null,
-  subscription: { status: 'inactive', plan: null, currentPeriodEnd: null, accesoAlarma: false, accesoPremium: false, trialEnd: null, unlimitedPlans: false },
+  subscription: { status: 'inactive', plan: null, currentPeriodEnd: null, accesoAlarma: false, accesoPremium: false, trialEnd: null, unlimitedPlans: false, stripeSubscriptionId: null },
   wakeStreak: { current: 0, best: 0, lastCompleted: '' }, // racha de la alarma diaria
   workoutLog: [],   // [{ id, ts, date, source:'alarm'|'challenge', exercise:'squat'|'lunge', reps }]
   progressLog: [],  // [{ id, ts, date, weight, note }]

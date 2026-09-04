@@ -167,6 +167,8 @@ async function pullSubscription() {
       accesoPremium: data.acceso_premium === true,
       trialEnd: data.trial_end ?? null,
       unlimitedPlans: data.unlimited_plans === true,
+      // Para el gate de CANJE (premium PAGADO): espejo de bc_is_premium_paid.
+      stripeSubscriptionId: data.stripe_subscription_id ?? null,
     })
   }
 }

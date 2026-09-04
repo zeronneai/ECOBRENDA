@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useApp } from '../store'
 import TabBar from './TabBar'
 import Toast from './Toast'
@@ -12,6 +12,11 @@ import Celebration from '../screens/Celebration'
 const CameraScan = lazy(() => import('../screens/CameraScan'))
 import AchievementModal from './AchievementModal'
 import RouletteModal from './RouletteModal'
+import RewardsModal from './RewardsModal'
+import BcPill from './BcPill'
+
+// La píldora de saldo aparece SOLO en estas pantallas (nunca en alarma/squats/progreso).
+const BC_PILL_ROUTES = new Set(['/', '/entrena', '/nutricion', '/profile'])
 import Onboarding from '../screens/Onboarding'
 import PermissionsPriming from '../screens/PermissionsPriming'
 import Auth from '../screens/Auth'
@@ -19,7 +24,10 @@ import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
 
 export default function AppShell() {
   const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef, needsPriming,
-          authOpen, authView, handleAuthed, closeAuth, needsAccount, accountRecap, roulette } = useApp()
+          authOpen, authView, handleAuthed, closeAuth, needsAccount, accountRecap, roulette, rewardsOpen } = useApp()
+  const { pathname } = useLocation()
+  // Píldora visible solo en las 4 pantallas y nunca sobre overlays de alarma/squats.
+  const showPill = BC_PILL_ROUTES.has(pathname) && !ringOpen && !scanning && !onboarding && !needsAccount
   return (
     <div className="app" ref={appRef}>
       {/* Audio único (alarma o reto): vive a nivel app para sobrevivir al
@@ -51,6 +59,10 @@ export default function AppShell() {
       {achievementQueue.length > 0 && !celebrating && <AchievementModal />}
       {/* Ruleta Brenda Coins: aparece tras la felicitación cuando hay giro */}
       {roulette && !celebrating && <RouletteModal key={roulette.ts || 'rlt'} />}
+      {/* Píldora de saldo Brenda Coins (esquina superior, 4 pantallas) */}
+      {showPill && <BcPill />}
+      {/* Sección Recompensas (se abre desde la píldora de saldo) */}
+      {rewardsOpen && <RewardsModal />}
       <Toast />
 
       {onboarding && <Onboarding />}

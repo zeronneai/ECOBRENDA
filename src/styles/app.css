@@ -1247,3 +1247,45 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .rlt-zero-m{font-size:14px;line-height:1.4;color:var(--txt-dim);margin:0 0 16px}
 .rlt-close{width:100%;padding:14px;border:1px solid var(--line-strong);border-radius:14px;background:var(--surface);color:#fff;font-family:'Archivo';font-weight:800;font-size:15px;cursor:pointer}
 .rlt-close:active{transform:scale(.98)}
+
+/* ── Brenda Coins: píldora de saldo ──────────────────────────────────────── */
+.bc-pill{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:90;display:inline-flex;align-items:center;gap:5px;padding:6px 11px 6px 8px;border-radius:999px;border:1px solid var(--line-strong);background:rgba(20,20,24,.72);backdrop-filter:blur(8px);color:#fff;font-family:'Archivo';font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.bc-pill:active{transform:scale(.96)}
+.bc-pill-ic{font-size:14px;line-height:1}
+.bc-pill-n{letter-spacing:.02em}
+
+/* ── Brenda Coins: sección Recompensas ───────────────────────────────────── */
+.rw-backdrop{position:fixed;inset:0;z-index:280;background:var(--bg,#0d0d10);display:flex;flex-direction:column}
+.rw-sheet{display:flex;flex-direction:column;height:100%;max-width:520px;width:100%;margin:0 auto}
+.rw-top{position:relative;padding:calc(env(safe-area-inset-top,0px) + 22px) 20px 22px;text-align:center;background:linear-gradient(170deg,rgba(255,31,107,.20),transparent)}
+.rw-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;background:none;border:none;color:var(--txt-dim);font-size:20px;cursor:pointer;line-height:1;padding:6px}
+.rw-bal-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-faint);font-weight:800;margin-bottom:4px}
+.rw-bal{font-family:'Archivo';font-weight:900;font-size:40px;line-height:1;color:#fff}
+.rw-streak{margin-top:8px;font-size:13px;color:var(--txt-dim);font-weight:700}
+.rw-body{flex:1;overflow-y:auto;padding:4px 16px calc(env(safe-area-inset-bottom,0px) + 28px)}
+.rw-loading,.rw-empty{color:var(--txt-dim);font-size:14px;text-align:center;padding:24px}
+.rw-expire{margin:10px 0 4px;padding:11px 13px;border-radius:12px;background:rgba(245,197,66,.12);border:1px solid rgba(245,197,66,.3);color:#f5c542;font-size:13px;font-weight:700}
+.rw-locked-plan{margin:12px 0 4px;padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line-strong);text-align:center}
+.rw-locked-t{font-family:'Archivo';font-weight:900;font-size:15px;color:#fff;margin-bottom:3px}
+.rw-locked-d{font-size:12.5px;color:var(--txt-dim);line-height:1.4}
+.rw-sec-h{font-family:'Archivo';font-weight:900;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint);margin:22px 2px 12px}
+.rw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rw-card{background:var(--surface);border:1px solid var(--line-strong);border-radius:16px;padding:14px 12px;text-align:center;position:relative}
+.rw-card.unlocked{border-color:rgba(216,255,62,.5);box-shadow:0 0 0 1px rgba(216,255,62,.25)}
+.rw-sil{font-size:34px;line-height:1;margin-bottom:8px;filter:grayscale(1) brightness(.55);opacity:.65;transition:filter .2s,opacity .2s}
+.rw-sil.on{filter:none;opacity:1}
+.rw-name{font-family:'Archivo';font-weight:800;font-size:14px;color:#fff;margin-bottom:2px}
+.rw-cost{font-size:12px;color:var(--txt-faint);font-weight:700;margin-bottom:8px}
+.rw-bar{height:6px;border-radius:4px;background:rgba(255,255,255,.09);overflow:hidden;margin-bottom:6px}
+.rw-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--magenta,#ff1f6b),var(--lime,#d8ff3e));border-radius:4px}
+.rw-status{font-size:11.5px;font-weight:700;color:var(--txt-dim)}
+.rw-card.unlocked .rw-status{color:var(--lime,#d8ff3e)}
+.rw-hist{display:flex;flex-direction:column;gap:2px}
+.rw-tx{display:flex;align-items:center;gap:11px;padding:11px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+.rw-tx-ic{font-size:18px;width:24px;text-align:center;flex:0 0 24px}
+.rw-tx-l{flex:1;display:flex;flex-direction:column;min-width:0}
+.rw-tx-t{font-size:13.5px;font-weight:700;color:#fff}
+.rw-tx-d{font-size:11.5px;color:var(--txt-faint)}
+.rw-tx-amt{font-family:'Archivo';font-weight:900;font-size:15px}
+.rw-tx-amt.pos{color:var(--lime,#d8ff3e)}
+.rw-tx-amt.neg{color:var(--txt-dim)}

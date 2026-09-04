@@ -527,6 +527,39 @@
       "zero3": "La suerte se entrena igual que los glúteos. ¡Sigue así!",
       "zero4": "Cero monedas, cero excusas. ¡Vas increíble!",
       "close": "Continuar"
+    },
+    "reward": {
+      "shaker": "Shaker",
+      "termo": "Termo",
+      "colageno": "Colágeno",
+      "creatina": "Creatina",
+      "proteina": "Proteína",
+      "outfit": "Outfit de gym"
+    },
+    "rewards": {
+      "balance_label": "Tus Brenda Coins",
+      "streak": "{{n}} días de racha",
+      "loading": "Cargando…",
+      "expiring": "{{n}} BC caducan el {{date}}",
+      "locked_plan": "El canje es exclusivo del plan completo",
+      "locked_plan_sub": "Sigue acumulando: tus puntos te esperan para cuando te suscribas.",
+      "catalog_h": "Catálogo",
+      "available": "¡Disponible!",
+      "reached": "¡Ya lo alcanzaste!",
+      "missing": "Te faltan {{n}} BC",
+      "history_h": "Movimientos",
+      "no_history": "Aún no tienes movimientos",
+      "close": "Cerrar",
+      "days_suffix": " días",
+      "tx": {
+        "earn_alarm": "Alarma completada",
+        "earn_milestone": "Hito de racha",
+        "earn_roulette": "Ruleta",
+        "earn_founder": "Bono de fundador",
+        "redeem": "Canje",
+        "expire": "Puntos caducados",
+        "adjust": "Ajuste"
+      }
     }
   },
   "legal": {
