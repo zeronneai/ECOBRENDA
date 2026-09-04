@@ -417,25 +417,29 @@ end $$;
 --   select cron.schedule('bc_expire_daily', '0 14 * * *', $$select public.bc_expire_sweep()$$);
 
 -- ── SEGURIDAD: solo service_role ejecuta las funciones que mueven dinero ──────
--- Postgres concede EXECUTE a public por defecto → hay que revocarlo. Sin esto,
--- un usuario autenticado podría llamar bc_redeem(otro_uid, ...) por RPC.
-revoke execute on function public.bc_add_earn(uuid, text, int, jsonb)                       from public;
-revoke execute on function public.bc_award_alarm(uuid)                                       from public;
-revoke execute on function public.bc_spin(uuid, text)                                        from public;
-revoke execute on function public.bc_redeem(uuid, text, text, text, text, text, text)        from public;
-revoke execute on function public.bc_grant_founder_bonus(uuid)                               from public;
-revoke execute on function public.bc_expire_sweep()                                          from public;
-revoke execute on function public.bc_balance(uuid)                                           from public;
-revoke execute on function public.bc_is_premium_paid(uuid)                                   from public;
-revoke execute on function public.bc_can_earn(uuid)                                          from public;
-
-grant execute on function public.bc_add_earn(uuid, text, int, jsonb)                         to service_role;
-grant execute on function public.bc_award_alarm(uuid)                                         to service_role;
-grant execute on function public.bc_spin(uuid, text)                                          to service_role;
-grant execute on function public.bc_redeem(uuid, text, text, text, text, text, text)          to service_role;
-grant execute on function public.bc_grant_founder_bonus(uuid)                                 to service_role;
-grant execute on function public.bc_expire_sweep()                                            to service_role;
-grant execute on function public.bc_balance(uuid)                                             to service_role;
-grant execute on function public.bc_is_premium_paid(uuid)                                     to service_role;
-grant execute on function public.bc_can_earn(uuid)                                            to service_role;
+-- OJO (lección aprendida): NO basta con "revoke ... from public". Supabase tiene
+-- ALTER DEFAULT PRIVILEGES que concede EXECUTE *directo* a anon y authenticated
+-- al crear cada función, así que hay que revocarles a ELLOS explícitamente, no
+-- solo a PUBLIC. Iteramos con oid::regprocedure para que la firma exacta siempre
+-- coincida (inmune a typos de firma y a overloads). Sin esto, un autenticado
+-- podría llamar bc_redeem(otro_uid, ...) por RPC (corren como owner).
+do $$
+declare
+  fn regprocedure;
+  money_fns text[] := array[
+    'bc_add_earn','bc_award_alarm','bc_spin','bc_redeem',
+    'bc_grant_founder_bonus','bc_expire_sweep',
+    'bc_balance','bc_is_premium_paid','bc_can_earn'
+  ];
+begin
+  for fn in
+    select p.oid::regprocedure
+    from pg_proc p
+    where p.pronamespace = 'public'::regnamespace
+      and p.proname = any(money_fns)
+  loop
+    execute format('revoke execute on function %s from public, anon, authenticated', fn);
+    execute format('grant  execute on function %s to service_role', fn);
+  end loop;
+end $$;
 -- (bc_biz_day y bc_milestone_bonus son helpers puros sin acceso a datos: se dejan.)
