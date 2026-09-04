@@ -545,6 +545,7 @@
       "locked_plan_sub": "Keep earning: your points are waiting for when you subscribe.",
       "catalog_h": "Catalog",
       "available": "Available!",
+      "redeem": "Redeem",
       "reached": "You reached it!",
       "missing": "{{n}} BC to go",
       "history_h": "Activity",
@@ -559,6 +560,30 @@
         "redeem": "Redemption",
         "expire": "Expired points",
         "adjust": "Adjustment"
+      }
+    },
+    "redeem": {
+      "full_name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Shipping address",
+      "size": "Size",
+      "confirm": "Redeem for {{n}} BC",
+      "sending": "Sending…",
+      "note": "We'll verify your redemption and email you to arrange shipping.",
+      "back": "Back",
+      "done_t": "Redemption confirmed!",
+      "done_d": "We logged your {{reward}}. We'll email you to arrange shipping.",
+      "err": {
+        "missing_fields": "Please fill in every field.",
+        "size_required": "Pick a size.",
+        "not_paid_premium": "Redeeming is exclusive to the paid full plan.",
+        "insufficient": "You don't have enough Brenda Coins.",
+        "reward_unavailable": "This reward isn't available.",
+        "no_session": "Sign in to redeem.",
+        "network": "Connection failed. Try again.",
+        "disabled": "Redeeming isn't available right now.",
+        "generic": "Couldn't complete the redemption. Try again."
       }
     }
   },

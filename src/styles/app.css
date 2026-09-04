@@ -1289,3 +1289,27 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .rw-tx-amt{font-family:'Archivo';font-weight:900;font-size:15px}
 .rw-tx-amt.pos{color:var(--lime,#d8ff3e)}
 .rw-tx-amt.neg{color:var(--txt-dim)}
+
+/* ── Brenda Coins: canje (botón, formulario, confirmación) ───────────────── */
+.rw-redeem{width:100%;margin-top:2px;padding:8px;border:none;border-radius:10px;background:var(--lime,#d8ff3e);color:#0d0d10;font-family:'Archivo';font-weight:900;font-size:12.5px;cursor:pointer}
+.rw-redeem:active{transform:scale(.97)}
+.rw-form-top{position:relative;display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 18px) 20px 16px;background:linear-gradient(170deg,rgba(255,31,107,.16),transparent)}
+.rw-back{position:absolute;left:10px;top:calc(env(safe-area-inset-top,0px) + 12px);background:none;border:none;color:#fff;font-size:30px;line-height:1;cursor:pointer;padding:2px 10px}
+.rw-form-title{font-family:'Archivo';font-weight:900;font-size:20px;color:#fff}
+.rw-form-cost{font-size:13px;color:var(--lime,#d8ff3e);font-weight:800;margin-top:2px}
+.rw-form{display:flex;flex-direction:column;padding-top:8px}
+.rw-lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-faint);font-weight:700;margin:12px 2px 6px}
+.rw-addr{resize:none;font-family:'Archivo'}
+.rw-sizes{display:flex;gap:8px}
+.rw-size{flex:1;padding:11px 0;border-radius:11px;border:1px solid var(--line-strong);background:var(--surface);color:#fff;font-family:'Archivo';font-weight:800;font-size:14px;cursor:pointer}
+.rw-size.on{border-color:var(--lime,#d8ff3e);background:rgba(216,255,62,.14);color:var(--lime,#d8ff3e)}
+.rw-err{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,31,107,.12);border:1px solid rgba(255,31,107,.35);color:#ff97ba;font-size:13px}
+.rw-primary{margin-top:16px;width:100%;padding:15px;border:none;border-radius:14px;background:var(--magenta,#ff1f6b);color:#fff;font-family:'Archivo';font-weight:900;font-size:16px;cursor:pointer}
+.rw-primary:disabled{opacity:.6;cursor:default}
+.rw-primary:active{transform:scale(.98)}
+.rw-form-note{margin-top:12px;font-size:12px;line-height:1.4;color:var(--txt-faint);text-align:center}
+.rw-center{align-items:center;justify-content:center}
+.rw-done{text-align:center;padding:30px 26px;max-width:340px}
+.rw-done-ic{font-size:52px;margin-bottom:12px}
+.rw-done-t{font-family:'Archivo';font-weight:900;font-size:22px;color:#fff;margin-bottom:8px}
+.rw-done-d{font-size:14px;line-height:1.5;color:var(--txt-dim);margin-bottom:22px}

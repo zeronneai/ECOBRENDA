@@ -50,3 +50,20 @@ export async function spin(source) {
     return null
   }
 }
+
+/* Canjea una recompensa. El SERVIDOR valida premium pagado, saldo y descuenta
+   FIFO; el cliente NO manda saldo, solo el slug + datos de envío. Devuelve el
+   jsonb del servidor: { ok, redemption_id, balance } | { ok:false, reason } |
+   { error } (fallo de red/servidor). Lanza si no hay sesión. */
+export async function redeem(form) {
+  if (!BC_ENABLED || !supabase) return { ok: false, reason: 'disabled' }
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  if (!token) return { ok: false, reason: 'no_session' }
+  const resp = await fetch(`${API_BASE}/api/bc/redeem`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(form || {}),
+  })
+  return resp.json().catch(() => ({ ok: false, reason: 'network' }))
+}

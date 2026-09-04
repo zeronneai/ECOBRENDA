@@ -545,6 +545,7 @@
       "locked_plan_sub": "Sigue acumulando: tus puntos te esperan para cuando te suscribas.",
       "catalog_h": "Catálogo",
       "available": "¡Disponible!",
+      "redeem": "Canjear",
       "reached": "¡Ya lo alcanzaste!",
       "missing": "Te faltan {{n}} BC",
       "history_h": "Movimientos",
@@ -559,6 +560,30 @@
         "redeem": "Canje",
         "expire": "Puntos caducados",
         "adjust": "Ajuste"
+      }
+    },
+    "redeem": {
+      "full_name": "Nombre completo",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "address": "Dirección de envío",
+      "size": "Talla",
+      "confirm": "Canjear por {{n}} BC",
+      "sending": "Enviando…",
+      "note": "Verificamos tu canje y te contactamos por correo para coordinar el envío.",
+      "back": "Volver",
+      "done_t": "¡Canje confirmado!",
+      "done_d": "Registramos tu {{reward}}. Te contactaremos por correo para coordinar el envío.",
+      "err": {
+        "missing_fields": "Completa todos los campos.",
+        "size_required": "Elige una talla.",
+        "not_paid_premium": "El canje es exclusivo del plan completo pagado.",
+        "insufficient": "No tienes Brenda Coins suficientes.",
+        "reward_unavailable": "Esta recompensa no está disponible.",
+        "no_session": "Inicia sesión para canjear.",
+        "network": "Falló la conexión. Intenta de nuevo.",
+        "disabled": "El canje no está disponible ahora.",
+        "generic": "No se pudo completar el canje. Intenta de nuevo."
       }
     }
   },
