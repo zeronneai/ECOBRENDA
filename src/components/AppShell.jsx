@@ -52,7 +52,6 @@ export default function AppShell() {
       pill_gate_component: BC_ENABLED && cloudEnabled && !!session && subscription?.accesoAlarma === true,
     }
     window.__bc = { ...(window.__bc || {}), cond }
-    console.log('[BC diag]', cond)
   }, [pathname, cloudEnabled, session, subscription, onboarding, needsAccount, ringOpen, scanning, showPill])
   return (
     <div className="app" ref={appRef}>
