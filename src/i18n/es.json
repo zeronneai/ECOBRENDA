@@ -67,6 +67,14 @@
     "streak_alerts_d": "Avísame si voy a perder mi racha",
     "weekly_t": "Reporte semanal",
     "weekly_d": "Resumen de tu semana",
+    "motiv_h": "MOTIVACIÓN",
+    "motiv_note": "Frases y recordatorios para mantenerte con ánimo. Máximo 2 al día, nunca de madrugada.",
+    "motiv_master_t": "Frases motivacionales",
+    "motiv_master_d": "Recibe afirmaciones y motivación",
+    "motiv_meal_t": "Recordatorio de comida",
+    "motiv_workout_t": "Recordatorio de entrenamiento",
+    "motiv_streak_t": "Cuida tu racha",
+    "motiv_streak_d": "Solo cuando tengas una racha activa",
     "legal_h": "LEGAL",
     "privacy": "Política de Privacidad",
     "terms": "Términos y Condiciones",
@@ -477,7 +485,11 @@
   "notif": {
     "alarm_body": "Hora de tus {{reps}} {{ex}}. No se apaga hasta que completes tus reps.",
     "alarm_title": "🍑 ¡ARRIBA! {{reps}} {{ex}}",
-    "squats_btn": "HACER SQUATS 🍑"
+    "squats_btn": "HACER SQUATS 🍑",
+    "meal_title": "🍽️ Momento de nutrirte",
+    "workout_title": "💪 Hora de moverte",
+    "streak_title": "🔥 No pierdas tu racha",
+    "streak_body": "Tu racha sigue viva. Un pequeño esfuerzo hoy la mantiene encendida."
   },
   "legal": {
     "back": "‹ Volver",

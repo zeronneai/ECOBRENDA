@@ -7,6 +7,7 @@ import { unlockAlarmAudio, isAlarmAudioReady, stopAlarmTone } from '../lib/alarm
 import { isNativeApp, onAlarmTapped } from '../lib/nativeAlarm'
 import { rescheduleAppleAlarms, requestAlarmKitAuthIfSupported, engageAlarmKit, completeAlarmKit, getPendingAlarmKit, onAlarmFired } from '../lib/iosAlarm'
 import { primeNativePermissions } from '../lib/nativePerms'
+import { rescheduleMotivational } from '../lib/motivationNotifs'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -124,6 +125,12 @@ export function AppProvider({ children }) {
     try { localStorage.setItem(LANG_KEY, lang) } catch { /* noop */ }
     updateProfile({ language: lang })
   }, [updateProfile])
+
+  // Notificaciones motivacionales: reprograma (nativo) al montar y cuando cambian
+  // los ajustes, la racha o el idioma. No toca las notificaciones de la alarma.
+  useEffect(() => {
+    rescheduleMotivational(settings, (streak?.current || 0) > 0, language)
+  }, [settings, streak?.current, language])
 
   // Reconcilia el idioma cuando el perfil llega de la nube (login en otro equipo).
   useEffect(() => {

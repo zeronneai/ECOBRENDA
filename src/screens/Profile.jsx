@@ -332,6 +332,41 @@ export default function Profile() {
             </div>
           </div>
 
+          {/* Notificaciones motivacionales (locales, banco de frases) */}
+          <div className="pf-sec reveal d5">
+            <h3>{t('profile.motiv_h')}</h3>
+            <div className="pf-note-soft">{t('profile.motiv_note')}</div>
+            <div className="set-row">
+              <div><div className="t">{t('profile.motiv_master_t')}</div><div className="d">{t('profile.motiv_master_d')}</div></div>
+              <Toggle on={settings.motivEnabled} onClick={() => saveSettings({ motivEnabled: !settings.motivEnabled })} />
+            </div>
+            {settings.motivEnabled && (
+              <>
+                <div className="set-row">
+                  <div><div className="t">{t('profile.motiv_meal_t')}</div></div>
+                  <Toggle on={settings.notifMeal} onClick={() => saveSettings({ notifMeal: !settings.notifMeal })} />
+                </div>
+                {settings.notifMeal && (
+                  <div className="pf-field"><input className="pf-input" type="time" value={settings.notifMealTime} onChange={(e) => saveSettings({ notifMealTime: e.target.value })} /></div>
+                )}
+                <div className="set-row">
+                  <div><div className="t">{t('profile.motiv_workout_t')}</div></div>
+                  <Toggle on={settings.notifWorkout} onClick={() => saveSettings({ notifWorkout: !settings.notifWorkout })} />
+                </div>
+                {settings.notifWorkout && (
+                  <div className="pf-field"><input className="pf-input" type="time" value={settings.notifWorkoutTime} onChange={(e) => saveSettings({ notifWorkoutTime: e.target.value })} /></div>
+                )}
+                <div className="set-row">
+                  <div><div className="t">{t('profile.motiv_streak_t')}</div><div className="d">{t('profile.motiv_streak_d')}</div></div>
+                  <Toggle on={settings.notifStreak} onClick={() => saveSettings({ notifStreak: !settings.notifStreak })} />
+                </div>
+                {settings.notifStreak && (
+                  <div className="pf-field"><input className="pf-input" type="time" value={settings.notifStreakTime} onChange={(e) => saveSettings({ notifStreakTime: e.target.value })} /></div>
+                )}
+              </>
+            )}
+          </div>
+
           {/* Legal */}
           <div className="pf-sec reveal d6">
             <h3>{t('profile.legal_h')}</h3>

@@ -121,6 +121,11 @@ async function pushSettings() {
   const notifications = {
     sound: s.sound, reminder: s.reminder, reminderTime: s.reminderTime,
     streakAlerts: s.streakAlerts, weeklyReport: s.weeklyReport,
+    // Motivacionales (locales; el toggle/hora se sincroniza, la programación es del dispositivo)
+    motivEnabled: s.motivEnabled,
+    notifMeal: s.notifMeal, notifMealTime: s.notifMealTime,
+    notifWorkout: s.notifWorkout, notifWorkoutTime: s.notifWorkoutTime,
+    notifStreak: s.notifStreak, notifStreakTime: s.notifStreakTime,
   }
   const { error } = await supabase.from('settings').upsert(
     { user_id: currentUser.id, units: dataStore.getProfile()?.weightUnit ?? null, notifications },

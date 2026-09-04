@@ -38,7 +38,15 @@ const DEFAULT_STATE = {
   alarms: [],
   // Logros ya anunciados (null = aún sin inicializar/seed).
   announcedAchievements: null,
-  settings: { sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false, permsPrimed: false, trainPromptDismissed: false },
+  settings: {
+    sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false,
+    permsPrimed: false, trainPromptDismissed: false,
+    // Notificaciones motivacionales (locales, sin servidor). Máx 2/día, diurnas.
+    motivEnabled: true,
+    notifMeal: true, notifMealTime: '14:00',
+    notifWorkout: true, notifWorkoutTime: '18:00',
+    notifStreak: false, notifStreakTime: '20:00',
+  },
   // Ejercicios de la rutina IA marcados como hechos (checklist, solo local).
   //   completions: { [planKey]: { [dayIdx]: { [exIdx]: true } } }
   //   loggedDays:   { [planKey]: { [dayIdx]: true } }  (guard anti-doble-conteo)
@@ -372,6 +380,11 @@ export function getRinging() { try { return localStorage.getItem(RINGING_KEY) ||
 export function setRinging(id) {
   try { if (id) localStorage.setItem(RINGING_KEY, String(id)); else localStorage.removeItem(RINGING_KEY) } catch { /* noop */ }
 }
+// Estado de rotación de frases motivacionales (bolsa barajada por categoría).
+const MOTIVROT_KEY = NS + 'motivrot'
+export function getMotivRotation() { try { return JSON.parse(localStorage.getItem(MOTIVROT_KEY) || '{}') } catch { return {} } }
+export function setMotivRotation(state) { try { localStorage.setItem(MOTIVROT_KEY, JSON.stringify(state || {})) } catch { /* noop */ } }
+
 export function addAlarm(alarm = {}) {
   const s = load()
   const row = {

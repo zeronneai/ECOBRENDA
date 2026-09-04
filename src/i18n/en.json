@@ -67,6 +67,14 @@
     "streak_alerts_d": "Warn me if I'm about to lose my streak",
     "weekly_t": "Weekly report",
     "weekly_d": "A recap of your week",
+    "motiv_h": "MOTIVATION",
+    "motiv_note": "Phrases and reminders to keep you going. Max 2 a day, never in the middle of the night.",
+    "motiv_master_t": "Motivational phrases",
+    "motiv_master_d": "Get affirmations and motivation",
+    "motiv_meal_t": "Meal reminder",
+    "motiv_workout_t": "Workout reminder",
+    "motiv_streak_t": "Protect your streak",
+    "motiv_streak_d": "Only when you have an active streak",
     "legal_h": "LEGAL",
     "privacy": "Privacy Policy",
     "terms": "Terms & Conditions",
@@ -477,7 +485,11 @@
   "notif": {
     "alarm_body": "Time for your {{reps}} {{ex}}. It won't stop until you finish your reps.",
     "alarm_title": "🍑 UP! {{reps}} {{ex}}",
-    "squats_btn": "DO SQUATS 🍑"
+    "squats_btn": "DO SQUATS 🍑",
+    "meal_title": "🍽️ Time to nourish yourself",
+    "workout_title": "💪 Time to move",
+    "streak_title": "🔥 Don't lose your streak",
+    "streak_body": "Your streak is still alive. A little effort today keeps it burning."
   },
   "legal": {
     "back": "‹ Back",
