@@ -68,7 +68,13 @@ export default async function handler(req, res) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ secret: process.env.APPS_SCRIPT_SECRET || '', ...payload }),
         })
-        notified = r.ok
+        // OJO: Apps Script SIEMPRE responde HTTP 200, incluso al rechazar por
+        // secreto o al fallar el envío. Hay que mirar el CUERPO (ok:true), no
+        // r.ok. Así, si no se envió el correo, NO marcamos notified y el poller
+        // de respaldo lo reintenta.
+        const j = await r.json().catch(() => ({}))
+        notified = j.ok === true
+        if (!notified) console.error('[bc/redeem] push no confirmado por Apps Script:', JSON.stringify(j).slice(0, 200))
       } catch (e) {
         console.error('[bc/redeem] push', e?.message || e)
       }
