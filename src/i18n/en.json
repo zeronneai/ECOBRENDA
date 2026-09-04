@@ -50,6 +50,7 @@
     "prefs_note": "Changes apply to your NEXT plan, not the current one.",
     "train_location": "Where do you train?",
     "equipment": "Home equipment",
+    "injuries_label": "Injuries or limitations",
     "diet_pref": "Food preference",
     "allergies_label": "Allergies",
     "dislikes_label": "Foods you avoid",
@@ -408,6 +409,11 @@
       "sub": "Optional. We use it to adapt your home routine. You can leave it empty.",
       "placeholder": "e.g., bands, dumbbells, a chair, nothing…"
     },
+    "injuries": {
+      "q": "ANY INJURY OR PHYSICAL LIMITATION?",
+      "sub": "Optional but important: we avoid exercises that load that area. You can leave it empty.",
+      "placeholder": "e.g., knee, lower back, shoulder, none…"
+    },
     "alarm": {
       "kick": "Active Wake-Up",
       "q": "SET UP YOUR ALARM",
@@ -587,7 +593,7 @@
   "entrena": {
     "header": "TRAIN",
     "setup_title": "Tailor your plan",
-    "setup_sub": "Tell us where you train to tailor your next plan.",
+    "setup_sub": "Tell us where you train (and any injury) to tailor your next plan.",
     "setup_done": "Done! Your next plan will adapt. Fine-tune equipment in your Profile.",
     "promo_kick": "Workout library",
     "promo_h": "WORKOUTS & PROGRAMS MADE FOR YOU",

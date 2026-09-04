@@ -50,6 +50,7 @@
     "prefs_note": "Los cambios aplican a tu PRÓXIMO plan, no al actual.",
     "train_location": "¿Dónde entrenas?",
     "equipment": "Equipo en casa",
+    "injuries_label": "Lesiones o limitaciones",
     "diet_pref": "Preferencia de comida",
     "allergies_label": "Alergias",
     "dislikes_label": "Alimentos que evitas",
@@ -408,6 +409,11 @@
       "sub": "Opcional. Lo usamos para adaptar tu rutina en casa. Puedes dejarlo vacío.",
       "placeholder": "Ej. bandas, mancuernas, una silla, nada…"
     },
+    "injuries": {
+      "q": "¿TIENES ALGUNA LESIÓN O LIMITACIÓN FÍSICA?",
+      "sub": "Opcional pero importante: evitamos ejercicios que carguen esa zona. Puedes dejarlo vacío.",
+      "placeholder": "Ej. rodilla, espalda baja, hombro, ninguna…"
+    },
     "alarm": {
       "kick": "Despertar Activo",
       "q": "CONFIGURA TU ALARMA",
@@ -587,7 +593,7 @@
   "entrena": {
     "header": "ENTRENA",
     "setup_title": "Adapta tu plan",
-    "setup_sub": "Dinos dónde entrenas para adaptar tu próximo plan.",
+    "setup_sub": "Dinos dónde entrenas (y si tienes alguna lesión) para adaptar tu próximo plan.",
     "setup_done": "¡Listo! Tu próximo plan se adaptará. Afina el equipo en tu Perfil.",
     "promo_kick": "Biblioteca de entrenamientos",
     "promo_h": "RUTINAS Y PROGRAMAS HECHOS PARA TI",

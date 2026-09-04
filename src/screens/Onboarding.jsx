@@ -44,6 +44,7 @@ export default function Onboarding() {
   const [dislikes, setDislikes] = useState('')
   const [trainLocation, setTrainLocation] = useState(null) // null = omitido → se trata como gym
   const [equipment, setEquipment] = useState('')
+  const [injuries, setInjuries] = useState('')
   const [hour, setHour] = useState('6')
   const [minute, setMinute] = useState('30')
   const [ampm, setAmpm] = useState('AM')
@@ -112,6 +113,7 @@ export default function Onboarding() {
       dislikes: dislikes.trim(),
       trainLocation,
       equipment: equipment.trim(),
+      injuries: injuries.trim(),
       ...(avatarPreview ? { avatarPendingDataUrl: avatarPreview } : {}),
       wakeTime,
       exercise,
@@ -328,6 +330,16 @@ export default function Onboarding() {
               autoComplete="off"
               value={equipment}
               onChange={(e) => setEquipment(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') next() }}
+            />
+            <div className="ob-q" style={{ marginTop: 18 }}>{t('onboarding.injuries.q')}</div>
+            <div className="ob-sub">{t('onboarding.injuries.sub')}</div>
+            <input
+              className="ob-name-input"
+              placeholder={t('onboarding.injuries.placeholder')}
+              autoComplete="off"
+              value={injuries}
+              onChange={(e) => setInjuries(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') next() }}
             />
           </div>

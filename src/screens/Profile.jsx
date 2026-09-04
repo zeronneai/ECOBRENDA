@@ -247,6 +247,10 @@ export default function Profile() {
               <input className="pf-input" placeholder={t('onboarding.equip.placeholder')} value={profile.equipment || ''} onChange={(e) => updateProfile({ equipment: e.target.value })} />
             </div>
             <div className="pf-field">
+              <label>{t('profile.injuries_label')}</label>
+              <input className="pf-input" placeholder={t('onboarding.injuries.placeholder')} value={profile.injuries || ''} onChange={(e) => updateProfile({ injuries: e.target.value })} />
+            </div>
+            <div className="pf-field">
               <label>{t('profile.diet_pref')}</label>
               <select className="pf-select" value={profile.dietPref || 'todo'} onChange={(e) => updateProfile({ dietPref: e.target.value })}>
                 {DIET_PREFS.map((d) => <option key={d.id} value={d.id}>{t('onboarding.diet_prefs.' + d.id + '.label')}</option>)}

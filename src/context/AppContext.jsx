@@ -59,6 +59,7 @@ const DEFAULT_PROFILE = {
   wakeTime: '06:30',
   trainLocation: null, // 'gym' | 'home' — null = existente sin responder (→ gym)
   equipment: '',       // texto libre: equipo disponible en casa
+  injuries: '',       // lesiones/limitaciones (dato de salud, texto libre)
 }
 
 export function AppProvider({ children }) {
