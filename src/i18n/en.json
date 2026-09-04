@@ -75,6 +75,8 @@
     "motiv_workout_t": "Workout reminder",
     "motiv_streak_t": "Protect your streak",
     "motiv_streak_d": "Only when you have an active streak",
+    "wa_h": "WHATSAPP UPDATES",
+    "wa_note": "Optional. You can change your number or unsubscribe anytime.",
     "legal_h": "LEGAL",
     "privacy": "Privacy Policy",
     "terms": "Terms & Conditions",
@@ -490,6 +492,24 @@
     "workout_title": "💪 Time to move",
     "streak_title": "🔥 Don't lose your streak",
     "streak_body": "Your streak is still alive. A little effort today keeps it burning."
+  },
+  "wa": {
+    "ob_kick": "LET'S STAY IN TOUCH",
+    "ob_q": "Want updates on WhatsApp?",
+    "ob_sub": "Optional. You can skip this step and unsubscribe anytime.",
+    "card_title": "WhatsApp updates",
+    "card_sub": "Get Booty Alarm updates and promotions. It's optional.",
+    "country_label": "Country code",
+    "phone_ph": "Your WhatsApp number",
+    "number_label": "WhatsApp number",
+    "consent_text": "I agree to receive news, updates and promotions from Booty Alarm on WhatsApp. I can unsubscribe anytime.",
+    "save_btn": "Save",
+    "update_btn": "Update number",
+    "revoke_btn": "Unsubscribe",
+    "granted_on": "Consent given on {{date}}.",
+    "saved": "Done! We'll reach you on WhatsApp.",
+    "number_updated": "Number updated.",
+    "revoked": "You unsubscribed from WhatsApp."
   },
   "legal": {
     "back": "‹ Back",

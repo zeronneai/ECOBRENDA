@@ -75,6 +75,8 @@
     "motiv_workout_t": "Recordatorio de entrenamiento",
     "motiv_streak_t": "Cuida tu racha",
     "motiv_streak_d": "Solo cuando tengas una racha activa",
+    "wa_h": "NOVEDADES POR WHATSAPP",
+    "wa_note": "Opcional. Puedes cambiar tu número o darte de baja cuando quieras.",
     "legal_h": "LEGAL",
     "privacy": "Política de Privacidad",
     "terms": "Términos y Condiciones",
@@ -490,6 +492,24 @@
     "workout_title": "💪 Hora de moverte",
     "streak_title": "🔥 No pierdas tu racha",
     "streak_body": "Tu racha sigue viva. Un pequeño esfuerzo hoy la mantiene encendida."
+  },
+  "wa": {
+    "ob_kick": "MANTENGÁMONOS EN CONTACTO",
+    "ob_q": "¿Quieres novedades por WhatsApp?",
+    "ob_sub": "Opcional. Puedes omitir este paso y darte de baja cuando quieras.",
+    "card_title": "Novedades por WhatsApp",
+    "card_sub": "Recibe actualizaciones y promociones de Booty Alarm. Es opcional.",
+    "country_label": "Código de país",
+    "phone_ph": "Tu número de WhatsApp",
+    "number_label": "Número de WhatsApp",
+    "consent_text": "Acepto recibir novedades, actualizaciones y promociones de Booty Alarm por WhatsApp. Puedo darme de baja cuando quiera.",
+    "save_btn": "Guardar",
+    "update_btn": "Actualizar número",
+    "revoke_btn": "Darme de baja",
+    "granted_on": "Consentimiento otorgado el {{date}}.",
+    "saved": "¡Listo! Te avisaremos por WhatsApp.",
+    "number_updated": "Número actualizado.",
+    "revoked": "Te diste de baja de WhatsApp."
   },
   "legal": {
     "back": "‹ Volver",

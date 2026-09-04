@@ -53,6 +53,11 @@ function profileRowFromLocal(p) {
     equipment: p.equipment ?? null,
     injuries: p.injuries ?? null,
     ai_consent_at: p.aiConsent?.date ?? null,
+    // WhatsApp opt-in: se guarda SOLO si aceptó la casilla (accepted === true).
+    whatsapp_phone: p.waConsent?.accepted ? (p.waPhone ?? null) : null,
+    whatsapp_consent: !!p.waConsent?.accepted,
+    whatsapp_consent_at: p.waConsent?.accepted ? (p.waConsent?.date ?? null) : null,
+    whatsapp_consent_version: p.waConsent?.accepted ? (p.waConsent?.version ?? null) : null,
     avatar_url: p.avatarUrl ?? null,
     language: p.language ?? null,
   }
@@ -91,6 +96,11 @@ function applyProfileRow(r) {
     // Consentimiento de IA: reconstruye el flag desde la columna (sobrevive
     // reinstalación si inició sesión).
     ...(r.ai_consent_at ? { aiConsent: { accepted: true, date: r.ai_consent_at } } : {}),
+    // WhatsApp opt-in (sobrevive reinstalación si inició sesión).
+    waPhone: r.whatsapp_phone ?? '',
+    ...(r.whatsapp_consent
+      ? { waConsent: { accepted: true, date: r.whatsapp_consent_at ?? null, version: r.whatsapp_consent_version ?? null } }
+      : {}),
     avatarUrl: r.avatar_url ?? null,
     ...(r.language ? { language: r.language } : {}),
     onboarded: true, // si ya tiene perfil en la nube, ya hizo onboarding

@@ -26,7 +26,8 @@ const DEFAULT_STATE = {
   version: SCHEMA_VERSION,
   // { name, age, gender, weight, height, goal, level, daysPerWeek, wakeTime,
   //   exercise, reps, allergies:[], dietPref, dislikes, createdAt,
-  //   aiConsent:{ accepted:true, date:ISO }, avatarUrl, language:'es'|'en' }
+  //   aiConsent:{ accepted:true, date:ISO }, avatarUrl, language:'es'|'en',
+  //   waPhone:'+52...', waConsent:{ accepted, date:ISO, version } }
   profile: null,
   subscription: { status: 'inactive', plan: null, currentPeriodEnd: null, accesoAlarma: false, accesoPremium: false, trialEnd: null, unlimitedPlans: false },
   wakeStreak: { current: 0, best: 0, lastCompleted: '' }, // racha de la alarma diaria
@@ -40,7 +41,7 @@ const DEFAULT_STATE = {
   announcedAchievements: null,
   settings: {
     sound: true, reminder: true, reminderTime: '20:00', streakAlerts: true, weeklyReport: false,
-    permsPrimed: false, trainPromptDismissed: false,
+    permsPrimed: false, trainPromptDismissed: false, waPromptDismissed: false,
     // Notificaciones motivacionales (locales, sin servidor). Máx 2/día, diurnas.
     motivEnabled: true,
     notifMeal: true, notifMealTime: '14:00',

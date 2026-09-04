@@ -462,6 +462,17 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .train-setup-btns{display:flex;gap:10px}
 .train-setup-btns button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line-strong);background:var(--surface);color:#fff;font-family:'Archivo';font-weight:800;font-size:14px;cursor:pointer}
 .train-setup-btns button:active{transform:scale(.98)}
+.train-setup-btns button:disabled{cursor:not-allowed}
+/* WhatsApp opt-in (onboarding / tarjeta / perfil) */
+.wa-optin{text-align:left;margin-top:6px}
+.wa-phone-row{display:flex;gap:8px}
+.wa-cc{flex:0 0 96px;width:96px;padding-left:10px;padding-right:6px}
+.wa-num{flex:1}
+.wa-consent{display:flex;align-items:flex-start;gap:10px;margin-top:12px;font-size:12.5px;line-height:1.45;color:var(--txt-dim);cursor:pointer;text-align:left}
+.wa-consent input{margin-top:2px;width:18px;height:18px;flex:0 0 18px;accent-color:var(--magenta);cursor:pointer}
+.wa-actions{display:flex;gap:10px;margin-top:4px}
+.wa-actions .pf-danger-btn{margin-bottom:0}
+.wa-actions .pf-danger-btn:disabled{opacity:.5;cursor:not-allowed}
 .pf-field label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint);font-weight:700;margin-bottom:6px}
 .pf-input,.pf-select{width:100%;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:13px 14px;color:var(--txt);font-family:'Archivo';font-size:15px;font-weight:600;outline:none}
 .pf-input:focus,.pf-select:focus{border-color:var(--magenta)}

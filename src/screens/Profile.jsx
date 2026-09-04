@@ -9,6 +9,8 @@ import { pickAndUploadAvatar } from '../lib/avatar'
 import LanguageSelect from '../components/LanguageSelect'
 import DestelloCard from '../components/ui/DestelloCard'
 import AiConsentModal from '../components/AiConsentModal'
+import WhatsAppOptIn from '../components/WhatsAppOptIn'
+import { WA_CONSENT_VERSION, WA_COUNTRIES, toE164, fromE164, isValidWaLocal } from '../data/waConsent'
 
 const kgToLb = (kg) => Math.round(kg * 2.20462)
 const lbToKg = (lb) => Math.round(lb / 2.20462)
@@ -43,6 +45,38 @@ export default function Profile() {
   const [deleteText, setDeleteText] = useState('') // confirmación escribiendo "ELIMINAR"
   const [deleting, setDeleting] = useState(false)
   const [changingAvatar, setChangingAvatar] = useState(false)
+
+  // WhatsApp opt-in (editable / revocable). Estado local para editar el número.
+  const waInit = fromE164(profile.waPhone)
+  const [waCountry, setWaCountry] = useState(waInit.country)
+  const [waLocal, setWaLocal] = useState(waInit.local)
+  const [waConsent, setWaConsent] = useState(false)
+  const waAccepted = !!profile.waConsent?.accepted
+  const waDateStr = profile.waConsent?.date
+    ? new Date(profile.waConsent.date).toLocaleString(language === 'en' ? 'en-US' : 'es-ES',
+        { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : ''
+  // Otorgar consentimiento: SOLO si marcó la casilla y el número es válido.
+  const grantWa = () => {
+    if (!(waConsent && isValidWaLocal(waLocal))) return
+    updateProfile({
+      waPhone: toE164(waCountry, waLocal),
+      waConsent: { accepted: true, date: new Date().toISOString(), version: WA_CONSENT_VERSION },
+    })
+    showToast(t('wa.saved'))
+  }
+  // Cambiar número (ya consintió): mantiene el consentimiento, solo actualiza el número.
+  const updateWaNumber = () => {
+    if (!isValidWaLocal(waLocal)) return
+    updateProfile({ waPhone: toE164(waCountry, waLocal) })
+    showToast(t('wa.number_updated'))
+  }
+  // Retirar consentimiento: baja el flag y borra el número (deja de recibir).
+  const revokeWa = () => {
+    updateProfile({ waPhone: '', waConsent: { ...(profile.waConsent || {}), accepted: false } })
+    setWaLocal(''); setWaConsent(false)
+    showToast(t('wa.revoked'))
+  }
 
   const changeAvatar = async () => {
     if (changingAvatar) return
@@ -363,6 +397,40 @@ export default function Profile() {
                 {settings.notifStreak && (
                   <div className="pf-field"><input className="pf-input" type="time" value={settings.notifStreakTime} onChange={(e) => saveSettings({ notifStreakTime: e.target.value })} /></div>
                 )}
+              </>
+            )}
+          </div>
+
+          {/* WhatsApp: novedades (editable y revocable, consentimiento explícito) */}
+          <div className="pf-sec reveal d5">
+            <h3>{t('profile.wa_h')}</h3>
+            <div className="pf-note-soft">{t('profile.wa_note')}</div>
+            {waAccepted ? (
+              <>
+                <div className="pf-field">
+                  <label>{t('wa.number_label')}</label>
+                  <div className="wa-phone-row">
+                    <select className="pf-select wa-cc" value={waCountry} onChange={(e) => setWaCountry(e.target.value)} aria-label={t('wa.country_label')}>
+                      {WA_COUNTRIES.map((c) => (<option key={c.code} value={c.code}>{c.flag} {c.dial}</option>))}
+                    </select>
+                    <input className="pf-input wa-num" type="tel" inputMode="tel" autoComplete="tel-national" placeholder={t('wa.phone_ph')} value={waLocal} onChange={(e) => setWaLocal(e.target.value)} />
+                  </div>
+                </div>
+                <div className="pf-note-soft">{t('wa.granted_on', { date: waDateStr })}</div>
+                <div className="wa-actions">
+                  <button className="pf-danger-btn" disabled={!isValidWaLocal(waLocal)} onClick={updateWaNumber}>{t('wa.update_btn')}</button>
+                  <button className="pf-danger-btn hard" onClick={revokeWa}>{t('wa.revoke_btn')}</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <WhatsAppOptIn
+                  country={waCountry} phone={waLocal} consent={waConsent}
+                  onCountry={setWaCountry} onPhone={setWaLocal} onConsent={setWaConsent}
+                />
+                <div className="wa-actions">
+                  <button className="pf-danger-btn" disabled={!(waConsent && isValidWaLocal(waLocal))} onClick={grantWa}>{t('wa.save_btn')}</button>
+                </div>
               </>
             )}
           </div>

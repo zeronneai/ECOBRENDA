@@ -7,8 +7,10 @@ import { pickAvatarPhoto } from '../lib/avatar'
 import RulerPicker from '../components/RulerPicker'
 import WheelPicker from '../components/WheelPicker'
 import LanguageSelect from '../components/LanguageSelect'
+import WhatsAppOptIn from '../components/WhatsAppOptIn'
+import { WA_CONSENT_VERSION, WA_DEFAULT_COUNTRY, toE164, isValidWaLocal } from '../data/waConsent'
 
-const OB_TOTAL = 13
+const OB_TOTAL = 14
 
 const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1))
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
@@ -45,6 +47,10 @@ export default function Onboarding() {
   const [trainLocation, setTrainLocation] = useState(null) // null = omitido → se trata como gym
   const [equipment, setEquipment] = useState('')
   const [injuries, setInjuries] = useState('')
+  // WhatsApp opt-in (paso omitible). Solo se guarda si marcó la casilla.
+  const [waCountry, setWaCountry] = useState(WA_DEFAULT_COUNTRY)
+  const [waPhone, setWaPhone] = useState('')
+  const [waConsent, setWaConsent] = useState(false)
   const [hour, setHour] = useState('6')
   const [minute, setMinute] = useState('30')
   const [ampm, setAmpm] = useState('AM')
@@ -114,6 +120,11 @@ export default function Onboarding() {
       trainLocation,
       equipment: equipment.trim(),
       injuries: injuries.trim(),
+      // WhatsApp: guarda número + consentimiento SOLO si marcó la casilla y el
+      // número es válido. Si no, no se guarda nada (opt-in real).
+      ...(waConsent && isValidWaLocal(waPhone)
+        ? { waPhone: toE164(waCountry, waPhone), waConsent: { accepted: true, date: new Date().toISOString(), version: WA_CONSENT_VERSION } }
+        : {}),
       ...(avatarPreview ? { avatarPendingDataUrl: avatarPreview } : {}),
       wakeTime,
       exercise,
@@ -401,8 +412,21 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* 10 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
+        {/* 12 — WHATSAPP (omitible): número + consentimiento explícito */}
         {step === 12 && (
+          <div className="ob-step active">
+            <div className="ob-kick">{t('wa.ob_kick')}</div>
+            <div className="ob-q">{t('wa.ob_q')}</div>
+            <div className="ob-sub">{t('wa.ob_sub')}</div>
+            <WhatsAppOptIn
+              country={waCountry} phone={waPhone} consent={waConsent}
+              onCountry={setWaCountry} onPhone={setWaPhone} onConsent={setWaConsent}
+            />
+          </div>
+        )}
+
+        {/* 13 — ALARMA (Despertar Activo) — se desbloquea por secciones */}
+        {step === 13 && (
           <div className="ob-step active">
             <div className="ob-kick">{t('onboarding.alarm.kick')}</div>
             <div className="ob-q">{t('onboarding.alarm.q')}</div>
@@ -476,7 +500,7 @@ export default function Onboarding() {
         <button className="cta full" onClick={next}>
           {step === OB_TOTAL - 1
             ? (unlocked < 4 ? t('onboarding.continue') : t('onboarding.start'))
-            : (step === 1 && !avatarPreview) || (step === 8 && !trainLocation) ? t('onboarding.skip')
+            : (step === 1 && !avatarPreview) || (step === 8 && !trainLocation) || (step === 12 && !(waConsent && isValidWaLocal(waPhone))) ? t('onboarding.skip')
             : t('onboarding.continue')}
         </button>
       </div>

@@ -8,6 +8,7 @@ import { isIOSNative } from '../lib/platform'
 import { getWakeStreak } from '../lib/dataStore'
 import { getBrendaMessage } from '../data/brendaMessages'
 import DestelloCard from '../components/ui/DestelloCard'
+import WhatsAppOptInCard from '../components/WhatsAppOptInCard'
 
 function greetingKey(h) {
   return h < 12 ? 'home.g_morning' : h < 19 ? 'home.g_afternoon' : 'home.g_evening'
@@ -65,6 +66,9 @@ export default function Home() {
             {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : avatarLetter}
           </div>
         </div>
+
+        {/* Captura de WhatsApp para usuarios existentes (omitible, no reaparece) */}
+        <WhatsAppOptInCard />
 
         {/* Racha */}
         <div className="streak reveal d2">
