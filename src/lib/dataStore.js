@@ -52,6 +52,10 @@ const DEFAULT_STATE = {
   //   completions: { [planKey]: { [dayIdx]: { [exIdx]: true } } }
   //   loggedDays:   { [planKey]: { [dayIdx]: true } }  (guard anti-doble-conteo)
   planProgress: { completions: {}, loggedDays: {} },
+  // Giros de ruleta PENDIENTES DE REVELAR (Brenda Coins). El premio YA se acreditó
+  // en el servidor; esto solo guarda la animación por mostrar, para que no se
+  // pierda si cierran la app antes de verla. Solo local, efímero. [{prize,source,ts}]
+  pendingSpins: [],
 }
 
 const DEFAULT_DAYS = [0, 1, 2, 3, 4] // Lun–Vie
@@ -317,6 +321,21 @@ export function setChallengeCount(n) {
   s.challengeCount = Number(n) || 0
   save()
   return s.challengeCount
+}
+
+// ── GIROS DE RULETA PENDIENTES DE REVELAR (Brenda Coins, solo local) ─────
+export function getPendingSpins() { return load().pendingSpins || [] }
+export function pushPendingSpin(spin) {
+  const s = load()
+  s.pendingSpins = [...(s.pendingSpins || []), spin].slice(-5) // tope defensivo
+  save()
+  return s.pendingSpins
+}
+export function shiftPendingSpin() {
+  const s = load()
+  s.pendingSpins = (s.pendingSpins || []).slice(1)
+  save()
+  return s.pendingSpins
 }
 
 // Aplica valores absolutos de la racha (pull de la nube).

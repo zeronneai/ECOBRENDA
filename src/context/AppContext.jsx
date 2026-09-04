@@ -75,7 +75,9 @@ export function AppProvider({ children }) {
   const [subscription, setSubscriptionState] = useState(() => dataStore.getSubscription())
   const [streak, setStreak] = useState(() => dataStore.getStreak())
   const [challengesDone, setChallengesDone] = useState(() => dataStore.getChallengeCount())
-  const [roulette, setRoulette] = useState(null) // { prize, source } cuando hay giro disponible
+  // Giro de ruleta por revelar. Se inicializa desde la cola persistida: si
+  // cerraron la app con un giro sin ver, aparece al abrir. { prize, source }.
+  const [roulette, setRoulette] = useState(() => dataStore.getPendingSpins()[0] || null)
   const [totals, setTotals] = useState(() => dataStore.getTotals())
   const [workoutLog, setWorkoutLogState] = useState(() => dataStore.getWorkoutLog())
   const [progressLog, setProgressLogState] = useState(() => dataStore.getProgressLog())
@@ -202,12 +204,21 @@ export function AppProvider({ children }) {
         // Giro de ruleta de la alarma (el servidor exige alarm_awarded y lo limita
         // a 1/día). Si procede, abre la ruleta; el cliente solo anima y revela.
         const sp = await bcSpin('alarm')
-        if (sp?.ok) setRoulette({ prize: sp.prize, source: 'alarm' })
+        if (sp?.ok) {
+          // Persiste el giro por revelar (sobrevive cierres de app) y muéstralo
+          // si no hay otro en pantalla. El premio YA está acreditado en el server.
+          dataStore.pushPendingSpin({ prize: sp.prize, source: 'alarm', ts: Date.now() })
+          setRoulette((cur) => cur || dataStore.getPendingSpins()[0] || null)
+        }
       }
     })()
   }, [syncAchievements, language])
 
-  const closeRoulette = useCallback(() => setRoulette(null), [])
+  // Cierra el giro actual: lo saca de la cola y avanza al siguiente pendiente.
+  const closeRoulette = useCallback(() => {
+    dataStore.shiftPendingSpin()
+    setRoulette(dataStore.getPendingSpins()[0] || null)
+  }, [])
 
   // Reto rápido completado → su contador propio (no toca la racha).
   const incrementChallenge = useCallback(() => {
@@ -217,7 +228,10 @@ export function AppProvider({ children }) {
     // no abre nada. Detrás de BC_ENABLED. Best-effort.
     ;(async () => {
       const sp = await bcSpin('challenge')
-      if (sp?.ok) setRoulette({ prize: sp.prize, source: 'challenge' })
+      if (sp?.ok) {
+        dataStore.pushPendingSpin({ prize: sp.prize, source: 'challenge', ts: Date.now() })
+        setRoulette((cur) => cur || dataStore.getPendingSpins()[0] || null)
+      }
     })()
   }, [])
 

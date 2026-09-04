@@ -50,7 +50,7 @@ export default function AppShell() {
       {/* Logro: aparece tras cerrar la felicitación de reto (no choca) */}
       {achievementQueue.length > 0 && !celebrating && <AchievementModal />}
       {/* Ruleta Brenda Coins: aparece tras la felicitación cuando hay giro */}
-      {roulette && !celebrating && <RouletteModal />}
+      {roulette && !celebrating && <RouletteModal key={roulette.ts || 'rlt'} />}
       <Toast />
 
       {onboarding && <Onboarding />}
