@@ -119,7 +119,10 @@ async function pushProfile() {
 
 // ── Mapeo SETTINGS ──────────────────────────────────────────────────────────
 // Los toggles van en `notifications` (jsonb). permsPrimed NO se sincroniza: es
-// del dispositivo (si otorgaste permisos nativos EN ESTE teléfono).
+// del dispositivo (si otorgaste permisos nativos EN ESTE teléfono). Los descartes
+// de tarjetas (trainPromptDismissed / waPromptDismissed) SÍ se sincronizan: son
+// una DECISIÓN de la usuaria (no estado del dispositivo), así que si descarta la
+// tarjeta en el teléfono no vuelve a salirle en el navegador (queda por cuenta).
 async function pullSettings() {
   const { data, error } = await supabase.from('settings').select('*').eq('user_id', currentUser.id).maybeSingle()
   if (!error && data && data.notifications && typeof data.notifications === 'object') {
@@ -136,6 +139,9 @@ async function pushSettings() {
     notifMeal: s.notifMeal, notifMealTime: s.notifMealTime,
     notifWorkout: s.notifWorkout, notifWorkoutTime: s.notifWorkoutTime,
     notifStreak: s.notifStreak, notifStreakTime: s.notifStreakTime,
+    // Descartes de tarjetas → por cuenta (no por dispositivo).
+    trainPromptDismissed: s.trainPromptDismissed,
+    waPromptDismissed: s.waPromptDismissed,
   }
   const { error } = await supabase.from('settings').upsert(
     { user_id: currentUser.id, units: dataStore.getProfile()?.weightUnit ?? null, notifications },
