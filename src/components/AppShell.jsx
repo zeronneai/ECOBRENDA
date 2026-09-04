@@ -1,6 +1,7 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useApp } from '../store'
+import { BC_ENABLED } from '../lib/features'
 import TabBar from './TabBar'
 import Toast from './Toast'
 import SheetHost from './SheetHost'
@@ -24,10 +25,35 @@ import { ALARM_AUDIO_SRC } from '../lib/alarmAudio'
 
 export default function AppShell() {
   const { appRef, onboarding, ringOpen, scanning, celebrating, achievementQueue, audioRef, needsPriming,
-          authOpen, authView, handleAuthed, closeAuth, needsAccount, accountRecap, roulette, rewardsOpen } = useApp()
+          authOpen, authView, handleAuthed, closeAuth, needsAccount, accountRecap, roulette, rewardsOpen,
+          cloudEnabled, session, subscription } = useApp()
   const { pathname } = useLocation()
   // Píldora visible solo en las 4 pantallas y nunca sobre overlays de alarma/squats.
   const showPill = BC_PILL_ROUTES.has(pathname) && !ringOpen && !scanning && !onboarding && !needsAccount
+
+  // Diagnóstico: expone en window.__bc.cond el valor de CADA condición de la
+  // píldora, para ver exactamente cuál falla (en vez de adivinar).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const cond = {
+      '1_BC_ENABLED': BC_ENABLED,
+      '2a_cloudEnabled': cloudEnabled,
+      '2b_session': !!session,
+      '3_accesoAlarma': subscription?.accesoAlarma,
+      '3_subscriptionKeys': subscription ? Object.keys(subscription) : null,
+      '3_subscription': subscription,
+      '4_pathname': pathname,
+      '4_routeOk': BC_PILL_ROUTES.has(pathname),
+      '5_onboarding': onboarding,
+      '5_needsAccount': needsAccount,
+      '6_ringOpen': ringOpen,
+      '6_scanning': scanning,
+      pill_gate_appshell: showPill,
+      pill_gate_component: BC_ENABLED && cloudEnabled && !!session && subscription?.accesoAlarma === true,
+    }
+    window.__bc = { ...(window.__bc || {}), cond }
+    console.log('[BC diag]', cond)
+  }, [pathname, cloudEnabled, session, subscription, onboarding, needsAccount, ringOpen, scanning, showPill])
   return (
     <div className="app" ref={appRef}>
       {/* Audio único (alarma o reto): vive a nivel app para sobrevivir al
