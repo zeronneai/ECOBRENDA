@@ -213,8 +213,22 @@ begin
   insert into public.bc_daily(user_id, day) values (uid, d) on conflict (user_id, day) do nothing;
   select * into row_daily from public.bc_daily where user_id=uid and day=d for update;
 
-  -- Estado de racha (crea y bloquea).
-  insert into public.bc_streak(user_id) values (uid) on conflict (user_id) do nothing;
+  -- Estado de racha: SIEMBRA desde wake_streaks si es la primera vez (migración
+  -- que preserva las rachas activas de los usuarios actuales). Ver bc_fase1.
+  insert into public.bc_streak(user_id, current, best, run_id, last_completed_at, deadline_at)
+  select uid,
+         coalesce(w.current, 0),
+         coalesce(w.best, 0),
+         0,
+         case when w.last_completed is not null
+              then ((w.last_completed + 1)::timestamp at time zone 'America/Mexico_City')
+              else null end,
+         case when w.last_completed is not null
+              then ((w.last_completed + 1)::timestamp at time zone 'America/Mexico_City') + interval '48 hours'
+              else null end
+  from (select 1) one
+  left join public.wake_streaks w on w.user_id = uid
+  on conflict (user_id) do nothing;
   select * into st from public.bc_streak where user_id=uid for update;
 
   if row_daily.alarm_awarded then

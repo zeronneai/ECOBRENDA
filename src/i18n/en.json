@@ -491,7 +491,9 @@
     "meal_title": "🍽️ Time to nourish yourself",
     "workout_title": "💪 Time to move",
     "streak_title": "🔥 Don't lose your streak",
-    "streak_body": "Your streak is still alive. A little effort today keeps it burning."
+    "streak_body": "Your streak is still alive. A little effort today keeps it burning.",
+    "streak_warn_title": "⏳ Your streak is about to break",
+    "streak_warn_body": "Complete your alarm soon so you don't lose your streak. You're doing amazing!"
   },
   "wa": {
     "ob_kick": "LET'S STAY IN TOUCH",

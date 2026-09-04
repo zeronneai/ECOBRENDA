@@ -491,7 +491,9 @@
     "meal_title": "🍽️ Momento de nutrirte",
     "workout_title": "💪 Hora de moverte",
     "streak_title": "🔥 No pierdas tu racha",
-    "streak_body": "Tu racha sigue viva. Un pequeño esfuerzo hoy la mantiene encendida."
+    "streak_body": "Tu racha sigue viva. Un pequeño esfuerzo hoy la mantiene encendida.",
+    "streak_warn_title": "⏳ Tu racha está por romperse",
+    "streak_warn_body": "Completa tu alarma pronto para no perder tu racha. ¡Vas increíble!"
   },
   "wa": {
     "ob_kick": "MANTENGÁMONOS EN CONTACTO",

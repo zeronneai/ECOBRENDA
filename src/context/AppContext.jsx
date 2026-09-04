@@ -8,6 +8,8 @@ import { isNativeApp, onAlarmTapped } from '../lib/nativeAlarm'
 import { rescheduleAppleAlarms, requestAlarmKitAuthIfSupported, engageAlarmKit, completeAlarmKit, getPendingAlarmKit, onAlarmFired } from '../lib/iosAlarm'
 import { primeNativePermissions } from '../lib/nativePerms'
 import { rescheduleMotivational } from '../lib/motivationNotifs'
+import { scheduleStreakBreakWarning } from '../lib/streakNotifs'
+import { awardAlarm } from '../lib/bc'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -187,7 +189,18 @@ export function AppProvider({ children }) {
       activeAlarmIdRef.current = null
       if (isIOS()) rescheduleAppleAlarms(schedRef.current.alarms || []) // arma la siguiente ocurrencia
     }
-  }, [syncAchievements])
+    // Brenda Coins (detrás de BC_ENABLED; inerte si está OFF): otorga los puntos
+    // del día en el SERVIDOR y programa el aviso de racha con su deadline. La
+    // racha del servidor manda (reconcilia el número local). Best-effort: si
+    // falla no rompe la alarma; se reintenta la próxima vez.
+    ;(async () => {
+      const r = await awardAlarm()
+      if (r?.ok) {
+        if (typeof r.streak === 'number') setStreak(r.streak)
+        if (r.deadline_at) scheduleStreakBreakWarning(r.deadline_at, language)
+      }
+    })()
+  }, [syncAchievements, language])
 
   // Reto rápido completado → su contador propio (no toca la racha).
   const incrementChallenge = useCallback(() => {
