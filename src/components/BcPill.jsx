@@ -10,7 +10,7 @@ export default function BcPill() {
   // true en ambos). El usuario "sin nada" no ve la píldora ni la sección.
   if (!BC_ENABLED || !cloudEnabled || !session || subscription?.accesoAlarma !== true) return null
   return (
-    <button className="bc-pill" onClick={openRewards} aria-label="Brenda Coins">
+    <button className="bc-pill" onClick={openRewards} aria-label="Booty Coins">
       {/* Moneda en SVG propio: idéntica en todos los navegadores (el emoji 🪙 lo
           pinta cada sistema distinto — dorado en desktop, plateado en Safari iOS). */}
       <svg className="bc-pill-ic" viewBox="0 0 20 20" width="15" height="15" aria-hidden="true">

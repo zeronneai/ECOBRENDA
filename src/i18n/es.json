@@ -520,7 +520,7 @@
       "sub_challenge": "Por tu primer reto del día",
       "spin_btn": "GIRAR",
       "spinning": "Girando…",
-      "won": "¡Ganaste {{n}} Brenda Coins!",
+      "won": "¡Ganaste {{n}} Booty Coins!",
       "zero_title": "¡Casi!",
       "zero1": "Hoy no cayó, pero no te rindas. ¡Mañana es tu día!",
       "zero2": "Sin premio esta vez, pero tu constancia vale oro.",
@@ -537,7 +537,7 @@
       "outfit": "Outfit de gym"
     },
     "rewards": {
-      "balance_label": "Tus Brenda Coins",
+      "balance_label": "Tus Booty Coins",
       "streak": "{{n}} días de racha",
       "loading": "Cargando…",
       "expiring": "{{n}} BC caducan el {{date}}",
@@ -578,7 +578,7 @@
         "missing_fields": "Completa todos los campos.",
         "size_required": "Elige una talla.",
         "not_paid_premium": "El canje es exclusivo del plan completo pagado.",
-        "insufficient": "No tienes Brenda Coins suficientes.",
+        "insufficient": "No tienes Booty Coins suficientes.",
         "reward_unavailable": "Esta recompensa no está disponible.",
         "no_session": "Inicia sesión para canjear.",
         "network": "Falló la conexión. Intenta de nuevo.",

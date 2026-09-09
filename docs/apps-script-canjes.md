@@ -87,7 +87,7 @@ function sendRedemptionEmail_(r, props) {
   Logger.log('sendEmail: TEAM_EMAILS="' + to + '"');
   if (!to || !to.trim()) throw new Error('TEAM_EMAILS vacío o no configurado');
   var reward = r.reward_label || r.reward_slug || '(sin nombre)';
-  var subject = 'Nuevo canje Brenda Coins: ' + reward;
+  var subject = 'Nuevo canje Booty Coins: ' + reward;
   var body = [
     'Recompensa: ' + reward + ' (' + r.cost + ' BC)',
     'Nombre: ' + r.full_name,
