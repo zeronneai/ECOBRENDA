@@ -54,6 +54,14 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, skipped: 'missing_fields' })
   }
 
+  const status = statusFor(type)
+  const periodType = (ev.period_type || 'NORMAL').toLowerCase() // 'trial'|'intro'|'normal'|'promotional'
+  const inTrial = (periodType === 'trial' || periodType === 'intro') && status === 'active'
+  // En BILLING_ISSUE Apple da un periodo de gracia: usa su fin si viene, para no
+  // cortar el acceso durante el reintento de cobro.
+  const expiresMs = ev.grace_period_expiration_at_ms || ev.expiration_at_ms || null
+  const expiresISO = expiresMs ? new Date(expiresMs).toISOString() : null
+
   try {
     const svc = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
 
@@ -61,9 +69,10 @@ export default async function handler(req, res) {
       user_id: uid,
       original_transaction_id: otxn,
       product_id: productId,
-      status: statusFor(type),
-      expires_at: ev.expiration_at_ms ? new Date(ev.expiration_at_ms).toISOString() : null,
-      auto_renew: type === 'CANCELLATION' ? false : (ev.auto_resume_at_ms ? false : true),
+      status,
+      period_type: periodType,
+      expires_at: expiresISO,
+      auto_renew: type === 'CANCELLATION' ? false : true,
       environment: (ev.environment || 'PRODUCTION').toLowerCase(),
       updated_at: new Date().toISOString(),
     }
@@ -77,10 +86,17 @@ export default async function handler(req, res) {
     }
 
     // Recalcula la UNIÓN de entitlements (Stripe OR Apple OR fundador OR manual).
+    // Crea la fila de subscriptions si el usuario es iOS-only.
     const { error: rpcErr } = await svc.rpc('recompute_entitlements', { uid })
     if (rpcErr) throw rpcErr
 
-    return res.status(200).json({ ok: true, type, uid })
+    // Muestra en el Perfil "prueba termina el…" durante el trial de Apple; lo
+    // limpia cuando ya no está en prueba (renovó a pago, expiró, etc.).
+    await svc.from('subscriptions')
+      .update({ trial_end: inTrial ? expiresISO : null })
+      .eq('user_id', uid)
+
+    return res.status(200).json({ ok: true, type, uid, period_type: periodType })
   } catch (e) {
     console.error('[iap/webhook]', e?.message || e)
     return res.status(500).json({ error: 'handler_failed', message: e?.message || 'unknown' })

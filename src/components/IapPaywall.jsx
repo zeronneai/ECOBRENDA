@@ -6,7 +6,9 @@
    (por ahora avisan "próximamente"). No otorga acceso todavía. */
 import { useEffect, useState } from 'react'
 import { useApp } from '../store'
-import { getOfferings, purchase, restore } from '../lib/iap'
+import { getOfferings, purchase, restore, getTrialEligibility } from '../lib/iap'
+
+const ALARM_ID = 'bootyalarm.alarm.monthly'
 
 // Copia propia por producto (la de StoreKit puede ser genérica); el PRECIO sí
 // viene de StoreKit (priceString).
@@ -22,10 +24,17 @@ export default function IapPaywall() {
   const [pkgs, setPkgs] = useState(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [trialElig, setTrialElig] = useState('unknown') // elegibilidad del trial de la alarma
 
   useEffect(() => {
     let alive = true
-    getOfferings().then((p) => { if (alive) { setPkgs(p); setLoading(false) } })
+    ;(async () => {
+      const p = await getOfferings()
+      if (!alive) return
+      setPkgs(p); setLoading(false)
+      const elig = await getTrialEligibility([ALARM_ID])
+      if (alive) setTrialElig(elig[ALARM_ID] || 'unknown')
+    })()
     return () => { alive = false }
   }, [])
 
@@ -74,7 +83,7 @@ export default function IapPaywall() {
           <button key={p.identifier} className="iap-plan" onClick={() => onBuy(p)} disabled={busy}>
             <span className="iap-plan-l">
               <span className="iap-plan-name">{t(LABEL[p.productId] || 'iap.plan.generic')}</span>
-              {p.productId === 'bootyalarm.alarm.monthly' && <span className="iap-plan-trial">{t('iap.trial')}</span>}
+              {p.productId === ALARM_ID && trialElig !== 'ineligible' && <span className="iap-plan-trial">{t('iap.trial')}</span>}
             </span>
             <span className="iap-plan-price">{p.priceString}</span>
           </button>

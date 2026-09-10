@@ -78,6 +78,27 @@ export async function getOfferings() {
   }
 }
 
+/* Elegibilidad de la oferta introductoria (trial). Devuelve { [productId]:
+   'eligible'|'ineligible'|'unknown' }. Apple/StoreKit deciden a nivel Apple ID:
+   quien ya usó el trial sale 'ineligible'. Se usa para NO prometer "3 días
+   gratis" a quien no aplica. */
+export async function getTrialEligibility(productIds) {
+  if (!iapAvailable() || !productIds?.length) return {}
+  try {
+    const Purchases = await ensureConfigured()
+    const res = await Purchases.checkTrialOrIntroductoryPriceEligibility({ productIdentifiers: productIds })
+    const out = {}
+    for (const pid of productIds) {
+      const st = res?.[pid]?.status // 2=ELIGIBLE, 1=INELIGIBLE, 0/3=desconocido/sin-oferta
+      out[pid] = st === 2 ? 'eligible' : st === 1 ? 'ineligible' : 'unknown'
+    }
+    return out
+  } catch (e) {
+    console.warn('[iap] eligibility', e?.message || e)
+    return {}
+  }
+}
+
 /* Compra el paquete (por identifier). Abre la hoja de StoreKit. El ACCESO NO se
    otorga aquí: lo escribe el webhook de RevenueCat en el servidor; el cliente
    luego consulta al servidor (refreshPremium) hasta ver el acceso. Devuelve
