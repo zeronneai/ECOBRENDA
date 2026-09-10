@@ -1,4 +1,4 @@
-/* Cliente del flujo de pago. Llama a /api/checkout y /api/portal y abre la URL
+/* Cliente del flujo de pago. Llama a /api/stripe/checkout y /api/stripe/portal y abre la URL
    de Stripe (en web redirige; en nativo abre el navegador in-app vía Capacitor
    Browser). Al pagar, Stripe redirige a:
      - web    : ${origin}/premium-return
