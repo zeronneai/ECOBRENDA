@@ -1,5 +1,5 @@
 /* Cliente de planes generados por IA. Llama a los endpoints serverless
-   /api/generate-workout y /api/generate-diet (con el JWT de Supabase) y lee los
+   /api/generate/workout y /api/generate/diet (con el JWT de Supabase) y lee los
    planes guardados desde la tabla ai_plans.
 
    Igual que stripeClient: API_BASE es relativo en web y apunta al deploy de
@@ -90,7 +90,7 @@ export async function generateWorkout(checkin) {
     mockPersistCheckin(checkin)
     return { content: MOCK_WORKOUT, lockedUntil: lockISO() }
   }
-  const { plan, lockedUntil, id } = await authedPost('/api/generate-workout', { checkin, lang: getInitialLang() })
+  const { plan, lockedUntil, id } = await authedPost('/api/generate/workout', { checkin, lang: getInitialLang() })
   return { content: plan, lockedUntil, id }
 }
 
@@ -101,7 +101,7 @@ export async function generateDiet(checkin) {
     mockPersistCheckin(checkin)
     return { content: MOCK_DIET, lockedUntil: lockISO() }
   }
-  const { plan, lockedUntil, id } = await authedPost('/api/generate-diet', { checkin, lang: getInitialLang() })
+  const { plan, lockedUntil, id } = await authedPost('/api/generate/diet', { checkin, lang: getInitialLang() })
   return { content: plan, lockedUntil, id }
 }
 
@@ -110,7 +110,7 @@ export async function generateDiet(checkin) {
 // Devuelve { location, day, cached }. El servidor deduplica: una sola generación
 // por día+lugar; llamarlo de nuevo reusa la fila (no gasta créditos).
 export async function generateWorkoutDay(sourcePlanId, dayIndex) {
-  const r = await authedPost('/api/generate-workout-day', {
+  const r = await authedPost('/api/generate/workout-day', {
     source_plan_id: sourcePlanId, day_index: dayIndex, lang: getInitialLang(),
   })
   return { location: r.location, day: r.day, cached: !!r.cached }

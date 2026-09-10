@@ -59,14 +59,14 @@ export async function closeNativeBrowser() {
 
 export async function startCheckout(plan) {
   const { success, cancel } = returnUrls()
-  const { url } = await authedFetch('/api/checkout', { plan, successUrl: success, cancelUrl: cancel })
+  const { url } = await authedFetch('/api/stripe/checkout', { plan, successUrl: success, cancelUrl: cancel })
   if (!url) throw new Error('Sin URL de pago.')
   await openExternal(url)
 }
 
 export async function openBillingPortal() {
   const returnUrl = isNative() ? 'com.zeronne.bootyalarm://premium-return' : (typeof window !== 'undefined' ? window.location.origin + '/profile' : '')
-  const { url } = await authedFetch('/api/portal', { returnUrl })
+  const { url } = await authedFetch('/api/stripe/portal', { returnUrl })
   if (!url) throw new Error('Sin URL del portal.')
   await openExternal(url)
 }
