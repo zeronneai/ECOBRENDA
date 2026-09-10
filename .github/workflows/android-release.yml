@@ -50,6 +50,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_BC_ENABLED: '1'   # Booty Coins ON en el APK (flag build-time)
 
       - name: Capacitor sync (copia web + plugins a android/)
         run: npx cap sync android
