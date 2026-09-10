@@ -42,9 +42,19 @@ create index if not exists apple_subs_active_idx on public.apple_subscriptions(u
 alter table public.subscriptions add column if not exists stripe_alarma  boolean not null default false;
 alter table public.subscriptions add column if not exists stripe_premium boolean not null default false;
 
--- Seed único: hoy acceso_* = (Stripe OR fundador). Sembramos la parte de Stripe
--- excluyendo a los fundadores (su acceso vive en is_founder dentro de la unión).
--- Así, al activar el modelo de unión en Fase 2, NADIE pierde el acceso actual.
+-- 2b) OVERRIDE MANUAL: acceso otorgado a mano por el equipo (pagos que fallaron,
+--     cortesías, etc.), SIN Stripe activo y sin ser fundador. Vive aparte para que
+--     NUNCA dependa de lo que diga Stripe/Apple. Se puebla en el reconcile de
+--     Fase 2 (detecta: tiene acceso hoy, no es fundador, Stripe en vivo no muestra
+--     suscripción activa → manual). También lo puedes marcar tú a mano cuando des
+--     una cortesía nueva.
+alter table public.subscriptions add column if not exists manual_alarma  boolean not null default false;
+alter table public.subscriptions add column if not exists manual_premium boolean not null default false;
+
+-- Seed único: hoy acceso_* = (Stripe OR fundador OR manual). Sembramos la parte
+-- de Stripe excluyendo a los fundadores (su acceso vive en is_founder). Los
+-- accesos manuales quedan preservados por este seed (stripe_* = acceso_*) HASTA
+-- que el reconcile de Fase 2 los reclasifique correctamente a manual_*.
 update public.subscriptions set
   stripe_alarma  = (acceso_alarma  and not coalesce(is_founder, false)),
   stripe_premium = (acceso_premium and not coalesce(is_founder, false));
@@ -84,8 +94,9 @@ begin
   from public.apple_subscriptions
   where user_id = uid and status = 'active' and expires_at > now();
 
-  final_alarma  := coalesce(s.stripe_alarma, false)  or apple_alarma  or founder;
-  final_premium := coalesce(s.stripe_premium, false) or apple_premium or founder;
+  -- UNIÓN: ningún proveedor pisa al otro; el override manual nunca se cae.
+  final_alarma  := coalesce(s.stripe_alarma, false)  or apple_alarma  or founder or coalesce(s.manual_alarma, false);
+  final_premium := coalesce(s.stripe_premium, false) or apple_premium or founder or coalesce(s.manual_premium, false);
 
   update public.subscriptions set
     acceso_alarma  = final_alarma,
@@ -97,7 +108,9 @@ begin
     'ok', true,
     'acceso_alarma', final_alarma, 'acceso_premium', final_premium,
     'stripe_alarma', coalesce(s.stripe_alarma,false), 'stripe_premium', coalesce(s.stripe_premium,false),
-    'apple_alarma', apple_alarma, 'apple_premium', apple_premium, 'founder', founder
+    'apple_alarma', apple_alarma, 'apple_premium', apple_premium,
+    'manual_alarma', coalesce(s.manual_alarma,false), 'manual_premium', coalesce(s.manual_premium,false),
+    'founder', founder
   );
 end $$;
 
