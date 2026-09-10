@@ -6,3 +6,7 @@ const truthy = (v) => v === '1' || v === 'true' || v === true
 
 // Puntos Brenda Coins (sistema completo: ganar, ruleta, catálogo, canje).
 export const BC_ENABLED = truthy(import.meta.env.VITE_BC_ENABLED)
+
+// In-App Purchase de Apple (RevenueCat). Se construye detrás de este flag y solo
+// aplica en iOS nativo (el gate isIOSNative() se combina en cada uso). Default OFF.
+export const IAP_ENABLED = truthy(import.meta.env.VITE_IAP_ENABLED)
