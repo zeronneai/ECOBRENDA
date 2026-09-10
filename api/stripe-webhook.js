@@ -38,6 +38,7 @@ function entitlementsFrom(subs) {
   const activePrices = new Set()
   let anyActive = false
   let periodEnd = null
+  let subId = null       // id de una suscripción ACTIVA representativa (para persistir)
   let trialing = false   // ¿alguna suscripción en periodo de prueba?
   let trialEnd = null    // fin del trial (unix) para mostrarlo en el Perfil
   for (const sub of subs) {
@@ -46,7 +47,8 @@ function entitlementsFrom(subs) {
     // quedan fuera → NO dan acceso.
     if (!ACTIVE_STATUSES.has(sub.status)) continue
     anyActive = true
-    if (sub.current_period_end && (!periodEnd || sub.current_period_end > periodEnd)) periodEnd = sub.current_period_end
+    if (!subId) subId = sub.id  // al menos una activa
+    if (sub.current_period_end && (!periodEnd || sub.current_period_end > periodEnd)) { periodEnd = sub.current_period_end; subId = sub.id }
     if (sub.status === 'trialing') {
       trialing = true
       const te = sub.trial_end || sub.current_period_end
@@ -73,7 +75,7 @@ function entitlementsFrom(subs) {
   else if (hasUpgrade49) plan = 'upgrade_pending' // $49 sin $9: premium NO otorgado
   else if (hasAlarm9) plan = 'alarm'
 
-  return { acceso_alarma, acceso_premium, anyActive, periodEnd, plan, trialing, trialEnd }
+  return { acceso_alarma, acceso_premium, anyActive, periodEnd, subscriptionId: subId, plan, trialing, trialEnd }
 }
 
 // Núcleo: resuelve el cliente, lista sus suscripciones, recalcula y hace upsert.
@@ -112,6 +114,10 @@ async function recomputeAndUpsert(stripe, supabase, { userId, customerId }) {
     current_period_end: ent.periodEnd ? new Date(ent.periodEnd * 1000).toISOString() : null,
     trial_end: ent.trialing && ent.trialEnd ? new Date(ent.trialEnd * 1000).toISOString() : null,
     stripe_customer_id: cust || null,
+    // FIX: persistir el id de la suscripción activa (antes se omitía → quedaba
+    // null y rompía bc_is_premium_paid y la cancelación en delete-account).
+    // Sin suscripción activa (cancelado) → null, que es lo correcto.
+    stripe_subscription_id: ent.subscriptionId || null,
   }
   const { error } = await supabase.from('subscriptions').upsert(row, { onConflict: 'user_id' })
   if (error) throw error
