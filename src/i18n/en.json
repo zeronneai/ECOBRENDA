@@ -587,6 +587,21 @@
       }
     }
   },
+  "iap": {
+    "title": "Unlock everything",
+    "sub": "Pick your plan and train with Brenda Fitness.",
+    "trial": "Includes 3 days free",
+    "restore": "Restore purchases",
+    "loading": "Loading plans…",
+    "unavailable": "Plans aren't available right now. Try again later.",
+    "soon": "Available very soon.",
+    "plan": {
+      "allinclusive_annual": "All-inclusive · Annual",
+      "allinclusive_monthly": "All-inclusive · Monthly",
+      "alarm": "Alarm",
+      "generic": "Plan"
+    }
+  },
   "legal": {
     "back": "‹ Back",
     "back_aria": "Back to home",

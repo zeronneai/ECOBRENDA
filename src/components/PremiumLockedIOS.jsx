@@ -1,10 +1,14 @@
-/* Card neutra que reemplaza cualquier CTA de pago en iOS — cumple App Store
-   Rule 3.1.1: NO menciona "premium", "suscripción", "pago", ni linkea a la
-   web. Texto suave: "acceso completo" / "iniciar sesión para continuar". */
+/* Gate premium en iOS.
+   - Con IAP activo (IAP_ENABLED + iOS): muestra el paywall de Apple (IapPaywall),
+     único camino de pago permitido por App Store 3.1.1 (sin links a la web).
+   - Sin IAP: card neutra que NO menciona pago/suscripción ni linkea a la web. */
 import { useApp } from '../store'
+import { iapAvailable } from '../lib/iap'
+import IapPaywall from './IapPaywall'
 
 export default function PremiumLockedIOS() {
   const { t } = useApp()
+  if (iapAvailable()) return <IapPaywall />
   return (
     <div className="premium-locked">
       <div className="premium-locked-ic">🔒</div>

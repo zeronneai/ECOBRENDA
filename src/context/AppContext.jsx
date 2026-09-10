@@ -11,6 +11,7 @@ import { rescheduleMotivational } from '../lib/motivationNotifs'
 import { scheduleStreakBreakWarning } from '../lib/streakNotifs'
 import { awardAlarm, spin as bcSpin } from '../lib/bc'
 import { fetchBalance } from '../lib/bcData'
+import { initIap, logoutIap } from '../lib/iap'
 import { isAndroid, scheduleAndroidAlarms, stopAndroidAlarm, consumePendingAndroidAlarm, ensureExactAlarmAllowed, onNativeAlarm } from '../lib/androidAlarm'
 import { onAuthChange, getSession, signOut as authSignOut } from '../lib/auth'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -709,6 +710,13 @@ export function AppProvider({ children }) {
     })
     return () => { offHy(); unsub() }
   }, [rehydrate])
+
+  // IAP (RevenueCat): identifica al usuario con su user_id de Supabase cuando hay
+  // sesión; vuelve a anónimo al cerrar. No-op fuera de iOS o con IAP_ENABLED off.
+  useEffect(() => {
+    if (session?.user?.id) initIap(session.user.id)
+    else logoutIap()
+  }, [session])
 
   // Sube el avatar capturado en el onboarding (dataUrl local) una vez que hay
   // sesión (Storage requiere uid). Si falla, deja el pendiente para reintentar.

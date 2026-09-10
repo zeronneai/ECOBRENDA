@@ -587,6 +587,21 @@
       }
     }
   },
+  "iap": {
+    "title": "Desbloquea todo",
+    "sub": "Elige tu plan y entrena con Brenda Fitness.",
+    "trial": "Incluye 3 días gratis",
+    "restore": "Restaurar compras",
+    "loading": "Cargando planes…",
+    "unavailable": "Los planes no están disponibles ahora. Intenta más tarde.",
+    "soon": "Disponible muy pronto.",
+    "plan": {
+      "allinclusive_annual": "Todo incluido · Anual",
+      "allinclusive_monthly": "Todo incluido · Mensual",
+      "alarm": "Alarma",
+      "generic": "Plan"
+    }
+  },
   "legal": {
     "back": "‹ Volver",
     "back_aria": "Volver al inicio",
