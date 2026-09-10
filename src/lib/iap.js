@@ -48,15 +48,22 @@ export async function logoutIap() {
   }
 }
 
+// Caché del offering actual (los objetos Package crudos que necesita la compra).
+let cachedOffering = null
+async function loadCurrentOffering() {
+  const Purchases = await ensureConfigured()
+  const res = await Purchases.getOfferings()
+  cachedOffering = res?.current || null
+  return cachedOffering
+}
+
 /* Devuelve los paquetes del offering actual con precios LOCALIZADOS de StoreKit
    (nunca hardcodeados). [{ identifier, productId, title, priceString, period }].
    null si no hay offering o IAP no aplica. */
 export async function getOfferings() {
   if (!iapAvailable()) return null
   try {
-    const Purchases = await ensureConfigured()
-    const res = await Purchases.getOfferings()
-    const current = res?.current
+    const current = await loadCurrentOffering()
     if (!current?.availablePackages?.length) return null
     return current.availablePackages.map((p) => ({
       identifier: p.identifier,
@@ -68,5 +75,43 @@ export async function getOfferings() {
   } catch (e) {
     console.warn('[iap] getOfferings', e?.message || e)
     return null
+  }
+}
+
+/* Compra el paquete (por identifier). Abre la hoja de StoreKit. El ACCESO NO se
+   otorga aquí: lo escribe el webhook de RevenueCat en el servidor; el cliente
+   luego consulta al servidor (refreshPremium) hasta ver el acceso. Devuelve
+   { ok } | { cancelled:true } | { ok:false, error }. */
+export async function purchase(packageIdentifier) {
+  if (!iapAvailable()) return { ok: false }
+  try {
+    const Purchases = await ensureConfigured()
+    const offering = cachedOffering || await loadCurrentOffering()
+    const pkg = offering?.availablePackages?.find((p) => p.identifier === packageIdentifier)
+    if (!pkg) return { ok: false, error: 'no_package' }
+    await Purchases.purchasePackage({ aPackage: pkg })
+    return { ok: true }
+  } catch (e) {
+    if (e?.userCancelled === true || e?.code === 'PURCHASE_CANCELLED' || /cancel/i.test(e?.message || '')) {
+      return { ok: false, cancelled: true }
+    }
+    console.warn('[iap] purchase', e?.message || e)
+    return { ok: false, error: e?.message || 'error' }
+  }
+}
+
+/* Restaura compras (obligatorio por Apple). RevenueCat re-sincroniza con Apple y
+   dispara el webhook; luego el cliente consulta al servidor. Devuelve
+   { ok, hasActive } | { ok:false, error }. */
+export async function restore() {
+  if (!iapAvailable()) return { ok: false }
+  try {
+    const Purchases = await ensureConfigured()
+    const info = await Purchases.restorePurchases()
+    const active = info?.customerInfo?.entitlements?.active || {}
+    return { ok: true, hasActive: Object.keys(active).length > 0 }
+  } catch (e) {
+    console.warn('[iap] restore', e?.message || e)
+    return { ok: false, error: e?.message || 'error' }
   }
 }

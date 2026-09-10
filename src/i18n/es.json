@@ -594,7 +594,11 @@
     "restore": "Restaurar compras",
     "loading": "Cargando planes…",
     "unavailable": "Los planes no están disponibles ahora. Intenta más tarde.",
-    "soon": "Disponible muy pronto.",
+    "processing": "Procesando tu compra…",
+    "success": "¡Listo! Ya tienes acceso.",
+    "error": "No se pudo completar. Intenta de nuevo.",
+    "restored": "¡Compras restauradas!",
+    "restore_none": "No encontramos compras para restaurar.",
     "plan": {
       "allinclusive_annual": "Todo incluido · Anual",
       "allinclusive_monthly": "Todo incluido · Mensual",

@@ -109,18 +109,25 @@ async function recomputeAndUpsert(stripe, supabase, { userId, customerId }) {
     user_id: uid,
     status: ent.anyActive || isFounder ? 'active' : 'inactive',
     plan: ent.plan,
-    acceso_alarma: ent.acceso_alarma || isFounder,
-    acceso_premium: ent.acceso_premium || isFounder,
+    // MODELO DE UNIÓN (Fase 2 IAP): el webhook ya NO escribe acceso_* directo.
+    // Escribe SOLO la contribución de Stripe; acceso_* lo calcula recompute_
+    // entitlements como stripe_* OR apple OR is_founder OR manual_*.
+    stripe_alarma: ent.acceso_alarma,
+    stripe_premium: ent.acceso_premium,
     current_period_end: ent.periodEnd ? new Date(ent.periodEnd * 1000).toISOString() : null,
     trial_end: ent.trialing && ent.trialEnd ? new Date(ent.trialEnd * 1000).toISOString() : null,
     stripe_customer_id: cust || null,
-    // FIX: persistir el id de la suscripción activa (antes se omitía → quedaba
-    // null y rompía bc_is_premium_paid y la cancelación en delete-account).
-    // Sin suscripción activa (cancelado) → null, que es lo correcto.
+    // Persistir el id de la suscripción activa (antes se omitía → quedaba null y
+    // rompía bc_is_premium_paid y la cancelación en delete-account). Sin
+    // suscripción activa → null, que es lo correcto.
     stripe_subscription_id: ent.subscriptionId || null,
   }
   const { error } = await supabase.from('subscriptions').upsert(row, { onConflict: 'user_id' })
   if (error) throw error
+
+  // Recalcula la UNIÓN (Stripe OR Apple OR fundador OR manual) → escribe acceso_*.
+  const { error: rpcErr } = await supabase.rpc('recompute_entitlements', { uid })
+  if (rpcErr) throw rpcErr
 }
 
 export default async function handler(req, res) {

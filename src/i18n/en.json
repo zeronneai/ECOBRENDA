@@ -594,7 +594,11 @@
     "restore": "Restore purchases",
     "loading": "Loading plans…",
     "unavailable": "Plans aren't available right now. Try again later.",
-    "soon": "Available very soon.",
+    "processing": "Processing your purchase…",
+    "success": "Done! You now have access.",
+    "error": "Couldn't complete it. Try again.",
+    "restored": "Purchases restored!",
+    "restore_none": "No purchases found to restore.",
     "plan": {
       "allinclusive_annual": "All-inclusive · Annual",
       "allinclusive_monthly": "All-inclusive · Monthly",
