@@ -4,7 +4,7 @@
 
    Fase 1: muestra planes + precios. La COMPRA y RESTAURAR se cablean en Fase 2
    (por ahora avisan "próximamente"). No otorga acceso todavía. */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useApp } from '../store'
 import { getOfferings, purchase, restore, getTrialEligibility } from '../lib/iap'
 import { openLegal } from '../lib/openLegal'
@@ -23,24 +23,43 @@ const ORDER = ['bootyalarm.allinclusive.annual', 'bootyalarm.allinclusive.monthl
 export default function IapPaywall() {
   const { t, showToast, refreshPremium } = useApp()
   const [pkgs, setPkgs] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [phase, setPhase] = useState('loading') // 'loading' | 'ready' | 'error'
   const [busy, setBusy] = useState(false)
   const [trialElig, setTrialElig] = useState('unknown') // elegibilidad del trial de la alarma
 
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
+  // Carga el offering. Nunca se queda en 'loading': si no hay planes o algo
+  // falla (incluye timeout en iap.getOfferings), pasa a 'error' (con reintentar).
+  const load = useCallback(async () => {
+    setPhase('loading')
+    try {
       const p = await getOfferings()
-      if (!alive) return
-      setPkgs(p); setLoading(false)
-      const elig = await getTrialEligibility([ALARM_ID])
-      if (alive) setTrialElig(elig[ALARM_ID] || 'unknown')
-    })()
-    return () => { alive = false }
+      if (p?.length) {
+        setPkgs(p); setPhase('ready')
+        // La elegibilidad del trial es secundaria: no bloquea el render.
+        getTrialEligibility([ALARM_ID]).then((e) => setTrialElig(e?.[ALARM_ID] || 'unknown')).catch(() => {})
+      } else {
+        setPhase('error')
+      }
+    } catch {
+      setPhase('error')
+    }
   }, [])
 
-  if (loading) return <div className="iap-pay"><div className="iap-note">{t('iap.loading')}</div></div>
-  if (!pkgs?.length) return <div className="iap-pay"><div className="iap-note">{t('iap.unavailable')}</div></div>
+  useEffect(() => {
+    let alive = true
+    // Red de seguridad: si por lo que sea no resolvió, no dejar "Cargando" eterno.
+    const guard = setTimeout(() => { if (alive) setPhase((ph) => (ph === 'loading' ? 'error' : ph)) }, 15000)
+    load().finally(() => { if (alive) clearTimeout(guard) })
+    return () => { alive = false; clearTimeout(guard) }
+  }, [load])
+
+  if (phase === 'loading') return <div className="iap-pay"><div className="iap-note">{t('iap.loading')}</div></div>
+  if (phase === 'error' || !pkgs?.length) return (
+    <div className="iap-pay">
+      <div className="iap-note">{t('iap.unavailable')}</div>
+      <button className="iap-restore" onClick={load}>{t('iap.retry')}</button>
+    </div>
+  )
 
   const sorted = [...pkgs].sort((a, b) => ORDER.indexOf(a.productId) - ORDER.indexOf(b.productId))
 

@@ -50,10 +50,23 @@ export async function logoutIap() {
 
 // Caché del offering actual (los objetos Package crudos que necesita la compra).
 let cachedOffering = null
+
+// Evita que una llamada nativa que no resuelve deje la UI colgada para siempre.
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('iap_timeout_' + label)), ms)),
+  ])
+}
+
 async function loadCurrentOffering() {
   const Purchases = await ensureConfigured()
-  const res = await Purchases.getOfferings()
-  cachedOffering = res?.current || null
+  const res = await withTimeout(Purchases.getOfferings(), 12000, 'offerings')
+  // 'current' = el offering marcado como actual en RevenueCat. Si NO está marcado
+  // (p.ej. existe 'default' pero sin fijarlo como current), caemos a 'default' o
+  // al primero disponible. Así no dependemos de esa config para pintar planes.
+  const all = res?.all || {}
+  cachedOffering = res?.current || all.default || Object.values(all)[0] || null
   return cachedOffering
 }
 
