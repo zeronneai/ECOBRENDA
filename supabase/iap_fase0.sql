@@ -4,8 +4,9 @@
 -- Objetivo: que el acceso de Apple CONVIVA con el de Stripe en la MISMA tabla
 -- sin que un proveedor pise al otro. Para eso separamos la contribución de cada
 -- proveedor y acceso_* pasa a ser la UNIÓN:
---     acceso_alarma  = stripe_alarma  OR (Apple activo) OR is_founder
---     acceso_premium = stripe_premium OR (Apple premium activo) OR is_founder
+--     acceso_alarma  = stripe_alarma  OR (Apple activo) OR is_founder OR manual_alarma
+--     acceso_premium = stripe_premium OR (Apple premium activo) OR manual_premium
+--     (OJO: is_founder da SOLO alarma, NUNCA premium.)
 --
 -- ⚠️  ADITIVO E INERTE en Fase 0: NADA llama todavía a recompute_entitlements.
 --     El webhook de Stripe sigue escribiendo acceso_* como hoy (sin cambios).
@@ -96,7 +97,7 @@ begin
 
   -- UNIÓN: ningún proveedor pisa al otro; el override manual nunca se cae.
   final_alarma  := coalesce(s.stripe_alarma, false)  or apple_alarma  or founder or coalesce(s.manual_alarma, false);
-  final_premium := coalesce(s.stripe_premium, false) or apple_premium or founder or coalesce(s.manual_premium, false);
+  final_premium := coalesce(s.stripe_premium, false) or apple_premium or coalesce(s.manual_premium, false);
 
   update public.subscriptions set
     acceso_alarma  = final_alarma,
