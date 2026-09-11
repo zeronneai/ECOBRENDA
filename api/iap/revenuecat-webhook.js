@@ -27,6 +27,26 @@ function secretOk(got) {
   return diff === 0
 }
 
+// Productos que otorgan premium (all-inclusive). Debe coincidir con la lista de
+// recompute_entitlements en SQL. Sirve para decidir upgrade vs downgrade.
+const PREMIUM_PRODUCTS = new Set([
+  'bootyalarm.allinclusive.monthly', 'bootyalarm.allinclusive.annual',
+])
+const tierOf = (pid) => (PREMIUM_PRODUCTS.has(pid) ? 2 : 1) // premium=2, alarma=1
+
+// En un PRODUCT_CHANGE, RevenueCat manda en `product_id` el producto ANTERIOR y en
+// `new_product_id` el NUEVO. Apple aplica los UPGRADES (a tier igual o mayor) de
+// inmediato con prorrateo → usamos el nuevo ya. Un DOWNGRADE estricto (premium →
+// alarma) Apple lo difiere al fin del período → conservamos el producto actual y
+// dejamos que el RENEWAL posterior traiga el nuevo product_id cuando de verdad
+// aplique (así no se cae el premium antes de tiempo).
+function effectiveProduct(type, oldPid, newPid) {
+  if (type === 'PRODUCT_CHANGE' && newPid) {
+    return tierOf(newPid) >= tierOf(oldPid) ? newPid : oldPid
+  }
+  return oldPid
+}
+
 // Estado a persistir según el tipo de evento. El acceso real se decide luego con
 // (status='active' AND expires_at > now()) en recompute_entitlements.
 function statusFor(type) {
@@ -48,7 +68,8 @@ export default async function handler(req, res) {
 
   const uid = ev.app_user_id || null
   const otxn = ev.original_transaction_id || ev.transaction_id || null
-  const productId = ev.product_id || null
+  // Producto EFECTIVO: en PRODUCT_CHANGE puede ser new_product_id (ver arriba).
+  const productId = effectiveProduct(type, ev.product_id || null, ev.new_product_id || null)
   if (!uid || !otxn || !productId) {
     // Sin datos mínimos no hay nada que aplicar (p. ej. eventos no de suscripción).
     return res.status(200).json({ ok: true, skipped: 'missing_fields' })
@@ -96,7 +117,7 @@ export default async function handler(req, res) {
       .update({ trial_end: inTrial ? expiresISO : null })
       .eq('user_id', uid)
 
-    return res.status(200).json({ ok: true, type, uid, period_type: periodType })
+    return res.status(200).json({ ok: true, type, uid, product_id: productId, period_type: periodType })
   } catch (e) {
     console.error('[iap/webhook]', e?.message || e)
     return res.status(500).json({ error: 'handler_failed', message: e?.message || 'unknown' })
