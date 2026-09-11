@@ -99,13 +99,21 @@ prueba de RevenueCat o monitorearlo en producción.
 ```
 Booty Alarm es una alarma con verificación por cámara (sentadillas), gratuita. El contenido premium "Brenda Fitness" (planes de nutrición y entrenamiento generados con IA) se desbloquea mediante suscripción.
 
+REQUISITO PARA PROBAR LA ALARMA — iOS 26: la alarma usa AlarmKit, disponible solo desde iOS 26. Por favor revisen en un dispositivo con iOS 26 o superior; en versiones anteriores la app funciona pero la alarma no se puede programar (es una limitación del sistema, no un fallo).
+
+CÓMO PROBAR LA ALARMA:
+1. En la pantalla principal, fijen una hora de alarma (pueden ponerla 1–2 minutos en el futuro) y guárdenla. iOS pedirá permiso para programar alarmas: acéptenlo.
+2. Bloqueen el teléfono y esperen a la hora. La alarma sonará como una alarma del sistema.
+3. Para apagarla hay que abrir la app y completar la verificación con la cámara (sentadillas): permitan el acceso a la cámara y hagan el movimiento que se indica en pantalla. Al detectarlo, la alarma se detiene.
+   (Si prefieren no hacer el ejercicio físico, la verificación por cámara es el mecanismo de apagado por diseño; basta simular el movimiento frente a la cámara.)
+
 PAGO EN iOS: las suscripciones se compran ÚNICAMENTE mediante compras dentro de la app de Apple (StoreKit). La app no contiene enlaces, botones ni menciones a métodos de pago externos.
 
-CUENTA DEMO (premium activo): correo [correo] / contraseña [contraseña]. Con esta cuenta verán desbloqueadas las secciones "Nutrición" y "Entrena". Para ver la pantalla de compra (paywall), creen una cuenta nueva y abran "Nutrición" o "Entrena".
+CUENTA DEMO (premium activo): correo [correo] / contraseña [contraseña]. Con esta cuenta verán desbloqueadas las secciones "Nutrición" y "Entrena" sin necesidad de comprar. Para ver la pantalla de compra (paywall), creen una cuenta nueva y abran "Nutrición" o "Entrena".
 
 PRODUCTOS: alarma mensual (con 3 días de prueba gratis), todo incluido mensual y todo incluido anual. El botón "Restaurar compras" está disponible en el paywall y en el Perfil.
 
-ACCESO MULTIPLATAFORMA: existe una versión web donde algunos usuarios se suscribieron previamente con un proveedor de pago web. Esos usuarios conservan su acceso al iniciar sesión en iOS, sin que se les pida volver a comprar. La app iOS NO enlaza ni promociona esa compra web; el único método de pago ofrecido en iOS es Apple. Esto es intencional y esperado.
+ACCESO MULTIPLATAFORMA (permitido por las guías): existe una versión web donde algunos usuarios se suscribieron previamente con un proveedor de pago web (Stripe). Esos usuarios conservan su acceso al iniciar sesión en iOS, sin que se les pida volver a comprar — este es el modelo multiplataforma que las guías de Apple permiten (el contenido adquirido en otra plataforma sigue disponible). La app iOS NO enlaza, NO menciona ni promociona esa compra web ni Stripe; el único método de pago ofrecido dentro de iOS es Apple. Es intencional y esperado.
 
 Gracias por la revisión.
 ```
@@ -114,13 +122,21 @@ Gracias por la revisión.
 ```
 Booty Alarm is a free camera-verified alarm (squats). The premium "Brenda Fitness" content (AI-generated nutrition and workout plans) is unlocked via subscription.
 
+REQUIREMENT TO TEST THE ALARM — iOS 26: the alarm uses AlarmKit, which is only available on iOS 26 and later. Please review on a device running iOS 26 or newer; on earlier versions the app works but the alarm cannot be scheduled (this is a system limitation, not a bug).
+
+HOW TO TEST THE ALARM:
+1. On the main screen, set an alarm time (you can set it 1–2 minutes in the future) and save it. iOS will ask permission to schedule alarms: please allow it.
+2. Lock the phone and wait for the time. The alarm will ring like a system alarm.
+3. To turn it off you must open the app and complete the camera verification (squats): allow camera access and perform the movement shown on screen. Once detected, the alarm stops.
+   (If you prefer not to do the physical exercise, the camera verification is the intended dismissal mechanism; simply mimicking the movement in front of the camera is enough.)
+
 PAYMENT ON iOS: subscriptions are purchased EXCLUSIVELY through Apple In-App Purchase (StoreKit). The app contains no links, buttons, or mentions of external payment methods.
 
-DEMO ACCOUNT (active premium): email [correo] / password [contraseña]. This account has the "Nutrición" and "Entrena" sections unlocked. To see the purchase screen (paywall), create a new account and open "Nutrición" or "Entrena".
+DEMO ACCOUNT (active premium): email [correo] / password [contraseña]. This account has the "Nutrición" and "Entrena" sections unlocked, no purchase needed. To see the purchase screen (paywall), create a new account and open "Nutrición" or "Entrena".
 
 PRODUCTS: monthly alarm (with a 3-day free trial), all-inclusive monthly, and all-inclusive annual. A "Restore Purchases" button is available on the paywall and in the Profile.
 
-CROSS-PLATFORM ACCESS: a web version exists where some users previously subscribed via a web payment provider. Those users keep their access when signing in on iOS, without being asked to purchase again. The iOS app does NOT link to or promote that web purchase; the only payment method offered on iOS is Apple. This is intentional and expected.
+CROSS-PLATFORM ACCESS (allowed by the guidelines): a web version exists where some users previously subscribed via a web payment provider (Stripe). Those users keep their access when signing in on iOS, without being asked to purchase again — this is the cross-platform model Apple's guidelines permit (content acquired on another platform remains available). The iOS app does NOT link to, mention, or promote that web purchase or Stripe; the only payment method offered inside iOS is Apple. This is intentional and expected.
 
 Thank you for the review.
 ```
