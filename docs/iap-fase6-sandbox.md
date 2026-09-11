@@ -93,6 +93,40 @@ prueba de RevenueCat o monitorearlo en producción.
 
 ---
 
+## 2b) Notas de App Review (listas para pegar — rellena [correo]/[contraseña])
+
+**Español:**
+```
+Booty Alarm es una alarma con verificación por cámara (sentadillas), gratuita. El contenido premium "Brenda Fitness" (planes de nutrición y entrenamiento generados con IA) se desbloquea mediante suscripción.
+
+PAGO EN iOS: las suscripciones se compran ÚNICAMENTE mediante compras dentro de la app de Apple (StoreKit). La app no contiene enlaces, botones ni menciones a métodos de pago externos.
+
+CUENTA DEMO (premium activo): correo [correo] / contraseña [contraseña]. Con esta cuenta verán desbloqueadas las secciones "Nutrición" y "Entrena". Para ver la pantalla de compra (paywall), creen una cuenta nueva y abran "Nutrición" o "Entrena".
+
+PRODUCTOS: alarma mensual (con 3 días de prueba gratis), todo incluido mensual y todo incluido anual. El botón "Restaurar compras" está disponible en el paywall y en el Perfil.
+
+ACCESO MULTIPLATAFORMA: existe una versión web donde algunos usuarios se suscribieron previamente con un proveedor de pago web. Esos usuarios conservan su acceso al iniciar sesión en iOS, sin que se les pida volver a comprar. La app iOS NO enlaza ni promociona esa compra web; el único método de pago ofrecido en iOS es Apple. Esto es intencional y esperado.
+
+Gracias por la revisión.
+```
+
+**English:**
+```
+Booty Alarm is a free camera-verified alarm (squats). The premium "Brenda Fitness" content (AI-generated nutrition and workout plans) is unlocked via subscription.
+
+PAYMENT ON iOS: subscriptions are purchased EXCLUSIVELY through Apple In-App Purchase (StoreKit). The app contains no links, buttons, or mentions of external payment methods.
+
+DEMO ACCOUNT (active premium): email [correo] / password [contraseña]. This account has the "Nutrición" and "Entrena" sections unlocked. To see the purchase screen (paywall), create a new account and open "Nutrición" or "Entrena".
+
+PRODUCTS: monthly alarm (with a 3-day free trial), all-inclusive monthly, and all-inclusive annual. A "Restore Purchases" button is available on the paywall and in the Profile.
+
+CROSS-PLATFORM ACCESS: a web version exists where some users previously subscribed via a web payment provider. Those users keep their access when signing in on iOS, without being asked to purchase again. The iOS app does NOT link to or promote that web purchase; the only payment method offered on iOS is Apple. This is intentional and expected.
+
+Thank you for the review.
+```
+
+---
+
 ## 3) Envío a App Review
 
 - [ ] Adjunta los 3 productos de suscripción a la versión de la app.
