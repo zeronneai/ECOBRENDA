@@ -14,23 +14,55 @@ const APPLE_SDK_KEY = 'appl_saDtSnJjRpfWsGWSrenrpdbSwcp'
 
 export const iapAvailable = () => IAP_ENABLED && isIOSNative()
 
+const log = (...a) => { try { console.log('[iap]', ...a) } catch { /* noop */ } }
+
+// Evita que una llamada nativa que no resuelve deje todo colgado (el bug: la
+// promesa de configure() no resolvía → ni logIn ni getOfferings se ejecutaban).
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('iap_timeout_' + label)), ms)),
+  ])
+}
+
+// Carga el plugin por import dinámico y extrae Purchases de forma defensiva
+// (según el bundling, puede venir en .Purchases o .default).
+async function getPurchases() {
+  const mod = await import('@revenuecat/purchases-capacitor')
+  const P = mod?.Purchases || mod?.default?.Purchases || mod?.default || null
+  log('module cargado; configure=', typeof P?.configure, 'getOfferings=', typeof P?.getOfferings, 'logIn=', typeof P?.logIn)
+  return P
+}
+
 let configured = false
 async function ensureConfigured() {
-  const { Purchases } = await import('@revenuecat/purchases-capacitor')
+  const Purchases = await getPurchases()
+  if (!Purchases) throw new Error('iap_no_plugin')
   if (!configured) {
-    await Purchases.configure({ apiKey: APPLE_SDK_KEY })
-    configured = true
+    configured = true // marca ANTES para que otra llamada no re-configure en paralelo
+    try {
+      log('configure →')
+      // NO se bloquea si configure() no resuelve: RC ya recibió el configure en
+      // nativo; con el timeout seguimos a logIn/getOfferings igual.
+      await withTimeout(Purchases.configure({ apiKey: APPLE_SDK_KEY }), 4000, 'configure')
+      log('configure ✓')
+    } catch (e) {
+      log('configure no resolvió (continuo igual):', e?.message || e)
+    }
   }
   return Purchases
 }
 
 /* Configura RevenueCat e identifica al usuario con su user_id de Supabase, para
-   que el webhook (Fase 2) mapee app_user_id -> user_id 1:1. Best-effort. */
+   que el webhook mapee app_user_id -> user_id 1:1. Best-effort. */
 export async function initIap(userId) {
+  log('initIap start; available=', iapAvailable(), 'uid=', !!userId)
   if (!iapAvailable() || !userId) return
   try {
     const Purchases = await ensureConfigured()
-    await Purchases.logIn({ appUserID: userId })
+    log('logIn →')
+    await withTimeout(Purchases.logIn({ appUserID: userId }), 6000, 'logIn')
+    log('logIn ✓')
   } catch (e) {
     console.warn('[iap] init', e?.message || e)
   }
@@ -41,8 +73,8 @@ export async function initIap(userId) {
 export async function logoutIap() {
   if (!iapAvailable() || !configured) return
   try {
-    const { Purchases } = await import('@revenuecat/purchases-capacitor')
-    await Purchases.logOut()
+    const Purchases = await getPurchases()
+    await withTimeout(Purchases.logOut(), 6000, 'logOut')
   } catch (e) {
     console.warn('[iap] logout', e?.message || e)
   }
@@ -51,21 +83,15 @@ export async function logoutIap() {
 // Caché del offering actual (los objetos Package crudos que necesita la compra).
 let cachedOffering = null
 
-// Evita que una llamada nativa que no resuelve deje la UI colgada para siempre.
-function withTimeout(promise, ms, label) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error('iap_timeout_' + label)), ms)),
-  ])
-}
-
 async function loadCurrentOffering() {
   const Purchases = await ensureConfigured()
+  log('getOfferings →')
   const res = await withTimeout(Purchases.getOfferings(), 12000, 'offerings')
+  const all = res?.all || {}
+  log('getOfferings ✓ current=', res?.current?.identifier || null, 'all=', Object.keys(all), 'pkgs=', res?.current?.availablePackages?.length ?? 0)
   // 'current' = el offering marcado como actual en RevenueCat. Si NO está marcado
   // (p.ej. existe 'default' pero sin fijarlo como current), caemos a 'default' o
   // al primero disponible. Así no dependemos de esa config para pintar planes.
-  const all = res?.all || {}
   cachedOffering = res?.current || all.default || Object.values(all)[0] || null
   return cachedOffering
 }
