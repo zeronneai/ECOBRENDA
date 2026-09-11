@@ -52,13 +52,18 @@ alter table public.subscriptions add column if not exists stripe_premium boolean
 alter table public.subscriptions add column if not exists manual_alarma  boolean not null default false;
 alter table public.subscriptions add column if not exists manual_premium boolean not null default false;
 
--- Seed único: hoy acceso_* = (Stripe OR fundador OR manual). Sembramos la parte
--- de Stripe excluyendo a los fundadores (su acceso vive en is_founder). Los
--- accesos manuales quedan preservados por este seed (stripe_* = acceso_*) HASTA
--- que el reconcile de Fase 2 los reclasifique correctamente a manual_*.
+-- Seed: stripe_* = acceso_* SOLO si hay SUSCRIPCIÓN STRIPE ACTIVA
+-- (stripe_subscription_id no nulo). OJO: NO excluir por is_founder — hay
+-- fundadores que SÍ pagan Stripe (premium), y excluirlos los dejaba sin premium
+-- al quitar `founder` de la unión. La señal correcta es "¿tiene suscripción
+-- Stripe?": captura a los pagadores (fundadores o no) y excluye a los de acceso
+-- por fundador/manual (su acceso vive en is_founder / manual_*).
+--   Requiere que el webhook de Stripe YA persista stripe_subscription_id (fix
+--   aplicado). La fuente de verdad DEFINITIVA de stripe_* es re-correr el webhook
+--   /reconcile desde Stripe en vivo; esta siembra es el arranque de la migración.
 update public.subscriptions set
-  stripe_alarma  = (acceso_alarma  and not coalesce(is_founder, false)),
-  stripe_premium = (acceso_premium and not coalesce(is_founder, false));
+  stripe_alarma  = (acceso_alarma  and stripe_subscription_id is not null),
+  stripe_premium = (acceso_premium and stripe_subscription_id is not null);
 
 -- 3) RLS: cliente SOLO LEE lo suyo de apple_subscriptions; escribe el service_role.
 alter table public.apple_subscriptions enable row level security;
