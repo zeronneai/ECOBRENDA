@@ -25,18 +25,28 @@ function withTimeout(promise, ms, label) {
   ])
 }
 
-// Carga el plugin por import dinámico y extrae Purchases de forma defensiva
-// (según el bundling, puede venir en .Purchases o .default).
-async function getPurchases() {
-  const mod = await import('@revenuecat/purchases-capacitor')
-  const P = mod?.Purchases || mod?.default?.Purchases || mod?.default || null
-  log('module cargado; configure=', typeof P?.configure, 'getOfferings=', typeof P?.getOfferings, 'logIn=', typeof P?.logIn)
-  return P
+// Carga el plugin por import dinámico UNA sola vez y lo devuelve dentro de un
+// CONTENEDOR { P } — NUNCA el objeto del plugin directamente. El objeto Purchases
+// es un proxy de Capacitor que reenvía CUALQUIER acceso a propiedad (incluido
+// `.then`) a nativo. Si una función async lo retornara, la maquinaria de Promesas
+// lo trataría como "thenable" y llamaría P.then(...) → reenviado a nativo →
+// "Purchases.then() is not implemented on ios" (Unhandled Rejection). El contenedor
+// impide que P sea asimilado como promesa. Regla: jamás retornar ni await-ear P.
+let _modPromise = null
+function loadModule() {
+  if (!_modPromise) {
+    _modPromise = import('@revenuecat/purchases-capacitor').then((mod) => {
+      const P = mod?.Purchases || mod?.default?.Purchases || mod?.default || null
+      log('module cargado; configure=', typeof P?.configure, 'getOfferings=', typeof P?.getOfferings, 'logIn=', typeof P?.logIn)
+      return { P } // contenedor: NO es thenable, no se asimila
+    })
+  }
+  return _modPromise
 }
 
 let configured = false
 async function ensureConfigured() {
-  const Purchases = await getPurchases()
+  const { P: Purchases } = await loadModule()
   if (!Purchases) throw new Error('iap_no_plugin')
   if (!configured) {
     configured = true // marca ANTES para que otra llamada no re-configure en paralelo
@@ -50,7 +60,7 @@ async function ensureConfigured() {
       log('configure no resolvió (continuo igual):', e?.message || e)
     }
   }
-  return Purchases
+  return { P: Purchases } // contenedor, NUNCA el proxy pelado
 }
 
 /* Configura RevenueCat e identifica al usuario con su user_id de Supabase, para
@@ -59,7 +69,7 @@ export async function initIap(userId) {
   log('initIap start; available=', iapAvailable(), 'uid=', !!userId)
   if (!iapAvailable() || !userId) return
   try {
-    const Purchases = await ensureConfigured()
+    const { P: Purchases } = await ensureConfigured()
     log('logIn →')
     await withTimeout(Purchases.logIn({ appUserID: userId }), 6000, 'logIn')
     log('logIn ✓')
@@ -73,7 +83,8 @@ export async function initIap(userId) {
 export async function logoutIap() {
   if (!iapAvailable() || !configured) return
   try {
-    const Purchases = await getPurchases()
+    const { P: Purchases } = await loadModule()
+    if (!Purchases) return
     await withTimeout(Purchases.logOut(), 6000, 'logOut')
   } catch (e) {
     console.warn('[iap] logout', e?.message || e)
@@ -84,7 +95,7 @@ export async function logoutIap() {
 let cachedOffering = null
 
 async function loadCurrentOffering() {
-  const Purchases = await ensureConfigured()
+  const { P: Purchases } = await ensureConfigured()
   log('getOfferings →')
   const res = await withTimeout(Purchases.getOfferings(), 12000, 'offerings')
   const all = res?.all || {}
@@ -124,7 +135,7 @@ export async function getOfferings() {
 export async function getTrialEligibility(productIds) {
   if (!iapAvailable() || !productIds?.length) return {}
   try {
-    const Purchases = await ensureConfigured()
+    const { P: Purchases } = await ensureConfigured()
     const res = await Purchases.checkTrialOrIntroductoryPriceEligibility({ productIdentifiers: productIds })
     const out = {}
     for (const pid of productIds) {
@@ -145,7 +156,7 @@ export async function getTrialEligibility(productIds) {
 export async function purchase(packageIdentifier) {
   if (!iapAvailable()) return { ok: false }
   try {
-    const Purchases = await ensureConfigured()
+    const { P: Purchases } = await ensureConfigured()
     const offering = cachedOffering || await loadCurrentOffering()
     const pkg = offering?.availablePackages?.find((p) => p.identifier === packageIdentifier)
     if (!pkg) return { ok: false, error: 'no_package' }
@@ -178,7 +189,7 @@ export function openAppleManageSubscriptions() {
 export async function restore() {
   if (!iapAvailable()) return { ok: false }
   try {
-    const Purchases = await ensureConfigured()
+    const { P: Purchases } = await ensureConfigured()
     const info = await Purchases.restorePurchases()
     const active = info?.customerInfo?.entitlements?.active || {}
     return { ok: true, hasActive: Object.keys(active).length > 0 }
