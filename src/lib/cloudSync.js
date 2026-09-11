@@ -169,6 +169,9 @@ async function pullSubscription() {
       unlimitedPlans: data.unlimited_plans === true,
       // Para el gate de CANJE (premium PAGADO): espejo de bc_is_premium_paid.
       stripeSubscriptionId: data.stripe_subscription_id ?? null,
+      // Proveedor primario del acceso (apple|stripe|founder|manual) → enruta
+      // "administrar suscripción" y el texto del Perfil (Fase 5).
+      provider: data.provider ?? null,
     })
   }
 }
