@@ -599,6 +599,9 @@
     "error": "Couldn't complete it. Try again.",
     "restored": "Purchases restored!",
     "restore_none": "No purchases found to restore.",
+    "legal_note": "The subscription auto-renews at the same price unless canceled at least 24h before the period ends. Payment is charged to your Apple account on confirmation. You can manage or cancel it in your account Settings.",
+    "terms": "Terms of Use",
+    "privacy": "Privacy",
     "plan": {
       "allinclusive_annual": "All-inclusive · Annual",
       "allinclusive_monthly": "All-inclusive · Monthly",

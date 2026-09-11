@@ -599,6 +599,9 @@
     "error": "No se pudo completar. Intenta de nuevo.",
     "restored": "¡Compras restauradas!",
     "restore_none": "No encontramos compras para restaurar.",
+    "legal_note": "La suscripción se renueva automáticamente al mismo precio salvo que la canceles al menos 24 h antes del fin del período. El pago se cargará a tu cuenta de Apple al confirmar. Puedes administrarla o cancelarla en los Ajustes de tu cuenta.",
+    "terms": "Términos de uso",
+    "privacy": "Privacidad",
     "plan": {
       "allinclusive_annual": "Todo incluido · Anual",
       "allinclusive_monthly": "Todo incluido · Mensual",

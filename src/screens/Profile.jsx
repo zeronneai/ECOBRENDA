@@ -5,6 +5,7 @@ import { useSubscription } from '../hooks/useSubscription'
 import { GOALS, LEVELS, DAYS_OPTIONS, DIET_PREFS, ALLERGIES } from '../data/onboarding'
 import { openLegal } from '../lib/openLegal'
 import { isIOSNative } from '../lib/platform'
+import { iapAvailable, openAppleManageSubscriptions, restore as restorePurchases } from '../lib/iap'
 import { pickAndUploadAvatar } from '../lib/avatar'
 import LanguageSelect from '../components/LanguageSelect'
 import DestelloCard from '../components/ui/DestelloCard'
@@ -21,8 +22,21 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 export default function Profile() {
   const navigate = useNavigate()
   const { t, profile, updateProfile, subscription, settings, saveSettings, resetProgress, openSheet, showToast,
-          cloudEnabled, session, openAuth, signOutAccount, openPortal, deleteAccount, language, setLanguage } = useApp()
+          cloudEnabled, session, openAuth, signOutAccount, openPortal, deleteAccount, language, setLanguage, refreshPremium } = useApp()
   const { isPremium } = useSubscription()
+  const iap = iapAvailable() // IAP_ENABLED + iOS nativo
+  const [restoring, setRestoring] = useState(false)
+
+  // Restaurar compras (obligatorio por Apple). El acceso lo confirma el servidor
+  // (webhook RevenueCat); esperamos con refreshPremium.
+  const onRestoreIap = async () => {
+    if (restoring) return
+    setRestoring(true)
+    const r = await restorePurchases()
+    if (r.ok) { await refreshPremium({ tries: 8, delay: 1500 }); showToast(t(r.hasActive ? 'iap.restored' : 'iap.restore_none')) }
+    else showToast(t('iap.error'))
+    setRestoring(false)
+  }
 
   // Free trial (plan alarma): si trial_end está en el futuro, mostramos que están
   // en periodo de prueba y cuándo termina.
@@ -197,19 +211,31 @@ export default function Profile() {
               <div className="pf-sub-t">{trialing ? t('profile.sub_trial_t') : isPremium ? t('profile.sub_premium_t') : t('profile.sub_free_t')}</div>
               <div className="pf-sub-d">{trialing ? t('profile.sub_trial_d', { date: trialDateStr }) : isPremium ? t('profile.sub_premium_d', { plan: subscription.plan || t('profile.sub_premium_d_active') }) : t('profile.sub_free_d')}</div>
             </div>
-            {/* iOS (App Store Rule 3.1.1): NINGÚN botón que dirija a pago externo.
-                Ni "Hazte premium" (checkout) ni "Gestionar" (Customer Portal de
-                Stripe) — ambos son links a pago fuera de la App Store. En iOS solo
-                se muestra el ESTADO de la suscripción, sin acciones de pago. En
-                web/Android sí aparecen. */}
-            {!isIOSNative() && (
-              isPremium ? (
+            {/* App Store 3.1.1: en iOS el ÚNICO camino de pago es Apple. Nunca se
+                enlaza el checkout ni el portal de Stripe desde iOS.
+                - Premium: "Administrar" enruta por provider — Apple (gestión
+                  nativa de Apple, válida en iOS y web) o portal de Stripe (solo
+                  web). Fundador/manual/cortesía: sin botón de pago.
+                - Libre: "Hazte premium" abre el paywall de Apple en iOS (si IAP
+                  activo) o el de Stripe en web. */}
+            {(isPremium || trialing) ? (
+              subscription?.provider === 'apple' ? (
+                <button onClick={openAppleManageSubscriptions}>{t('profile.manage')}</button>
+              ) : (!isIOSNative() && subscription?.provider === 'stripe') ? (
                 <button onClick={() => openPortal()}>{t('profile.manage')}</button>
-              ) : (
+              ) : null
+            ) : (
+              (!isIOSNative() || iap) && (
                 <button onClick={() => openSheet('paywall')}>{t('profile.go_premium')}</button>
               )
             )}
           </div>
+          {/* Restaurar compras (Apple lo exige; accesible fuera del paywall) */}
+          {iap && (
+            <button className="pf-restore reveal d2" onClick={onRestoreIap} disabled={restoring}>
+              {t('iap.restore')}
+            </button>
+          )}
 
           {/* Cuenta en la nube (sesión) */}
           {cloudEnabled && (

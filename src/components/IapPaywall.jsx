@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '../store'
 import { getOfferings, purchase, restore, getTrialEligibility } from '../lib/iap'
+import { openLegal } from '../lib/openLegal'
 
 const ALARM_ID = 'bootyalarm.alarm.monthly'
 
@@ -91,6 +92,15 @@ export default function IapPaywall() {
       </div>
 
       <button className="iap-restore" onClick={onRestore} disabled={busy}>{t('iap.restore')}</button>
+
+      {/* Textos que exige App Review: auto-renovación + cómo cancelar + enlaces
+          funcionales a Términos (EULA) y Privacidad. */}
+      <p className="iap-legal-note">{t('iap.legal_note')}</p>
+      <div className="iap-legal-links">
+        <button onClick={() => openLegal('/terms')}>{t('iap.terms')}</button>
+        <span aria-hidden="true">·</span>
+        <button onClick={() => openLegal('/privacy')}>{t('iap.privacy')}</button>
+      </div>
     </div>
   )
 }

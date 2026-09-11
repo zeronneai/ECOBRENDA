@@ -121,6 +121,18 @@ export async function purchase(packageIdentifier) {
   }
 }
 
+/* Abre la pantalla de suscripciones de Apple (Ajustes / App Store) para
+   administrar o cancelar. Es gestión NATIVA de Apple, no un pago externo → OK
+   con App Store 3.1.1. Funciona en iOS y también en web (redirige al Apple ID). */
+export function openAppleManageSubscriptions() {
+  const url = 'itms-apps://apps.apple.com/account/subscriptions'
+  try {
+    window.open(url, '_system')
+  } catch {
+    try { window.open('https://apps.apple.com/account/subscriptions', '_blank') } catch { /* noop */ }
+  }
+}
+
 /* Restaura compras (obligatorio por Apple). RevenueCat re-sincroniza con Apple y
    dispara el webhook; luego el cliente consulta al servidor. Devuelve
    { ok, hasActive } | { ok:false, error }. */
