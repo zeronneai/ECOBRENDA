@@ -222,7 +222,7 @@
     "priming_lead_b": "en tiempo real. El video",
     "priming_lead_c": "no se sube",
     "priming_lead_d": ": todo se procesa en tu teléfono.",
-    "activate": "ACTIVAR CÁMARA",
+    "activate": "CONTINUAR",
     "denied_title": "SIN ACCESO A LA CÁMARA",
     "denied_lead": "Necesito tu cámara para contar tus reps (no hay forma de saltarlo). Activa el permiso en los ajustes de la app y recarga la cámara.",
     "retry": "REINTENTAR",
@@ -240,15 +240,15 @@
   },
   "perms": {
     "title": "UN PASO MÁS",
-    "lead": "Para que la alarma funcione de verdad, Booty Alarm necesita dos permisos:",
+    "lead": "Para que la alarma funcione de verdad, Booty Alarm usa lo siguiente:",
     "notif_t": "Notificaciones",
     "notif_d": "Para que la alarma suene a su hora, aunque la app esté cerrada.",
     "cam_t": "Cámara",
     "cam_d": "Cuenta tus reps en tu teléfono. El video no se sube a ningún lado.",
     "alarmkit_t": "Alarma imparable",
     "alarmkit_d": "Suena aunque el iPhone esté en Silencio o Concentración, como el Reloj de Apple.",
-    "allowing": "PERMITIENDO…",
-    "allow": "PERMITIR"
+    "allowing": "UN MOMENTO…",
+    "allow": "CONTINUAR"
   },
   "preturn": {
     "canceled_title": "PAGO CANCELADO",

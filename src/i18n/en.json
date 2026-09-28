@@ -222,7 +222,7 @@
     "priming_lead_b": "in real time. The video",
     "priming_lead_c": "is not uploaded",
     "priming_lead_d": ": it's all processed on your phone.",
-    "activate": "ENABLE CAMERA",
+    "activate": "CONTINUE",
     "denied_title": "NO CAMERA ACCESS",
     "denied_lead": "I need your camera to count your reps (there's no way around it). Enable the permission in the app settings and reload the camera.",
     "retry": "RETRY",
@@ -240,15 +240,15 @@
   },
   "perms": {
     "title": "ONE MORE STEP",
-    "lead": "For the alarm to really work, Booty Alarm needs two permissions:",
+    "lead": "For the alarm to really work, Booty Alarm uses the following:",
     "notif_t": "Notifications",
     "notif_d": "So the alarm rings on time, even when the app is closed.",
     "cam_t": "Camera",
     "cam_d": "Counts your reps on your phone. The video isn't uploaded anywhere.",
     "alarmkit_t": "Unstoppable alarm",
     "alarmkit_d": "Rings even when your iPhone is on Silent or Focus, like Apple's Clock.",
-    "allowing": "ALLOWING…",
-    "allow": "ALLOW"
+    "allowing": "ONE MOMENT…",
+    "allow": "CONTINUE"
   },
   "preturn": {
     "canceled_title": "PAYMENT CANCELED",
