@@ -8,6 +8,11 @@ import { songUrlById } from '../data/songs'
 
 const Alarm = registerPlugin('Alarm')
 
+// El servicio nativo descarga la canción por red, así que necesita una URL
+// completa: las rutas locales (/media/...) solo existen dentro del WebView.
+const MEDIA_ORIGIN = 'https://ecobrenda.vercel.app'
+const absoluteUrl = (u) => (/^https?:/.test(u) ? u : MEDIA_ORIGIN + u)
+
 export const isAndroid = () => Capacitor.getPlatform() === 'android'
 
 // Agenda TODAS las alarmas activas en el plugin nativo (cancela y reescribe).
@@ -24,7 +29,7 @@ export async function scheduleAndroidAlarms(alarms = []) {
         days: a.days && a.days.length ? a.days : [0, 1, 2, 3, 4],
         exercise: a.exercise === 'lunges' ? 'lunges' : 'squats',
         reps: a.reps || 10,
-        songUrl: songUrlById(a.songId), // la nativa reproduce la canción elegida (con fallback al pitido)
+        songUrl: absoluteUrl(songUrlById(a.songId)), // la nativa reproduce la canción elegida (con fallback al pitido)
       }
     })
   try { await Alarm.schedule({ alarms: payload }) } catch (e) { console.warn('[androidAlarm] schedule', e) }

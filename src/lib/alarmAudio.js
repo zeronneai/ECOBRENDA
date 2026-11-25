@@ -24,10 +24,10 @@
 
 // Canción de la alarma por defecto (usada para preload en AppShell).
 // Debe coincidir con DEFAULT_SONG_ID de src/data/songs.js (workout1). Libres de
-// derechos, empaquetadas en la cuenta de Cloudinary del proyecto.
+// derechos, empaquetadas en el propio repo (public/media).
 export const ALARM_AUDIO_SRC =
-  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1786411094/WORKOUT_1_kxnhvc.mp3'
+  '/media/workout-1-kxnhvc.mp3'
 
 // Canción FIJA de los retos rápidos (distinta de la alarma).
 export const CHALLENGE_AUDIO_SRC =
-  'https://res.cloudinary.com/dsprn0ew4/video/upload/v1786411095/WORKOUT_2_umnaig.mp3'
+  '/media/workout-2-umnaig.mp3'

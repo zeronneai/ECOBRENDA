@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store'
 
 const BRENDA_WIN_IMG =
-  'https://res.cloudinary.com/dsprn0ew4/image/upload/v1775537960/BRENDA_ee6cl2.png'
+  '/media/brenda-ee6cl2.webp'
 
 export default function Celebration() {
   const navigate = useNavigate()
